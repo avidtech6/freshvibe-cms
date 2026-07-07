@@ -9,7 +9,7 @@
 }
 
 /* ---------- dock strip (thin black, max 45px) ---------- */
-.oscar-dock {
+.fvcms-dock {
   position: fixed;
   background: rgba(8, 8, 10, 0.98);
   display: flex;
@@ -22,7 +22,7 @@
 }
 /* On mobile: hide the dock background, only pills show */
 @media (max-width: 600px) {
-  .oscar-dock {
+  .fvcms-dock {
     background: transparent !important;
     box-shadow: none !important;
     padding: 6px 6px !important;
@@ -261,7 +261,7 @@
 }
 
 /* ---------- snap hint (when dragging panel near edge) ---------- */
-.oscar-snap-hint {
+.fvcms-snap-hint {
   position: fixed;
   background: rgba(180, 140, 80, 0.85);
   pointer-events: none;
@@ -269,19 +269,19 @@
   display: none;
   box-shadow: 0 0 20px rgba(180, 140, 80, 0.6);
 }
-.oscar-snap-hint-left {
+.fvcms-snap-hint-left {
   left: 0; top: 0; bottom: 0; width: 50px;
   border-right: 2px solid rgba(255, 220, 100, 1);
 }
-.oscar-snap-hint-right {
+.fvcms-snap-hint-right {
   right: 0; top: 0; bottom: 0; width: 50px;
   border-left: 2px solid rgba(255, 220, 100, 1);
 }
-.oscar-snap-hint-top {
+.fvcms-snap-hint-top {
   top: 0; left: 0; right: 0; height: 50px;
   border-bottom: 2px solid rgba(255, 220, 100, 1);
 }
-.oscar-snap-hint-bottom {
+.fvcms-snap-hint-bottom {
   bottom: 0; left: 0; right: 0; height: 50px;
   border-top: 2px solid rgba(255, 220, 100, 1);
 }
