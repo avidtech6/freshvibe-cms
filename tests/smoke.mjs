@@ -3,6 +3,9 @@
 
 import { detectElementor } from '../detectors/elementor.js';
 import { getModuleDef, listModuleDefs } from '../modules/index.js';
+import { listSampleSkins } from '../skins/index.js';
+import { reignSkin } from '../skins/reign.js';
+import { buddyxSkin } from '../skins/buddYx.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -32,10 +35,15 @@ for (const id of ['M-heading', 'M-cta', 'M-image', 'M-paragraph', 'M-video',
   assert(!!d, `${id} exists`);
   assert(!!d.schema, `${id} has schema`);
   assert(!!d.defaultConfig, `${id} has defaultConfig`);
+  assert(!!d.editor, `${id} has editor id (${d.editor})`);
+}
+
+console.log('\nTest: variants');
+for (const d of defs) {
+  assert(d.variants && d.variants.length > 0, `${d.id} has variants`);
 }
 
 console.log('\nTest: scope resolver (pure logic, no IndexedDB)');
-// Simulate scope resolver logic by checking module defs have variants
 const heading = getModuleDef('M-heading');
 assert(heading.variants.length >= 3, `heading has variants (got ${heading.variants.length})`);
 const cta = getModuleDef('M-cta');
@@ -43,8 +51,7 @@ assert(cta.variants.length >= 3, `cta has variants (got ${cta.variants.length})`
 
 console.log('\nTest: detector with sample HTML');
 const sampleHtml = `
-<html>
-<body>
+<html><body>
 <div class="e-con e-parent" data-id="r1">
   <div class="elementor-element elementor-element-abc123" data-id="abc123" data-element_type="widget" data-widget_type="heading.default" data-settings="{&quot;title&quot;:&quot;Hello World&quot;,&quot;header_size&quot;:&quot;2&quot;}">
     <div class="elementor-widget-container">
@@ -57,8 +64,7 @@ const sampleHtml = `
     </div>
   </div>
 </div>
-</body>
-</html>
+</body></html>
 `;
 const result = detectElementor({ pathname: '/test/', html: sampleHtml });
 assert(result.pages.length === 1, `1 page detected (got ${result.pages.length})`);
@@ -93,6 +99,20 @@ const mixed = detectElementor({ pathname: '/mix/', html: mixedHtml });
 assert(mixed.modules.length === 1, `unknown widget skipped (got ${mixed.modules.length} modules)`);
 assert(mixed.modules[0].config && mixed.modules[0].config.text === 'Real heading', 'known widget still detected');
 
+console.log('\nTest: skins');
+const skins = listSampleSkins();
+assert(skins.length === 2, `2 sample skins (got ${skins.length})`);
+for (const skin of skins) {
+  assert(!!skin.id, `${skin.id || '(unnamed)'} has id`);
+  assert(!!skin.label, `${skin.id || '(unnamed)'} has label`);
+  assert(!!skin.cssTokens && Object.keys(skin.cssTokens).length > 0, `${skin.id} has CSS tokens`);
+  assert(!!skin.moduleDefaults && Object.keys(skin.moduleDefaults).length > 0, `${skin.id} has module defaults`);
+}
+
+console.log('\nTest: skin token shape');
+assert(reignSkin.cssTokens['--cta-radius'] === '4px', `Reign has sharp cta-radius (4px)`);
+assert(buddyxSkin.cssTokens['--cta-radius'] === '24px', `BuddyX has rounded cta-radius (24px)`);
+
 console.log('\nTest: annotation.json exists and is well-formed');
 const annotationPath = path.join(__dirname, '..', 'annotation.json');
 if (fs.existsSync(annotationPath)) {
@@ -103,6 +123,9 @@ if (fs.existsSync(annotationPath)) {
   assert(ann.modules.length > 0, `has modules (${ann.modules.length})`);
   const moduleIds = ann.modules.map(m => m.id);
   assert(new Set(moduleIds).size === moduleIds.length, `all module IDs unique`);
+  // Quick sanity: count modules that mapped to known types
+  const knownTypes = ann.modules.filter(m => m.moduleId !== undefined).length;
+  assert(knownTypes > 200, `most modules mapped (${knownTypes}/${ann.modules.length})`);
 } else {
   console.log('  - annotation.json not found, skipping');
 }

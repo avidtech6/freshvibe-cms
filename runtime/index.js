@@ -2,7 +2,7 @@
 // Public API for consumers (Oscar's dist, future Shopify/Webflow, etc.)
 //
 // Usage:
-//   import { initCms, loadAnnotation, getStore, resolveScope } from './runtime/index.js';
+//   import { initCms, loadAnnotation, getStore } from './runtime/index.js';
 //   import annotation from './annotation.json';
 //   await initCms();
 //   loadAnnotation(annotation);
@@ -13,6 +13,19 @@
 export { getStore, Store } from './store.js';
 export { resolveScope, assertOp } from './scope.js';
 export { loadAnnotation, findPage } from './load-annotation.js';
+export { renderFormEditor } from './form-editor.js';
+export { makeInlineEditable } from './inline-editor.js';
+export {
+  registerRenderer, connect, renderModule, renderAll, subscribeToStore
+} from './renderer.js';
+export {
+  applySkin, registerSkin, renderSkinPicker, listSkins
+} from './skin.js';
+export {
+  showRegionOverlays, hideRegionOverlays, isOverlaysActive, startOverlayTracking
+} from './visualizer.js';
+export { renderGroupToggleUI, toggleGroupToModule } from './group-toggle.js';
+export { openEditorShell } from './editor-shell.js';
 
 import { getStore } from './store.js';
 import { CANONICAL_MODULES } from '../modules/index.js';
@@ -27,18 +40,6 @@ export async function initCms() {
   return store;
 }
 
-/**
- * Run a detector on a page's HTML and persist the annotation.
- * The detector is stack-specific; the runtime does the persistence.
- *
- * Most consumers should use loadAnnotation() instead — it's faster.
- * Use this only when you need to detect on-the-fly.
- *
- * @param {Object} opts
- * @param {string} opts.pathname
- * @param {string} opts.html
- * @param {Function} opts.detect - a detector function ({pathname, html}) => AnnotationResult
- */
 export async function detectPage({ pathname, html, detect }) {
   const store = getStore();
   const result = detect({ pathname, html });

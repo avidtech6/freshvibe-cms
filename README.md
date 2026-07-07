@@ -5,20 +5,54 @@ reconstructed static site. Oscar's Tree Academy is the first consumer.
 
 ## Status
 
-**v0.2.0 — annotate + edit what's there.**
+**v0.3.0 — skins + group toggle + DOM re-renderer + editor polish.**
 
 - 10 canonical modules (Heading, CTA, Image, Paragraph, Video, Carousel,
   Menu, Social icons, Accordion, Icon list)
 - Store with IndexedDB persistence + scope resolver
-- Elementor + EAEL detector (10 widget types mapped)
+- Elementor + EAEL detector with proper nesting + unique IDs
 - Annotation script that scans a dist → JSON
 - Annotation loader for runtime use
-- Generic form editor for any module schema
+- Generic form editor + improved shell (tabs, variants preview, raw JSON)
 - Inline text editor with field-level scope safety
+- **DOM re-renderer**: edits show live in the page
+- **Skins system**: 2 sample skins + skin picker
+- **Group → module manual toggle**: operator UI to promote/demote
+- **Region visualiser**: dashed overlays with labels, click-to-jump
 - Bootstrap module that wires everything into a host page
-- Annotation of Oscar's dist: **25 pages, 249 regions, 418 groups, 265 modules**
-- v0.2 items remaining: full region navigator in dev panel, more inline
-  edit coverage, module re-renderer, tests
+- Smoke tests (49/49 passing)
+
+## What's new in v0.3
+
+### DOM re-renderer
+Every module has a `render(instance, def, skin)` function that patches
+the live DOM when config changes. Editing "Learn more" → "Read more"
+in a CTA module updates the page text instantly without reload.
+
+### Skins
+A skin is `{moduleDefaults: ..., cssTokens: ...}`. Apply one and the
+runtime:
+1. Sets CSS custom properties on `:root`
+2. Overrides module defaults where the instance hasn't explicitly set
+   a field (operator overrides win)
+3. Triggers a re-render of all modules
+
+Two sample skins:
+- **Reign** (sharp corners, serif headings, forest green)
+- **BuddyX** (rounded corners, sans-serif, soft blue)
+
+### Group → module toggle
+Operator can mark any group as a module (or not) and pick its type.
+Auto-detect may come later as a suggestion, never auto-promote.
+
+### Region visualiser
+Toggle dashed overlays showing each region's boundary with label +
+group-count badge. Hover highlights gold. Click jumps to the region
+in the navigator.
+
+### Editor shell
+Modal with three tabs: Fields (form), Variants (preset list with Apply
+buttons), Raw JSON (live-parsed JSON editor with syntax-error feedback).
 
 ## Architecture
 
@@ -26,7 +60,8 @@ reconstructed static site. Oscar's Tree Academy is the first consumer.
 ┌─────────────────────────────────────────────────┐
 │           Runtime (universal)                   │
 │  Region/Group/Module store, scope resolver,     │
-│  field-level editor, skin system.               │
+│  re-renderer, skins, visualizer, form editor,   │
+│  inline editor, group toggle, scope system.     │
 │  → No stack-specific code here.                 │
 └─────────────────────────────────────────────────┘
                     ▲
@@ -58,7 +93,7 @@ reconstructed static site. Oscar's Tree Academy is the first consumer.
 
 ## Data model
 
-See `schemas/data-model.md` for the full shapes.
+See `schemas/data-model.md`.
 
 ## Use it
 
@@ -68,11 +103,7 @@ See `schemas/data-model.md` for the full shapes.
 node scripts/annotate.js /path/to/your/dist ./annotation.json
 ```
 
-Generates `annotation.json` with all pages, regions, groups, modules.
-
 ### Step 2: serve annotation.json alongside your pages
-
-E.g. `dist/annotation.json` or any URL your pages can fetch.
 
 ### Step 3: boot the CMS in your page
 
@@ -83,15 +114,13 @@ E.g. `dist/annotation.json` or any URL your pages can fetch.
 </script>
 ```
 
-That's it. The CMS:
-- Loads the annotation into IndexedDB
-- Wires inline editing on detected heading text
-- Exposes `window.__fvcmsOpenEditor(moduleInstanceId)` for opening the form editor
-
-### Step 4: integrate with your dev panel
-
-In your existing dev panel, call `host.mountNavigator(navigatorEl)` to
-get a region/group/module navigator mounted into your UI.
+That gives you:
+- Region overlays (click "Show regions" in dev panel)
+- Module navigator (region → group → module buttons)
+- Inline editing on heading text (click to edit, blur to save)
+- Skin picker (live preview)
+- Group → module toggle
+- Click a module button → modal editor (Fields / Variants / Raw JSON)
 
 ## Module library
 
@@ -108,18 +137,12 @@ get a region/group/module navigator mounted into your UI.
 | `M-accordion` | Accordion | eael-adv-accordion, eael-toggle |
 | `M-icon-list` | Icon list | icon-list |
 
-## Detected but not yet supported (Oscar inventory)
+## Skins
 
-These widget types exist in Oscar's dist but don't have canonical modules
-yet — they'd need new modules added to the library:
-
-- `css`, `container`, `mobile`, `spacer` — chrome/layout, low priority
-- `form`, `eael-fluentform`, `eael-weform` — forms (different concern)
-- `eael-info-box`, `eael-cta-box`, `eael-countdown`, `eael-protected-content`,
-  `eael-data-table`, `eael-adv-tabs`, `eael-post-block`, `eael-breadcrumbs`,
-  `eael-testimonial` (premium-addon) — extras
-- `theme-post-title`, `theme-post-content`, `post-navigation` — WordPress theme widgets
-- `template`, `shortcode` — generic placeholders
+| ID | Label | Style |
+|---|---|---|
+| `skin-reign` | Reign (default) | Sharp corners, serif, forest green |
+| `skin-buddYx` | BuddyX | Rounded corners, sans-serif, soft blue |
 
 ## Repo layout
 
@@ -127,44 +150,43 @@ yet — they'd need new modules added to the library:
 freshvibe-cms/
 ├── README.md                    # this file
 ├── schemas/
-│   └── data-model.md            # canonical shapes
-├── modules/                     # universal module library
-│   ├── index.js                 # barrel
-│   ├── heading.js
-│   ├── cta.js
-│   ├── image.js
-│   ├── paragraph.js
-│   ├── video.js
-│   ├── carousel.js
-│   ├── menu.js
-│   ├── social-icons.js
-│   ├── accordion.js
-│   └── icon-list.js
-├── detectors/                   # stack-specific
-│   └── elementor.js
-├── runtime/                     # universal runtime
+│   └── data-model.md
+├── modules/                     # universal module library (10)
+├── detectors/                   # stack-specific (elementor.js)
+├── runtime/
 │   ├── index.js                 # public API
 │   ├── store.js                 # IndexedDB-backed store
 │   ├── scope.js                 # scope resolver + ops policy
 │   ├── load-annotation.js       # JSON loader
 │   ├── form-editor.js           # generic form editor
+│   ├── editor-shell.js          # improved modal shell v0.3
 │   ├── inline-editor.js         # inline text edit
-│   └── styles.css               # scoped styles
+│   ├── renderer.js              # DOM re-renderer v0.3
+│   ├── skin.js                  # skin system v0.3
+│   ├── visualizer.js            # region overlays v0.3
+│   ├── group-toggle.js          # group→module toggle v0.3
+│   └── styles.css
+├── skins/                       # sample skins v0.3
+│   ├── index.js
+│   ├── reign.js
+│   └── buddYx.js
 ├── scripts/
 │   └── annotate.js              # dist → annotation.json
-├── bootstrap.js                 # entry point for host sites
-└── annotation.json              # generated by annotate.js (Oscar's dist)
+├── bootstrap.js                 # entry point
+├── annotation.json              # generated for Oscar's dist
+└── tests/
+    └── smoke.mjs                # 49 tests
 ```
 
 ## Roadmap
 
 - [x] **v0.1** — foundation: data model + 3 modules + Elementor detector stub
-- [x] **v0.2** — annotate + edit what's there (annotation script, 10 modules,
-       form editor, inline editor, bootstrap)
-- [ ] **v0.3** — skins + manual group→module toggle + module re-renderer
+- [x] **v0.2** — annotate + edit what's there (10 modules, annotation
+       script, form editor, inline editor, bootstrap)
+- [x] **v0.3** — skins + group toggle + DOM re-renderer + editor shell
 - [ ] **v1.0** — tests + docs + AI integration spec
 - [ ] **v2.0 (Thread B — Oscar platform)** — auth + gating + progress + quiz module
 
 ## License
 
-Operator-internal. Same as the rest of FreshVibe.
+Operator-internal.

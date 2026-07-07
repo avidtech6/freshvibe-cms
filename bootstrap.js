@@ -1,29 +1,26 @@
 // bootstrap.js — entry point that wires FreshVibe CMS into a host site
-// Designed to be loaded from any page that wants the CMS enabled.
-//
-// Usage in HTML:
-//   <script type="module">
-//     import './bootstrap.js';
-//   </script>
-//
-// Or imported by another module like oscar-dev-panel.js.
-//
-// What this does:
-//  1. Initialize the IndexedDB store
-//  2. Load annotation JSON (must be served alongside the page)
-//  3. Mount the region navigator into the existing dev panel (if present)
-//  4. Wire inline text editing on detected module text elements
-//  5. Expose __fvcmsOpenEditor(id) so any badge/click can open a module editor
+// v0.3: skins + group toggle + visualizer + improved editor shell
 
 import { initCms, getStore, resolveScope, getModuleDef } from './runtime/index.js';
 import { renderFormEditor } from './runtime/form-editor.js';
 import { makeInlineEditable } from './runtime/inline-editor.js';
+import { subscribeToStore, renderModule, connect } from './runtime/renderer.js';
+import { applySkin, registerSkin, renderSkinPicker } from './runtime/skin.js';
+import { showRegionOverlays, hideRegionOverlays, startOverlayTracking } from './runtime/visualizer.js';
+import { renderGroupToggleUI, toggleGroupToModule } from './runtime/group-toggle.js';
+import { openEditorShell } from './runtime/editor-shell.js';
+import { SAMPLE_SKINS } from './skins/index.js';
 import './runtime/styles.css';
 
 let _annotation = null;
 
-export async function bootFreshvibeCms({ annotation, annotationUrl, host } = {}) {
+export async function bootFreshvibeCms({ annotation, annotationUrl, host, registerSampleSkins = true } = {}) {
   await initCms();
+
+  // Register sample skins
+  if (registerSampleSkins) {
+    for (const skin of SAMPLE_SKINS) registerSkin(skin);
+  }
 
   if (!annotation && annotationUrl) {
     const resp = await fetch(annotationUrl);
@@ -47,25 +44,77 @@ export async function bootFreshvibeCms({ annotation, annotationUrl, host } = {})
   }
   store.setActivePage(page.id);
 
-  // Wire inline editing for text fields in heading modules on this page.
+  // Connect each module instance to its DOM element so the renderer
+  // can re-render it when config changes.
+  for (const regionId of page.regionIds) {
+    for (const group of store.listGroupsForRegion(regionId)) {
+      if (!group.isModule || !group.moduleInstanceId) continue;
+      const el = document.querySelector(group.selector);
+      if (el) connect(group.moduleInstanceId, el);
+    }
+  }
+
+  // Wire inline editing for text fields on heading modules.
   wireInlineEditors(page);
+
+  // Subscribe renderer to store changes (auto re-render on edit)
+  subscribeToStore();
+
+  // Start overlay tracking for region visualisation.
+  startOverlayTracking();
 
   // Wire navigator into host (if host provided).
   if (host && typeof host.mountNavigator === 'function') {
     host.mountNavigator(buildNavigatorForPage(page));
   }
 
-  // Expose global openEditor for badge clicks etc.
+  // Expose globals for badge clicks etc.
   window.__fvcmsOpenEditor = openModuleEditor;
+  window.__fvcmsShowOverlays = showRegionOverlays;
+  window.__fvcmsHideOverlays = hideRegionOverlays;
+  window.__fvcmsApplySkin = applySkin;
+  window.__fvcmsHighlightRegion = (regionId) => {
+    const region = store.getRegion(regionId);
+    if (!region) return;
+    const target = document.querySelector(region.selector);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+  window.__fvcmsRenderGroupToggle = () => renderGroupToggleUI();
 
-  console.info(`[fvcms] booted — ${page.regionIds.length} regions on this page`);
+  console.info(`[fvcms v0.3] booted — ${page.regionIds.length} regions on this page`);
 }
 
 function buildNavigatorForPage(page) {
   const store = getStore();
-  const regions = store.listRegionsForPage(page.id);
   const root = document.createElement('div');
   root.className = 'fvcms-navigator';
+
+  // Skin picker
+  root.appendChild(renderSkinPicker());
+
+  // Overlays toggle
+  const overlayToggle = document.createElement('div');
+  overlayToggle.style.cssText = 'display: flex; gap: 6px; padding: 4px 0;';
+  const onBtn = document.createElement('button');
+  onBtn.textContent = 'Show regions';
+  onBtn.style.cssText = btn();
+  onBtn.addEventListener('click', () => { showRegionOverlays(); onBtn.style.opacity = 0.5; offBtn.style.opacity = 1; });
+  const offBtn = document.createElement('button');
+  offBtn.textContent = 'Hide regions';
+  offBtn.style.cssText = btn();
+  offBtn.addEventListener('click', () => { hideRegionOverlays(); offBtn.style.opacity = 0.5; onBtn.style.opacity = 1; });
+  overlayToggle.appendChild(onBtn);
+  overlayToggle.appendChild(offBtn);
+  root.appendChild(overlayToggle);
+
+  // Group toggle panel
+  const groupToggleRoot = renderGroupToggleUI();
+  root.appendChild(groupToggleRoot);
+
+  // Region tree with module buttons
+  const tree = document.createElement('div');
+  tree.className = 'fvcms-nav-tree';
+  const regions = store.listRegionsForPage(page.id);
   for (const region of regions) {
     const regionEl = document.createElement('div');
     regionEl.className = 'fvcms-nav-region';
@@ -88,9 +137,21 @@ function buildNavigatorForPage(page) {
       }
       regionEl.appendChild(groupEl);
     }
-    root.appendChild(regionEl);
+    tree.appendChild(regionEl);
   }
+  root.appendChild(tree);
+
   return root;
+}
+
+function btn() {
+  return `
+    background: rgba(60, 100, 60, 0.4); color: #e8e8e0;
+    border: 1px solid rgba(120, 160, 120, 0.3);
+    border-radius: 4px; padding: 4px 10px;
+    font: 11px ui-monospace, monospace; cursor: pointer;
+    flex: 1;
+  `;
 }
 
 function openModuleEditor(moduleInstanceId) {
@@ -102,7 +163,7 @@ function openModuleEditor(moduleInstanceId) {
     alert(`No canonical module found for "${m.moduleId}".\nThis widget type isn't in the library yet.`);
     return;
   }
-  // Use the existing dev panel if available
+  // Use the existing dev panel if available (legacy mode)
   const devPanel = document.querySelector('[data-panel-id="oscar-dev-panel"]');
   if (devPanel) {
     const body = devPanel.querySelector('.oscar-pm-body');
@@ -116,53 +177,16 @@ function openModuleEditor(moduleInstanceId) {
         moduleInstance: m,
         moduleDef: def,
         onSave: (newConfig) => {
-          store.updateField(m.id, '__replace__', newConfig);
-          // updateField only sets one field; do a full replace
-          const stored = store.getModule(m.id);
-          stored.config = newConfig;
-          store.putModule(stored);
-          console.info('[fvcms] saved', m.id);
+          m.config = newConfig;
+          store.putModule(m);
         },
       });
       body.appendChild(editor);
+      return;
     }
-  } else {
-    // Open in a modal
-    openEditorModal(m, def, store);
   }
-}
-
-function openEditorModal(m, def, store) {
-  const modal = document.createElement('div');
-  modal.style.cssText = `
-    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    background: rgba(20, 28, 20, 0.97); color: #e8e8e0;
-    padding: 20px; border-radius: 10px;
-    border: 1px solid rgba(120, 160, 120, 0.3);
-    z-index: 2147483647; max-width: 480px; max-height: 80vh; overflow: auto;
-    font: 12px ui-monospace, monospace;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-  `;
-  const close = document.createElement('button');
-  close.textContent = '×';
-  close.style.cssText = `
-    position: absolute; top: 6px; right: 10px;
-    background: transparent; border: none; color: #fff; cursor: pointer;
-    font-size: 22px; line-height: 1;
-  `;
-  close.addEventListener('click', () => modal.remove());
-  modal.appendChild(close);
-  const editor = renderFormEditor({
-    moduleInstance: m,
-    moduleDef: def,
-    onSave: (newConfig) => {
-      const stored = store.getModule(m.id);
-      stored.config = newConfig;
-      store.putModule(stored);
-    },
-  });
-  modal.appendChild(editor);
-  document.body.appendChild(modal);
+  // Standalone modal with full shell
+  openEditorShell({ moduleInstance: m, moduleDef: def, store });
 }
 
 function wireInlineEditors(page) {
@@ -173,7 +197,6 @@ function wireInlineEditors(page) {
         if (m.moduleId !== 'M-heading') continue;
         const el = document.querySelector(m.selector);
         if (!el) continue;
-        // Find the actual heading element inside
         const headingEl = el.querySelector('h1, h2, h3, h4, h5, h6') || el;
         makeInlineEditable({
           el: headingEl,
