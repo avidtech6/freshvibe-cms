@@ -596,18 +596,27 @@
           // A real drag. Decide whether to leave the pill in view
           // (operator slid it in) or snap it back to parked.
           // Threshold: if the final position is closer to fully
-          // shown than to fully parked, leave it shown. Otherwise
-          // snap back.
+          // shown than to fully parked, leave it shown — set the
+          // inline transform to translateX(0) so it stays fully
+          // visible after the finger lifts. Otherwise clear the
+          // inline transform and let CSS snap it back to parked.
           const cs2 = getComputedStyle(pill);
           const finalTx = (new DOMMatrixReadOnly(cs2.transform)).m41 || 0;
-          // PARK = 30, FULL = 0. Midpoint = -15. If finalTx > -15,
-          // the operator pulled it past the midpoint, leave it shown.
           if (isLeftDock && finalTx > -15) {
-            pill.style.transform = '';
+            // Operator pulled it most of the way in — leave it
+            // fully shown so a follow-up tap can activate.
+            pill.style.transition = 'transform 0.18s ease';
+            pill.style.transform = 'translateX(0)';
+            setTimeout(function () { pill.style.transition = ''; }, 200);
           } else if (isRightDock && finalTx < 15) {
-            pill.style.transform = '';
+            pill.style.transition = 'transform 0.18s ease';
+            pill.style.transform = 'translateX(0)';
+            setTimeout(function () { pill.style.transition = ''; }, 200);
           } else {
+            // Not far enough in — snap back to parked.
+            pill.style.transition = 'transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
             pill.style.transform = '';
+            setTimeout(function () { pill.style.transition = ''; }, 240);
           }
         }
         pill.addEventListener('touchmove', onTouchMove, { passive: false });
