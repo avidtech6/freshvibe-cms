@@ -42,7 +42,7 @@
   }
 
   function panelToast(msg) {
-    var t = document.getElementById('oscar-toast');
+    var t = document.getElementById('fvcms-toast');
     if (!t) return;
     t.textContent = msg;
     t.classList.add('show');
@@ -69,7 +69,7 @@
   DockManager.prototype._init = function () {
     // Single container for all dock DOM. Sits at the end of <body>.
     this.containerEl = document.createElement('div');
-    this.containerEl.className = 'oscar-dock-root';
+    this.containerEl.className = 'fvcms-dock-root';
     document.body.appendChild(this.containerEl);
   };
 
@@ -380,7 +380,12 @@
       // data-overlayMode attribute (set by the squeeze button in the panel
       // header). When squeeze, body gets padding equal to panel width.
       el.style.position = 'fixed';
-      const w = panel.position && panel.position.w ? panel.position.w : 380;
+      const requestedW = panel.position && panel.position.w ? panel.position.w : 380;
+      // On mobile, cap docked width to leave room for the dock strip itself.
+      // Operator can still re-resize via the inner-edge drag handle.
+      const isMobile = window.innerWidth <= 600;
+      const maxW = isMobile ? (window.innerWidth - DOCK_WIDTH) : Infinity;
+      const w = Math.min(requestedW, maxW);
       const overlay = el.dataset.overlayMode !== '1';  // default = overlay
 
       // Calculate offsets from ACTIVE panels on perpendicular edges so
@@ -473,8 +478,8 @@
       el: null
     };
     const el = elFromHTML(
-      '<div class="oscar-dock oscar-dock-' + edge + '" data-dock-edge="' + edge + '">' +
-        '<div class="oscar-dock-pills" data-pm-role="dock-pills"></div>' +
+      '<div class="fvcms-dock fvcms-dock-' + edge + '" data-dock-edge="' + edge + '">' +
+        '<div class="fvcms-dock-pills" data-pm-role="dock-pills"></div>' +
       '</div>'
     );
     dock.el = el;
@@ -492,28 +497,50 @@
       if (!panel) return;
       const isActive = panel.state === 'docked-active';
       const pill = elFromHTML(
-        '<div class="oscar-dock-pill' + (isActive ? ' active' : '') + '" data-pm-panel-id="' + panelId + '" title="' + escapeHtml(panel.title) + '">' +
-          '<span class="oscar-dock-pill-grip" aria-hidden="true">⋮⋮</span>' +
-          '<span class="oscar-dock-pill-label">' + escapeHtml(panel.title) + '</span>' +
+        '<div class="fvcms-dock-pill' + (isActive ? ' active' : '') + '" data-pm-panel-id="' + panelId + '" title="' + escapeHtml(panel.title) + '">' +
+          '<span class="fvcms-dock-pill-grip" aria-hidden="true">⋮⋮</span>' +
+          '<span class="fvcms-dock-pill-label">' + escapeHtml(panel.title) + '</span>' +
         '</div>'
       );
-      // Click pill = activate (or collapse if already active)
-      pill.addEventListener('click', function (e) {
-        if (e.target.closest('.oscar-dock-pill-grip')) return; // grip = drag, not click
-        if (panel.state === 'docked-active') {
-          // Already active — collapse to a pill only
-          this.collapse(panelId);
-        } else {
-          this.activate(panelId);
+      // Pill interactions: click anywhere except the grip span should
+      // activate the panel. The drag system already calls preventDefault
+      // on mousedown, which suppresses the synthetic click — so we hook
+      // the activate logic into the pill's mousedown directly and
+      // short-circuit _startDrag when the user isn't actually dragging.
+      // We also still want grip-only drags to detach.
+      const isGripTarget = function (e) {
+        return e.target && e.target.closest && e.target.closest('.fvcms-dock-pill-grip');
+      };
+      pill.addEventListener('mousedown', function (e) {
+        if (!isGripTarget(e)) {
+          // Pure click: activate (or collapse if already active).
+          // preventDefault so the click event doesn't double-fire and
+          // so text-selection doesn't start.
+          e.preventDefault();
+          if (panel.state === 'docked-active') {
+            this.collapse(panelId);
+          } else {
+            this.activate(panelId);
+          }
+          return;
         }
+        // Grip: start a real drag that can detach or move edge.
+        e.preventDefault();
+        this._startDrag(e, panel, 'pill');
       }.bind(this));
-      // Drag pill = detach
-      const startPillDrag = function (ev) {
-        ev.preventDefault();
-        this._startDrag(ev, panel, 'pill');
-      }.bind(this);
-      pill.addEventListener('mousedown', function (e) { startPillDrag(e); });
-      pill.addEventListener('touchstart', function (e) { startPillDrag(e); }, { passive: false });
+      pill.addEventListener('touchstart', function (e) {
+        if (!isGripTarget(e)) {
+          e.preventDefault();
+          if (panel.state === 'docked-active') {
+            this.collapse(panelId);
+          } else {
+            this.activate(panelId);
+          }
+          return;
+        }
+        e.preventDefault();
+        this._startDrag(e, panel, 'pill');
+      }.bind(this), { passive: false });
       container.appendChild(pill);
     }.bind(this));
   };
@@ -608,21 +635,21 @@
   };
 
   DockManager.prototype._showSnapHint = function (edge) {
-    let hint = this.containerEl.querySelector('.oscar-snap-hint');
+    let hint = this.containerEl.querySelector('.fvcms-snap-hint');
     if (!edge) {
       if (hint) hint.style.display = 'none';
       return;
     }
     if (!hint) {
-      hint = elFromHTML('<div class="oscar-snap-hint"></div>');
+      hint = elFromHTML('<div class="fvcms-snap-hint"></div>');
       this.containerEl.appendChild(hint);
     }
-    hint.className = 'oscar-snap-hint oscar-snap-hint-' + edge;
+    hint.className = 'fvcms-snap-hint fvcms-snap-hint-' + edge;
     hint.style.display = 'block';
   };
 
   DockManager.prototype._hideSnapHint = function () {
-    const hint = this.containerEl.querySelector('.oscar-snap-hint');
+    const hint = this.containerEl.querySelector('.fvcms-snap-hint');
     if (hint) hint.style.display = 'none';
   };
 
@@ -640,7 +667,8 @@
   };
 
   if (typeof window !== 'undefined') {
-    window.PanelManager = api; window.OscarPanelManager = api;
+    window.PanelManager = api;
+    window.OscarPanelManager = api;
   }
 
 })();

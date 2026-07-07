@@ -453,3 +453,27 @@ body:has(.fvcms-dock-bottom) .fvcms-dock-right {
   font-weight: 600;
   font-size: 10px;
 }
+
+/* Editor panel body — Fields / Variants / Raw JSON tabs */
+.fvcms-editor-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  font: 12px ui-monospace, monospace;
+  color: #e8e8e0;
+}
+.fvcms-editor-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #b0c0b0;
+  margin-bottom: 10px;
+}
+.fvcms-editor-tab-content {
+  display: block;
+}
+.fvcms-tab-active {
+  color: #c0e0c0 !important;
+  border-bottom-color: rgba(120, 180, 120, 0.7) !important;
+}

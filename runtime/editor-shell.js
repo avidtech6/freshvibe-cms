@@ -1,84 +1,137 @@
-// runtime/editor-shell.js — improved editor shell with header, tabs, and undo
-// Wraps the basic form-editor with better UX.
+// runtime/editor-shell.js — editor for a single module instance.
+//
+// The editor is a PanelManager panel — exactly the same shape as the
+// CMS panel and the region panels. Same header (← / − / ⋮⋮ / ×),
+// same dock/drag/slim-pill behaviour, same resize handle, same
+// full-height docked-active state, same multi-panel stacking.
+//
+// No backdrop. No modal positioning. No special CSS. The panel
+// manager handles everything.
 
 import { renderFormEditor } from './form-editor.js';
 
+const PANEL_PREFIX = 'fvcms-edit-';
+
+function panelIdFor(moduleInstance) {
+  return PANEL_PREFIX + moduleInstance.id;
+}
+
+/**
+ * Open (or focus) an editor panel for a module instance.
+ *
+ * If the panel already exists, reactivate it on the existing edge.
+ * If it doesn't, create it docked-active on the right edge (opposite
+ * the CMS panel which usually lives on the left).
+ */
 export function openEditorShell({ moduleInstance, moduleDef, onSave, store }) {
-  const modal = document.createElement('div');
-  modal.className = 'fvcms-modal-backdrop';
-  modal.style.cssText = `
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 2147483640;
-    display: flex; align-items: center; justify-content: center;
+  const api = (typeof window !== 'undefined')
+    ? (window.PanelManager || window.OscarPanelManager)
+    : null;
+  if (!api) {
+    console.warn('[fvcms] PanelManager not available; cannot open editor panel.');
+    return null;
+  }
+  let mgr = api.get();
+  if (!mgr) {
+    api.create();
+    mgr = api.get();
+    if (!mgr) return null;
+  }
+
+  const id = panelIdFor(moduleInstance);
+  const existing = mgr.list().panels.find(p => p.id === id);
+
+  if (existing) {
+    // Already exists — bring it back. Re-render content in case the
+    // store has a newer copy of the module.
+    _refreshContent(existing, { moduleInstance, moduleDef, onSave, store });
+    if (existing.state === 'docked-active') mgr.collapse(id); // collapse-then-activate to give visual feedback
+    mgr.activate(id);
+    return existing;
+  }
+
+  // Build the body. The body is the entire editor — header is added
+  // by the panel manager itself.
+  const body = document.createElement('div');
+  body.className = 'fvcms-editor-body';
+  body.dataset.moduleId = moduleInstance.id;
+  body.dataset.moduleType = moduleDef.id;
+  _renderTabsInto(body, { moduleInstance, moduleDef, onSave, store, mgr, panelId: id });
+
+  mgr.addPanel({
+    id,
+    title: `Edit: ${moduleDef.label}`,
+    content: body,
+    position: { x: 60, y: 80, w: 480, h: 540 },
+  });
+  mgr.dock(id, 'right');
+  mgr.activate(id);
+
+  return mgr.list().panels.find(p => p.id === id);
+}
+
+function _refreshContent(panel, ctx) {
+  // Find the panel's body in the DOM and re-render into it.
+  const root = document.querySelector('.fvcms-pm-panel[data-panel-id="' + panel.id + '"]');
+  if (!root) return;
+  const body = root.querySelector('.fvcms-pm-body');
+  if (!body) return;
+  body.innerHTML = '';
+  // Replace panel.content with a fresh body element so future renders
+  // also operate on the latest content.
+  const fresh = document.createElement('div');
+  fresh.className = 'fvcms-editor-body';
+  fresh.dataset.moduleId = ctx.moduleInstance.id;
+  fresh.dataset.moduleType = ctx.moduleDef.id;
+  body.appendChild(fresh);
+  panel.content = fresh;
+  _renderTabsInto(fresh, ctx);
+}
+
+function _renderTabsInto(body, ctx) {
+  const { moduleInstance, moduleDef, onSave, store, mgr, panelId } = ctx;
+
+  // Status line
+  const status = document.createElement('div');
+  status.className = 'fvcms-editor-status';
+  status.style.cssText = `
+    font-size: 11px; color: #b0c0b0; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
   `;
+  const idLabel = document.createElement('span');
+  idLabel.textContent = `${moduleDef.label} · ${moduleInstance.id}`;
+  idLabel.style.cssText = 'flex: 1;';
+  status.appendChild(idLabel);
+  const flash = document.createElement('span');
+  flash.className = 'fvcms-editor-flash';
+  flash.style.cssText = 'color: #80c080; font-size: 10px; opacity: 0; transition: opacity 0.2s;';
+  status.appendChild(flash);
+  body.appendChild(status);
 
-  const shell = document.createElement('div');
-  shell.className = 'fvcms-modal';
-  shell.style.cssText = `
-    width: 480px; max-width: 90vw; max-height: 80vh; overflow: auto;
-    background: rgba(20, 28, 20, 0.98); color: #e8e8e0;
-    border: 1px solid rgba(120, 160, 120, 0.4); border-radius: 10px;
-    padding: 18px 20px;
-    font: 12px ui-monospace, monospace;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-  `;
-
-  // Header
-  const header = document.createElement('div');
-  header.className = 'fvcms-modal-header';
-  header.style.cssText = `
-    display: flex; align-items: center; gap: 10px;
-    padding-bottom: 12px; margin-bottom: 12px;
-    border-bottom: 1px solid rgba(120, 160, 120, 0.3);
-  `;
-  const title = document.createElement('div');
-  title.style.cssText = 'flex: 1; font-weight: 700; font-size: 13px; color: #c0e0c0;';
-  title.textContent = `Edit: ${moduleDef.label}`;
-  header.appendChild(title);
-
-  const idBadge = document.createElement('span');
-  idBadge.style.cssText = `
-    background: rgba(60, 100, 60, 0.4); color: #d0d8d0;
-    padding: 2px 8px; border-radius: 4px; font-size: 10px;
-    border: 1px solid rgba(120, 160, 120, 0.3);
-  `;
-  idBadge.textContent = moduleInstance.id;
-  header.appendChild(idBadge);
-
-  // Close
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = '×';
-  closeBtn.style.cssText = `
-    background: transparent; border: 1px solid rgba(160, 160, 160, 0.4);
-    color: #d0d0d0; cursor: pointer; padding: 0 8px;
-    border-radius: 4px; font-size: 18px; line-height: 22px;
-  `;
-  closeBtn.addEventListener('click', () => modal.remove());
-  header.appendChild(closeBtn);
-
-  shell.appendChild(header);
-
-  // Tabs (Fields / Variants / Raw)
+  // Tabs
   const tabsBar = document.createElement('div');
-  tabsBar.className = 'fvcms-tabs';
   tabsBar.style.cssText = `
     display: flex; gap: 2px; margin-bottom: 12px;
     border-bottom: 1px solid rgba(120, 160, 120, 0.2);
   `;
-  const tabFields = makeTab('Fields');
-  const tabVariants = makeTab('Variants');
-  const tabRaw = makeTab('Raw JSON');
+  const tabFields = _makeTab('Fields');
+  const tabVariants = _makeTab('Variants');
+  const tabRaw = _makeTab('Raw JSON');
   tabsBar.appendChild(tabFields);
   tabsBar.appendChild(tabVariants);
   tabsBar.appendChild(tabRaw);
-  shell.appendChild(tabsBar);
+  body.appendChild(tabsBar);
 
   const tabContent = document.createElement('div');
-  tabContent.className = 'fvcms-tab-content';
-  shell.appendChild(tabContent);
+  tabContent.className = 'fvcms-editor-tab-content';
+  body.appendChild(tabContent);
 
-  // Build field/variants/raw sections
+  const showSaved = function () {
+    flash.textContent = '✓ Saved';
+    flash.style.opacity = '1';
+    setTimeout(() => { flash.style.opacity = '0'; }, 1400);
+  };
+
   const fieldsEl = renderFormEditor({
     moduleInstance,
     moduleDef,
@@ -86,11 +139,11 @@ export function openEditorShell({ moduleInstance, moduleDef, onSave, store }) {
       moduleInstance.config = newConfig;
       if (store) store.putModule(moduleInstance);
       if (onSave) onSave(moduleInstance);
-      flashSaved();
+      showSaved();
     },
   });
 
-  const variantsEl = renderVariantsSection({
+  const variantsEl = _renderVariantsSection({
     moduleInstance,
     moduleDef,
     onApply: (variant) => {
@@ -98,11 +151,11 @@ export function openEditorShell({ moduleInstance, moduleDef, onSave, store }) {
       if (store) store.putModule(moduleInstance);
       if (onSave) onSave(moduleInstance);
       activateTab('variants');
-      flashSaved();
+      showSaved();
     },
   });
 
-  const rawEl = renderRawJSONSection({
+  const rawEl = _renderRawJSONSection({
     moduleInstance,
     onChange: (parsedConfig) => {
       moduleInstance.config = parsedConfig;
@@ -125,27 +178,9 @@ export function openEditorShell({ moduleInstance, moduleDef, onSave, store }) {
   tabRaw.addEventListener('click', () => activateTab('raw'));
 
   activateTab('fields');
-
-  modal.appendChild(shell);
-  document.body.appendChild(modal);
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) modal.remove();
-  });
-
-  function flashSaved() {
-    const flash = document.createElement('div');
-    flash.textContent = '✓ Saved';
-    flash.style.cssText = `
-      position: absolute; top: 12px; right: 60px;
-      background: rgba(76, 175, 80, 0.8); color: #fff;
-      padding: 3px 10px; border-radius: 12px; font-size: 10px;
-    `;
-    shell.appendChild(flash);
-    setTimeout(() => flash.remove(), 1500);
-  }
 }
 
-function makeTab(label) {
+function _makeTab(label) {
   const tab = document.createElement('button');
   tab.type = 'button';
   tab.textContent = label;
@@ -156,10 +191,13 @@ function makeTab(label) {
     border-bottom: 2px solid transparent;
     font: 11px ui-monospace, monospace;
   `;
+  tab.addEventListener('click', () => {
+    tab.dispatchEvent(new CustomEvent('fvcms-tab-click', { bubbles: false }));
+  });
   return tab;
 }
 
-function renderVariantsSection({ moduleInstance, moduleDef, onApply }) {
+function _renderVariantsSection({ moduleInstance, moduleDef, onApply }) {
   const root = document.createElement('div');
   if (!moduleDef.variants || moduleDef.variants.length === 0) {
     root.textContent = '(no variants for this module type)';
@@ -184,6 +222,7 @@ function renderVariantsSection({ moduleInstance, moduleDef, onApply }) {
     preview.textContent = JSON.stringify(variant.config);
     row.appendChild(preview);
     const apply = document.createElement('button');
+    apply.type = 'button';
     apply.textContent = 'Apply';
     apply.style.cssText = `
       background: rgba(180, 140, 80, 0.7); color: #fff;
@@ -197,7 +236,7 @@ function renderVariantsSection({ moduleInstance, moduleDef, onApply }) {
   return root;
 }
 
-function renderRawJSONSection({ moduleInstance, onChange }) {
+function _renderRawJSONSection({ moduleInstance, onChange }) {
   const root = document.createElement('div');
   const textarea = document.createElement('textarea');
   textarea.style.cssText = `
