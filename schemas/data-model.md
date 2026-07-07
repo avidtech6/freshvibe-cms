@@ -45,6 +45,15 @@ type Region = {
   order: number;                 // visual order on page (0-based)
   skin?: string;                 // optional per-region skin override
 
+  // Per-region layout/style config — operator-editable
+  config?: {
+    background?: string;         // CSS background: e.g. '#fff', 'linear-gradient(...)'
+    paddingX?: string;           // horizontal padding: e.g. '64px', '2rem'
+    paddingY?: string;           // vertical padding
+    maxWidth?: 'narrow' | 'normal' | 'wide' | 'full'; // content max-width preset
+    textColor?: string;          // inherited text colour for this region
+  };
+
   // Thread B (Oscar platform) hooks — unused in v1, present in v1 shape
   gating?: {
     level: 'free' | 'pro' | 'school';   // who can see this region

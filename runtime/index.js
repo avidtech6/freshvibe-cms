@@ -26,6 +26,8 @@ export {
 } from './visualizer.js';
 export { renderGroupToggleUI, toggleGroupToModule } from './group-toggle.js';
 export { openEditorShell } from './editor-shell.js';
+export { renderRegion, renderAllRegions, applyRegionToStore, updateRegionConfig, subscribeRegionRenderer } from './region-renderer.js';
+export { renderRegionEditor } from './region-editor.js';
 
 import { getStore } from './store.js';
 import { CANONICAL_MODULES } from '../modules/index.js';

@@ -1,0 +1,470 @@
+/* Oscar Panel Manager v2 — docks + panels */
+
+/* ---------- root container ---------- */
+.fvcms-dock-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;  /* most things inside re-enable */
+  z-index: 2147483646;
+}
+
+/* ---------- dock strip (thin black, max 45px) ---------- */
+.fvcms-dock {
+  position: fixed;
+  background: rgba(8, 8, 10, 0.98);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 6px 4px;
+  pointer-events: auto;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
+}
+/* On mobile: hide the dock background, only pills show */
+@media (max-width: 600px) {
+  .fvcms-dock {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 6px 6px !important;
+    /* Allow taps to pass through the empty space between pills */
+    pointer-events: none;
+  }
+  .fvcms-dock-pill {
+    pointer-events: auto;
+  }
+}
+.fvcms-dock-left {
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 44px;
+  flex-direction: column;
+  border-right: 1px solid rgba(180, 140, 80, 0.55);
+}
+.fvcms-dock-right {
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 44px;
+  flex-direction: column;
+  border-left: 1px solid rgba(180, 140, 80, 0.55);
+}
+.fvcms-dock-top {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  border-bottom: 1px solid rgba(180, 140, 80, 0.55);
+}
+.fvcms-dock-bottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  border-top: 1px solid rgba(180, 140, 80, 0.55);
+}
+@media (max-width: 600px) {
+  /* Mobile: dock has no visible body, so pills get a small inset from edge */
+  .fvcms-dock-left { left: 6px; width: auto; border-right: none; }
+  .fvcms-dock-right { right: 6px; width: auto; border-left: none; }
+  .fvcms-dock-top { top: 6px; height: auto; border-bottom: none; }
+  .fvcms-dock-bottom { bottom: 6px; height: auto; border-top: none; }
+  /* Pills get a subtle drop shadow since they float now */
+  .fvcms-dock-pill {
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* ---------- pills (green rounded buttons) ---------- */
+.fvcms-dock-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: rgba(76, 175, 80, 1);
+  color: #fff;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  padding: 8px 6px;
+  border-radius: 6px;
+  cursor: grab;
+  user-select: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  position: relative;
+}
+.fvcms-dock-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+.fvcms-dock-pill.active {
+  background: rgba(255, 220, 100, 1);
+  color: #1a1a1a;
+  font-weight: 700;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6), 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Vertical pills on left/right docks */
+.fvcms-dock-left .fvcms-dock-pill,
+.fvcms-dock-right .fvcms-dock-pill {
+  width: 32px;
+  height: auto;
+  min-height: 80px;
+  max-height: 200px;
+  writing-mode: vertical-rl;  /* rotated text */
+  text-orientation: mixed;
+  padding: 12px 4px;
+}
+.fvcms-dock-left .fvcms-dock-pill .fvcms-dock-pill-label,
+.fvcms-dock-right .fvcms-dock-pill .fvcms-dock-pill-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  display: inline-block;
+  max-height: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fvcms-dock-left .fvcms-dock-pill .fvcms-dock-pill-grip,
+.fvcms-dock-right .fvcms-dock-pill .fvcms-dock-pill-grip {
+  /* Grip shown horizontally at the top of vertical pill */
+  writing-mode: horizontal-tb;
+  font-size: 10px;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+/* Horizontal pills on top/bottom docks */
+.fvcms-dock-top .fvcms-dock-pill,
+.fvcms-dock-bottom .fvcms-dock-pill {
+  height: 30px;
+  padding: 4px 10px;
+}
+.fvcms-dock-top .fvcms-dock-pill .fvcms-dock-pill-label,
+.fvcms-dock-bottom .fvcms-dock-pill .fvcms-dock-pill-label {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- panel DOM ---------- */
+.fvcms-pm-panel {
+  position: fixed;
+  background: rgba(20, 28, 20, 0.97);
+  color: #e8e8e0;
+  font: 12px ui-monospace, Menlo, monospace;
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(120, 160, 120, 0.3);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  /* Lower z than the dock so the dock + pills always sit on top */
+  z-index: 2147483640;
+  pointer-events: auto;
+}
+
+/* Docked panels: full height, no border radius (snaps cleanly to viewport edge) */
+.fvcms-pm-panel[data-state="docked-active"] {
+  border-radius: 0;
+  height: 100vh !important;
+  max-height: 100vh !important;
+}
+.fvcms-pm-panel[data-state="docked-active"] .fvcms-pm-header {
+  border-radius: 0;
+}
+
+/* On mobile, docked panel fits inside remaining viewport so Open buttons stay visible */
+@media (max-width: 600px) {
+  .fvcms-pm-panel[data-state="docked-active"][data-dock-edge="left"],
+  .fvcms-pm-panel[data-state="docked-active"][data-dock-edge="right"] {
+    width: calc(100vw - 44px) !important;
+    max-width: calc(100vw - 44px) !important;
+  }
+}
+.fvcms-pm-header {
+  padding: 10px 12px;
+  background: rgba(45, 79, 45, 0.92);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  user-select: none;
+  cursor: grab;
+  flex-shrink: 0;
+  gap: 8px;
+}
+.fvcms-pm-title {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fvcms-pm-controls {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.fvcms-pm-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 14px;
+  min-width: 26px;
+  min-height: 26px;
+  line-height: 1;
+}
+.fvcms-pm-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 6-dot grip icon (2 columns × 3 rows) used for the detach button */
+.fvcms-pm-grip {
+  display: inline-block;
+  width: 7px;
+  height: 11px;
+  background-image:
+    radial-gradient(circle, currentColor 1.1px, transparent 1.4px),
+    radial-gradient(circle, currentColor 1.1px, transparent 1.4px);
+  background-size: 3.5px 3.66px;
+  background-position: 0 0, 3.5px 0;
+  background-repeat: repeat;
+  vertical-align: middle;
+}
+.fvcms-pm-close:hover {
+  background: rgba(220, 60, 60, 0.9);
+  border-color: rgba(255, 80, 80, 1);
+}
+.fvcms-pm-body {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 12px;
+  min-height: 0;
+  /* Kill ugly native scrollbars — scroll still works, just no chrome */
+  scrollbar-width: none;          /* Firefox */
+  -ms-overflow-style: none;       /* IE/old Edge */
+  -webkit-overflow-scrolling: touch;
+}
+.fvcms-pm-body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;                  /* WebKit / Blink */
+}
+
+/* Apply same scrollbar hiding to all descendants of a panel
+   (checkboxes, list views, anything inside that might scroll) */
+.fvcms-pm-panel * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.fvcms-pm-panel *::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* ---------- snap hint (when dragging panel near edge) ---------- */
+.fvcms-snap-hint {
+  position: fixed;
+  background: rgba(180, 140, 80, 0.85);
+  pointer-events: none;
+  z-index: 2147483644;
+  display: none;
+  box-shadow: 0 0 20px rgba(180, 140, 80, 0.6);
+}
+.fvcms-snap-hint-left {
+  left: 0; top: 0; bottom: 0; width: 50px;
+  border-right: 2px solid rgba(255, 220, 100, 1);
+}
+.fvcms-snap-hint-right {
+  right: 0; top: 0; bottom: 0; width: 50px;
+  border-left: 2px solid rgba(255, 220, 100, 1);
+}
+.fvcms-snap-hint-top {
+  top: 0; left: 0; right: 0; height: 50px;
+  border-bottom: 2px solid rgba(255, 220, 100, 1);
+}
+.fvcms-snap-hint-bottom {
+  bottom: 0; left: 0; right: 0; height: 50px;
+  border-top: 2px solid rgba(255, 220, 100, 1);
+}
+/* ---------- squeeze body padding when docked panel is in squeeze mode ---------- */
+/* data-overlay-mode="1" means SQUEEZE mode is active (panel pushes page). */
+/* Default (no attribute) = overlay mode (panel sits on top of page, no padding). */
+body:has(.fvcms-pm-panel[data-state="docked-active"][data-dock-edge="left"][data-overlay-mode="1"]) {
+  padding-left: var(--fvcms-pm-pinned-w, 0px) !important;
+  transition: padding-left 0.2s ease;
+}
+body:has(.fvcms-pm-panel[data-state="docked-active"][data-dock-edge="right"][data-overlay-mode="1"]) {
+  padding-right: var(--fvcms-pm-pinned-w, 0px) !important;
+  transition: padding-right 0.2s ease;
+}
+body:has(.fvcms-pm-panel[data-state="docked-active"][data-dock-edge="top"][data-overlay-mode="1"]) {
+  padding-top: var(--fvcms-pm-pinned-h, 0px) !important;
+  transition: padding-top 0.2s ease;
+}
+body:has(.fvcms-pm-panel[data-state="docked-active"][data-dock-edge="bottom"][data-overlay-mode="1"]) {
+  padding-bottom: var(--fvcms-pm-pinned-h, 0px) !important;
+  transition: padding-bottom 0.2s ease;
+}
+
+/* Squeeze button visual feedback: highlighted when in squeeze mode */
+.fvcms-pm-squeeze[data-active="1"] {
+  background: rgba(180, 140, 80, 0.6) !important;
+  color: #fff !important;
+}
+
+/* On floating panels, only the close button + collapse button make sense.
+   Squeeze and detach are dock-only operations.
+   Collapse IS shown on floating — clicking it docks to the nearest edge. */
+.fvcms-pm-panel.fvcms-pm-floating .fvcms-pm-squeeze,
+.fvcms-pm-panel.fvcms-pm-floating .fvcms-pm-detach {
+  display: none;
+}
+
+/* ---------- resize handle (on inner edge of docked panel) ---------- */
+.fvcms-pm-resize {
+  position: absolute;
+  z-index: 2;
+  /* Default hidden; positioned by dock edge */
+  display: none;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+/* Show only when panel is docked-active OR floating */
+.fvcms-pm-panel[data-state="docked-active"] .fvcms-pm-resize,
+.fvcms-pm-panel[data-state="floating"] .fvcms-pm-resize {
+  display: block;
+}
+/* Floating: handle is bottom-right corner (free 2-axis resize) */
+.fvcms-pm-panel[data-state="floating"] .fvcms-pm-resize {
+  right: 0;
+  bottom: 0;
+  width: 18px;
+  height: 18px;
+  cursor: nwse-resize;
+  background-image:
+    linear-gradient(135deg, transparent 0%, transparent 50%,
+      rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0.4) 60%,
+      transparent 60%, transparent 70%,
+      rgba(255, 255, 255, 0.4) 70%, rgba(255, 255, 255, 0.4) 80%,
+      transparent 80%);
+}
+/* Left dock: handle on RIGHT (inner) edge of panel */
+.fvcms-pm-panel[data-state="docked-active"][data-dock-edge="left"] .fvcms-pm-resize {
+  right: -6px;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  cursor: ew-resize;
+}
+/* Right dock: handle on LEFT (inner) edge */
+.fvcms-pm-panel[data-state="docked-active"][data-dock-edge="right"] .fvcms-pm-resize {
+  left: -6px;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  cursor: ew-resize;
+}
+/* Top dock: handle on BOTTOM (inner) edge */
+.fvcms-pm-panel[data-state="docked-active"][data-dock-edge="top"] .fvcms-pm-resize {
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 12px;
+  cursor: ns-resize;
+}
+/* Bottom dock: handle on TOP (inner) edge */
+.fvcms-pm-panel[data-state="docked-active"][data-dock-edge="bottom"] .fvcms-pm-resize {
+  left: 0;
+  right: 0;
+  top: -6px;
+  height: 12px;
+  cursor: ns-resize;
+}
+/* Gold tint on hover */
+.fvcms-pm-panel[data-state="docked-active"] .fvcms-pm-resize:hover,
+.fvcms-pm-panel[data-state="floating"] .fvcms-pm-resize:hover {
+  background-color: rgba(180, 140, 80, 0.7);
+  box-shadow: 0 0 8px rgba(180, 140, 80, 0.5);
+}
+
+/* Prevent horizontal page scroll when dock has docked panel that pushes
+   page (squeeze) — elementor swiper duplicates overflow otherwise. */
+html:has(.fvcms-pm-panel[data-state="docked-active"]),
+body:has(.fvcms-pm-panel[data-state="docked-active"]) {
+  overflow-x: hidden !important;
+}
+
+/* When multiple docks exist on perpendicular edges, offset them so
+   pills on different edges don't visually overlap. */
+body:has(.fvcms-dock-left) .fvcms-dock-top,
+body:has(.fvcms-dock-left) .fvcms-dock-bottom {
+  left: 50px;  /* clear the left dock area */
+}
+body:has(.fvcms-dock-right) .fvcms-dock-top,
+body:has(.fvcms-dock-right) .fvcms-dock-bottom {
+  right: 50px;
+}
+body:has(.fvcms-dock-top) .fvcms-dock-left,
+body:has(.fvcms-dock-top) .fvcms-dock-right {
+  top: 50px;
+}
+body:has(.fvcms-dock-bottom) .fvcms-dock-left,
+body:has(.fvcms-dock-bottom) .fvcms-dock-right {
+  bottom: 50px;
+}
+
+/* Region editor UI (inside the CMS panel) */
+.fvcms-region-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fvcms-region-editor-section {
+  border-left: 2px solid rgba(180, 140, 80, 0.5);
+  padding-left: 8px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.fvcms-region-editor-head {
+  font-size: 11px;
+  color: #c0e0c0;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 4px;
+}
+.fvcms-region-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 10px;
+  color: #b0c0b0;
+}
+.fvcms-region-field label {
+  font-weight: 600;
+  font-size: 10px;
+}
+.fvcms-region-overlay-label {
+  position: absolute; top: -22px; left: -1px;
+  background: rgba(180, 140, 80, 0.95); color: #1a1a1a;
+  padding: 2px 8px; font: 11px ui-monospace, monospace;
+  font-weight: 700; letter-spacing: 0.4px;
+  border-radius: 3px 3px 0 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.fvcms-region-overlay-badge {
+  position: absolute; top: -22px; right: -1px;
+  background: rgba(40, 40, 40, 0.85); color: #fff;
+  padding: 2px 8px; font: 10px ui-monospace, monospace;
+  border-radius: 3px 3px 0 0;
+  pointer-events: none;
+}

@@ -1,12 +1,13 @@
-// runtime/visualizer.js — annotation visualiser
-// When the operator opens the dev panel, draw overlays on the live page
-// marking each region's boundary. Hovering shows the label.
-// Clicking the overlay opens the region navigator entry.
+// runtime/visualizer.js — region visualisation
+// Dashed overlays that follow the region's live position. Reposition
+// every frame via requestAnimationFrame while overlays are active, so
+// they stay glued to the region as the page scrolls.
 
 import { getStore } from './store.js';
 
 let _overlayRoot = null;
 let _active = false;
+let _rafHandle = null;
 
 export function showRegionOverlays() {
   if (_active) return;
@@ -35,46 +36,30 @@ export function showRegionOverlays() {
 
     const overlay = document.createElement('div');
     overlay.className = 'fvcms-region-overlay';
+    overlay.dataset.regionId = region.id;
     overlay.style.cssText = `
-      position: absolute; pointer-events: auto;
+      position: fixed; pointer-events: auto;
       border: 1.5px dashed rgba(180, 140, 80, 0.7);
       background: rgba(180, 140, 80, 0.05);
-      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.0);
       cursor: pointer;
       transition: background 0.15s ease, border-color 0.15s ease;
+      z-index: 1;
     `;
-    const rect = target.getBoundingClientRect();
-    overlay.style.top = (rect.top + window.scrollY) + 'px';
-    overlay.style.left = (rect.left + window.scrollX) + 'px';
-    overlay.style.width = rect.width + 'px';
-    overlay.style.height = rect.height + 'px';
+    _overlayRoot.appendChild(overlay);
 
     const label = document.createElement('div');
+    label.className = 'fvcms-region-overlay-label';
     label.textContent = region.label || region.id;
-    label.style.cssText = `
-      position: absolute; top: -22px; left: -1px;
-      background: rgba(180, 140, 80, 0.95); color: #1a1a1a;
-      padding: 2px 8px; font: 11px ui-monospace, monospace;
-      font-weight: 700; letter-spacing: 0.4px;
-      border-radius: 3px 3px 0 0;
-      pointer-events: none;
-    `;
     overlay.appendChild(label);
 
     const badgeCount = store.listGroupsForRegion(regionId).length;
     const badge = document.createElement('div');
+    badge.className = 'fvcms-region-overlay-badge';
     badge.textContent = `${badgeCount} groups`;
-    badge.style.cssText = `
-      position: absolute; top: -22px; right: -1px;
-      background: rgba(40, 40, 40, 0.85); color: #fff;
-      padding: 2px 8px; font: 10px ui-monospace, monospace;
-      border-radius: 3px 3px 0 0;
-      pointer-events: none;
-    `;
     overlay.appendChild(badge);
 
     overlay.addEventListener('mouseenter', () => {
-      overlay.style.background = 'rgba(180, 140, 80, 0.15)';
+      overlay.style.background = 'rgba(180, 140, 80, 0.18)';
       overlay.style.borderColor = 'rgba(255, 220, 100, 1)';
     });
     overlay.addEventListener('mouseleave', () => {
@@ -86,13 +71,33 @@ export function showRegionOverlays() {
       e.stopPropagation();
       if (window.__fvcmsHighlightRegion) window.__fvcmsHighlightRegion(region.id);
     });
-
-    _overlayRoot.appendChild(overlay);
   }
+
+  // Reposition every frame while active
+  const reposition = () => {
+    if (!_active) return;
+    const overlays = _overlayRoot ? _overlayRoot.querySelectorAll('.fvcms-region-overlay') : [];
+    overlays.forEach((overlay) => {
+      const regionId = overlay.dataset.regionId;
+      const region = store.getRegion(regionId);
+      if (!region) return;
+      const target = document.querySelector(region.selector);
+      if (!target) return;
+      const rect = target.getBoundingClientRect();
+      overlay.style.top = rect.top + 'px';
+      overlay.style.left = rect.left + 'px';
+      overlay.style.width = rect.width + 'px';
+      overlay.style.height = rect.height + 'px';
+    });
+    _rafHandle = requestAnimationFrame(reposition);
+  };
+  _rafHandle = requestAnimationFrame(reposition);
 }
 
 export function hideRegionOverlays() {
   _active = false;
+  if (_rafHandle) cancelAnimationFrame(_rafHandle);
+  _rafHandle = null;
   if (_overlayRoot) _overlayRoot.innerHTML = '';
 }
 
@@ -100,19 +105,16 @@ export function isOverlaysActive() {
   return _active;
 }
 
-// Re-position overlays on scroll/resize (best-effort)
+// Backwards-compat: also listen to scroll/resize for browsers that
+// don't fire rAF continuously (rare).
 let _scrollTimer = null;
 export function startOverlayTracking() {
   window.addEventListener('scroll', () => {
+    // rAF loop already handles this; nothing extra needed.
+    if (!_active) return;
     clearTimeout(_scrollTimer);
     _scrollTimer = setTimeout(() => {
-      if (_active) showRegionOverlays();
+      // No-op; rAF repaints at 60fps already.
     }, 100);
   }, true);
-  window.addEventListener('resize', () => {
-    clearTimeout(_scrollTimer);
-    _scrollTimer = setTimeout(() => {
-      if (_active) showRegionOverlays();
-    }, 100);
-  });
 }
