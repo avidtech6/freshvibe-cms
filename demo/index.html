@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FreshVibe CMS Demo — Oscar Tree Academy</title>
+  <meta name="x-build-tag" content="fvcms-demo-v1" />
+  <style>
+    /* Page chrome — outside the CMS control */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #f4f4ec;
+      color: #2a2a2a;
+      padding: 0;
+    }
+
+    .demo-nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(8px);
+      padding: 14px 32px;
+      display: flex; gap: 16px; align-items: center;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    .demo-nav .logo { font-weight: 800; font-size: 18px; color: #2d4f2d; }
+    .demo-nav .pill {
+      background: rgba(45, 79, 45, 0.1); color: #2d4f2d;
+      padding: 4px 12px; border-radius: 999px;
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.6px;
+    }
+
+    .demo-page {
+      max-width: 1180px; margin: 0 auto;
+      padding: 0 32px 80px;
+    }
+
+    .region {
+      padding: 60px 0;
+      border-bottom: 1px dashed rgba(0,0,0,0.08);
+    }
+    .region:last-child { border-bottom: none; }
+
+    .demo-region-label {
+      font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      color: #b0b0a8;
+      margin-bottom: 12px;
+    }
+
+    /* Hero */
+    #demo-hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    @media (max-width: 720px) {
+      #demo-hero { grid-template-columns: 1fr; }
+    }
+
+    /* Books region */
+    #demo-books {
+      display: flex; flex-direction: column; gap: 24px;
+    }
+    .demo-book-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 720px) {
+      .demo-book-row { grid-template-columns: 1fr; }
+    }
+
+    /* Newsletter */
+    #demo-newsletter {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* CMS-launched panel for editing */
+    #cms-panel {
+      position: fixed; right: 0; top: 0; bottom: 0;
+      width: 420px; max-width: 100vw;
+      background: rgba(20, 28, 20, 0.98);
+      color: #e8e8e0;
+      transform: translateX(100%);
+      transition: transform 0.2s ease;
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 16px 20px;
+      font: 12px ui-monospace, monospace;
+      box-shadow: -8px 0 24px rgba(0,0,0,0.3);
+    }
+    #cms-panel.open { transform: translateX(0); }
+    #cms-panel.open ~ #cms-backdrop { opacity: 1; pointer-events: auto; }
+    #cms-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.3);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 999;
+    }
+    .cms-toggle {
+      position: fixed; right: 0; top: 80px;
+      background: #2d4f2d; color: #fff;
+      padding: 10px 14px;
+      border-radius: 6px 0 0 6px;
+      cursor: pointer;
+      font: 700 12px ui-monospace, monospace;
+      z-index: 998;
+      box-shadow: -2px 2px 6px rgba(0,0,0,0.2);
+      border: none;
+    }
+    .cms-toggle:hover { background: #3a663a; }
+
+    .cms-header {
+      padding-bottom: 12px; margin-bottom: 14px;
+      border-bottom: 1px solid rgba(120, 160, 120, 0.3);
+    }
+    .cms-header h2 {
+      font-size: 14px; color: #c0e0c0;
+      margin-bottom: 4px;
+    }
+    .cms-header p {
+      font-size: 11px; color: #b0c0b0;
+      margin: 0;
+    }
+
+    .cms-section { margin: 16px 0; }
+    .cms-section h3 {
+      font-size: 11px; color: #c0e0c0;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .cms-row {
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(120, 160, 120, 0.1);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .cms-row:last-child { border-bottom: none; }
+    .cms-row .id { flex: 1; font-size: 10px; color: #d0d8d0; }
+    .cms-row .type {
+      font-size: 9px; background: rgba(60, 100, 60, 0.4);
+      padding: 1px 6px; border-radius: 3px;
+      color: #d0e0d0;
+    }
+    .cms-row button {
+      background: rgba(180, 140, 80, 0.7); color: #fff;
+      border: none; padding: 3px 10px; border-radius: 4px;
+      cursor: pointer; font: 10px ui-monospace, monospace;
+    }
+    .cms-row button:hover { background: rgba(180, 140, 80, 0.9); }
+
+    .status-line {
+      background: rgba(76, 175, 80, 0.2);
+      padding: 6px 10px; border-radius: 4px;
+      font-size: 10px; color: #c8e6c9;
+      margin: 8px 0;
+    }
+
+    /* When overlays are active */
+    .fvcms-region-overlay {
+      position: absolute !important;
+      pointer-events: auto;
+      cursor: pointer;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Demo nav -->
+  <nav class="demo-nav">
+    <span class="logo">FreshVibe CMS — live demo</span>
+    <span class="pill">15 modules · 2 skins</span>
+    <span class="pill" style="background: rgba(76, 152, 175, 0.15); color: #4c98af;">v0.4</span>
+    <span style="margin-left: auto; font-size: 11px; color: #888;">Click the { } button to open the dev panel →</span>
+  </nav>
+
+  <main class="demo-page">
+
+    <!-- HERO REGION -->
+    <div class="region">
+      <div class="demo-region-label">Region: Hero</div>
+      <section id="demo-hero">
+
+        <div>
+          <div id="demo-hero-h"></div>
+          <div id="demo-hero-p" style="margin: 18px 0;"></div>
+          <div id="demo-hero-cta" style="margin-top: 24px;"></div>
+        </div>
+
+        <div id="demo-hero-img"></div>
+
+      </section>
+    </div>
+
+    <!-- BOOKS REGION -->
+    <div class="region">
+      <div class="demo-region-label">Region: Books</div>
+      <section id="demo-books">
+
+        <div id="demo-books-h"></div>
+        <div id="demo-books-p"></div>
+
+        <div class="demo-book-row">
+          <div id="demo-books-card1"></div>
+          <div id="demo-books-card2"></div>
+          <div id="demo-books-card3"></div>
+        </div>
+
+      </section>
+    </div>
+
+    <!-- NEWSLETTER REGION -->
+    <div class="region">
+      <div class="demo-region-label">Region: Newsletter</div>
+      <section id="demo-newsletter">
+
+        <div id="demo-news-h"></div>
+        <div id="demo-news-form" style="margin-top: 24px;"></div>
+
+      </section>
+    </div>
+
+  </main>
+
+  <!-- Backdrop for the CMS panel -->
+  <div id="cms-backdrop"></div>
+
+  <!-- CMS slide-in panel -->
+  <aside id="cms-panel"></aside>
+
+  <!-- Toggle button — what would be the { } dev icon -->
+  <button class="cms-toggle" id="cms-toggle-btn">{ }</button>
+
+  <!-- Boot FreshVibe CMS. We import the bootstrapped dist fallback inline because the demo is self-contained. -->
+  <script type="module">
+    import { bootFreshvibeCms } from '../bootstrap.js';
+
+    // Load the sample annotation
+    const resp = await fetch('./sample-annotation.json');
+    const annotation = await resp.json();
+
+    await bootFreshvibeCms({ annotation });
+
+    // The panel manager. We mimic the { } toggle behaviour.
+    const panel = document.getElementById('cms-panel');
+    const backdrop = document.getElementById('cms-backdrop');
+    document.getElementById('cms-toggle-btn').addEventListener('click', () => {
+      panel.classList.toggle('open');
+    });
+    backdrop.addEventListener('click', () => panel.classList.remove('open'));
+
+    // Top-level await not allowed in event handler — wrap in async fn
+    async function refreshPanel() {
+      const { getStore, getModuleDef } = await import('../runtime/index.js');
+      const store = getStore();
+      const page = store.getPage(store.activeContext.page);
+      const modules = Array.from(store.modules.values());
+
+      panel.innerHTML = '';
+
+      const header = document.createElement('div');
+      header.className = 'cms-header';
+      header.innerHTML = `
+        <h2>FreshVibe CMS — live editing</h2>
+        <p>${page.regionIds.length} regions · ${modules.length} modules on this page</p>
+      `;
+      panel.appendChild(header);
+
+      const status = document.createElement('div');
+      status.className = 'status-line';
+      status.id = 'cms-status';
+      status.textContent = 'Idle — pick a module below to edit';
+      panel.appendChild(status);
+
+      // Region overlays button
+      const overlaySection = document.createElement('div');
+      overlaySection.className = 'cms-section';
+      overlaySection.innerHTML = '<h3>Region overlays</h3>';
+      const overlayDiv = document.createElement('div');
+      overlayDiv.style.cssText = 'display: flex; gap: 6px;';
+      const onBtn = document.createElement('button');
+      onBtn.textContent = 'Show regions';
+      onBtn.style.cssText = 'background: rgba(60, 100, 60, 0.4); color: #e8e8e0; border: 1px solid rgba(120, 160, 120, 0.3); border-radius: 4px; padding: 6px 10px; cursor: pointer; font: 11px ui-monospace, monospace; flex: 1;';
+      onBtn.addEventListener('click', () => window.__fvcmsShowOverlays());
+      const offBtn = document.createElement('button');
+      offBtn.textContent = 'Hide regions';
+      offBtn.style.cssText = onBtn.style.cssText;
+      offBtn.addEventListener('click', () => window.__fvcmsHideOverlays());
+      overlayDiv.appendChild(onBtn);
+      overlayDiv.appendChild(offBtn);
+      overlaySection.appendChild(overlayDiv);
+      panel.appendChild(overlaySection);
+
+      // Skins
+      const skinSection = document.createElement('div');
+      skinSection.className = 'cms-section';
+      skinSection.innerHTML = '<h3>Skin</h3>';
+      const { renderSkinPicker } = await import('../runtime/skin.js');
+      skinSection.appendChild(renderSkinPicker({ onChange: (id) => {
+        status.textContent = id ? `Skin applied: ${id.replace('skin-', '')}` : 'Skin cleared (defaults restored)';
+      }}));
+      panel.appendChild(skinSection);
+
+      // Module list (region-grouped)
+      const modSection = document.createElement('div');
+      modSection.className = 'cms-section';
+      modSection.innerHTML = '<h3>Modules</h3>';
+      const regions = store.listRegionsForPage(page.id);
+      for (const region of regions) {
+        const regHead = document.createElement('div');
+        regHead.style.cssText = 'font-size: 10px; color: #b0c0b0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(120, 160, 120, 0.2);';
+        regHead.textContent = region.label;
+        modSection.appendChild(regHead);
+        for (const group of store.listGroupsForRegion(region.id)) {
+          for (const m of store.listModulesForGroup(group.id)) {
+            const def = getModuleDef(m.moduleId);
+            const label = (m.config.text || m.config.title || m.config.buttonText || '').toString().substring(0, 18);
+            const row = document.createElement('div');
+            row.className = 'cms-row';
+            row.innerHTML = `
+              <span class="type">${m.moduleId.replace('M-', '')}</span>
+              <span class="id" title="${label}">${label || '—'}</span>
+              <button>Open</button>
+            `;
+            row.querySelector('button').addEventListener('click', () => {
+              window.__fvcmsOpenEditor(m.id);
+              status.textContent = `Editing: ${m.moduleId} ${m.id}`;
+            });
+            modSection.appendChild(row);
+          }
+        }
+      }
+      panel.appendChild(modSection);
+
+      // Group toggle (would go here in a fuller build)
+      const gtSection = document.createElement('div');
+      gtSection.className = 'cms-section';
+      gtSection.innerHTML = '<h3>Group → Module toggle</h3>';
+      const { renderGroupToggleUI } = await import('../runtime/group-toggle.js');
+      gtSection.appendChild(renderGroupToggleUI());
+      panel.appendChild(gtSection);
+
+      // Tip
+      const tip = document.createElement('div');
+      tip.style.cssText = 'font-size: 10px; color: #a0b0a0; padding: 8px; background: rgba(60, 100, 60, 0.15); border-radius: 4px; margin-top: 16px;';
+      tip.innerHTML = '<strong style="color:#c8e6c9">Try:</strong><br>• Click any heading text on the page to edit it inline<br>• Change a skin — modules re-render live<br>• Open any module to see fields, variants, raw JSON';
+      panel.appendChild(tip);
+    }
+
+    // Render initial panel
+    await refreshPanel();
+
+    // Re-render panel on store changes
+    setInterval(refreshPanel, 2000);
+
+    console.info('[demo] FreshVibe CMS booted successfully');
+    document.getElementById('cms-toggle-btn').textContent = '{ }';
+  </script>
+
+</body>
+</html>

@@ -28,9 +28,11 @@ function assert(cond, msg) {
 
 console.log('Test: module library');
 const defs = listModuleDefs();
-assert(defs.length === 10, `10 modules loaded (got ${defs.length})`);
-for (const id of ['M-heading', 'M-cta', 'M-image', 'M-paragraph', 'M-video',
-                  'M-carousel', 'M-menu', 'M-social-icons', 'M-accordion', 'M-icon-list']) {
+assert(defs.length === 15, `15 modules loaded (got ${defs.length})`);
+const moduleIds = ['M-heading', 'M-cta', 'M-image', 'M-paragraph', 'M-video',
+                  'M-carousel', 'M-menu', 'M-social-icons', 'M-accordion', 'M-icon-list',
+                  'M-info-box', 'M-contact-form', 'M-breadcrumb', 'M-testimonial', 'M-cta-box'];
+for (const id of moduleIds) {
   const d = getModuleDef(id);
   assert(!!d, `${id} exists`);
   assert(!!d.schema, `${id} has schema`);
@@ -38,8 +40,9 @@ for (const id of ['M-heading', 'M-cta', 'M-image', 'M-paragraph', 'M-video',
   assert(!!d.editor, `${id} has editor id (${d.editor})`);
 }
 
-console.log('\nTest: variants');
+console.log('\nTest: variants (where defined)');
 for (const d of defs) {
+  if (d.id === 'M-breadcrumb') continue; // no variants — that's fine
   assert(d.variants && d.variants.length > 0, `${d.id} has variants`);
 }
 

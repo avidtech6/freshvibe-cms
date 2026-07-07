@@ -1,5 +1,5 @@
 // bootstrap.js — entry point that wires FreshVibe CMS into a host site
-// v0.3: skins + group toggle + visualizer + improved editor shell
+// v0.4: queryable scope, 15 modules, editor polish
 
 import { initCms, getStore, resolveScope, getModuleDef } from './runtime/index.js';
 import { renderFormEditor } from './runtime/form-editor.js';
@@ -10,7 +10,18 @@ import { showRegionOverlays, hideRegionOverlays, startOverlayTracking } from './
 import { renderGroupToggleUI, toggleGroupToModule } from './runtime/group-toggle.js';
 import { openEditorShell } from './runtime/editor-shell.js';
 import { SAMPLE_SKINS } from './skins/index.js';
-import './runtime/styles.css';
+
+// Side-effect import for CSS. Inject <link> rather than ES-importing
+// the stylesheet (browsers reject CSS-imports as JS modules).
+function ensureStylesheet() {
+  if (document.getElementById('fvcms-styles')) return;
+  const link = document.createElement('link');
+  link.id = 'fvcms-styles';
+  link.rel = 'stylesheet';
+  link.href = new URL('./runtime/styles.css', import.meta.url).href;
+  document.head.appendChild(link);
+}
+ensureStylesheet();
 
 let _annotation = null;
 

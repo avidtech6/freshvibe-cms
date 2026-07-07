@@ -1,0 +1,210 @@
+{
+  "version": 1,
+  "generated": "2026-07-07-demo",
+  "pages": [
+    {
+      "id": "p-demo-home",
+      "pathname": "/demo/index.html",
+      "label": "Demo home",
+      "regionIds": ["R-hero", "R-books", "R-newsletter"],
+      "metadata": {}
+    }
+  ],
+  "regions": [
+    { "id": "R-hero",      "pageId": "p-demo-home", "label": "Hero region",      "selector": "#demo-hero",      "order": 0, "metadata": {} },
+    { "id": "R-books",     "pageId": "p-demo-home", "label": "Books region",     "selector": "#demo-books",     "order": 1, "metadata": {} },
+    { "id": "R-newsletter","pageId": "p-demo-home", "label": "Newsletter region","selector": "#demo-newsletter","order": 2, "metadata": {} }
+  ],
+  "groups": [
+    { "id": "G-hero-0",      "regionId": "R-hero",       "selector": "#demo-hero-h",      "order": 0, "isModule": true, "moduleInstanceId": "MI-hero-h",      "metadata": { "dataId": "hero-h" } },
+    { "id": "G-hero-1",      "regionId": "R-hero",       "selector": "#demo-hero-p",      "order": 1, "isModule": true, "moduleInstanceId": "MI-hero-p",      "metadata": { "dataId": "hero-p" } },
+    { "id": "G-hero-2",      "regionId": "R-hero",       "selector": "#demo-hero-cta",    "order": 2, "isModule": true, "moduleInstanceId": "MI-hero-cta",    "metadata": { "dataId": "hero-cta" } },
+    { "id": "G-hero-3",      "regionId": "R-hero",       "selector": "#demo-hero-img",    "order": 3, "isModule": true, "moduleInstanceId": "MI-hero-img",    "metadata": { "dataId": "hero-img" } },
+
+    { "id": "G-books-0",     "regionId": "R-books",      "selector": "#demo-books-h",     "order": 0, "isModule": true, "moduleInstanceId": "MI-books-h",     "metadata": { "dataId": "books-h" } },
+    { "id": "G-books-1",     "regionId": "R-books",      "selector": "#demo-books-p",     "order": 1, "isModule": true, "moduleInstanceId": "MI-books-p",     "metadata": { "dataId": "books-p" } },
+    { "id": "G-books-2",     "regionId": "R-books",      "selector": "#demo-books-card1", "order": 2, "isModule": true, "moduleInstanceId": "MI-books-card1", "metadata": { "dataId": "books-card1" } },
+    { "id": "G-books-3",     "regionId": "R-books",      "selector": "#demo-books-card2", "order": 3, "isModule": true, "moduleInstanceId": "MI-books-card2", "metadata": { "dataId": "books-card2" } },
+    { "id": "G-books-4",     "regionId": "R-books",      "selector": "#demo-books-card3", "order": 4, "isModule": true, "moduleInstanceId": "MI-books-card3", "metadata": { "dataId": "books-card3" } },
+
+    { "id": "G-news-0",      "regionId": "R-newsletter", "selector": "#demo-news-h",      "order": 0, "isModule": true, "moduleInstanceId": "MI-news-h",      "metadata": { "dataId": "news-h" } },
+    { "id": "G-news-1",      "regionId": "R-newsletter", "selector": "#demo-news-form",   "order": 1, "isModule": true, "moduleInstanceId": "MI-news-form",   "metadata": { "dataId": "news-form" } }
+  ],
+  "modules": [
+    {
+      "id": "MI-hero-h",
+      "moduleId": "M-heading",
+      "groupId": "G-hero-0",
+      "selector": "#demo-hero-h",
+      "config": {
+        "text": "Oscar the friendly Oak tree",
+        "level": "h1",
+        "align": "left",
+        "color": null,
+        "size": "xlarge"
+      },
+      "metadata": { "originalWidgetType": "heading", "dataId": "hero-h" }
+    },
+    {
+      "id": "MI-hero-p",
+      "moduleId": "M-paragraph",
+      "groupId": "G-hero-1",
+      "selector": "#demo-hero-p",
+      "config": {
+        "text": "From the Oak to hands-on activities and creative projects, our materials are designed to spark curiosity and support educators, families, and nature lovers alike.",
+        "size": "medium",
+        "align": "left",
+        "color": null,
+        "maxWidth": "normal"
+      },
+      "metadata": { "originalWidgetType": "text-editor", "dataId": "hero-p" }
+    },
+    {
+      "id": "MI-hero-cta",
+      "moduleId": "M-cta",
+      "groupId": "G-hero-2",
+      "selector": "#demo-hero-cta",
+      "config": {
+        "text": "Explore the world of trees",
+        "href": "/book/",
+        "variant": "solid",
+        "color": null,
+        "radius": "medium",
+        "size": "large",
+        "openInNewTab": false,
+        "icon": "none"
+      },
+      "metadata": { "originalWidgetType": "button", "dataId": "hero-cta" }
+    },
+    {
+      "id": "MI-hero-img",
+      "moduleId": "M-image",
+      "groupId": "G-hero-3",
+      "selector": "#demo-hero-img",
+      "config": {
+        "src": "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=600&q=70",
+        "alt": "A friendly oak tree",
+        "width": "auto",
+        "align": "left",
+        "aspectRatio": "4:3",
+        "caption": "Photo: Oscar the Oak",
+        "link": null
+      },
+      "metadata": { "originalWidgetType": "image", "dataId": "hero-img" }
+    },
+
+    {
+      "id": "MI-books-h",
+      "moduleId": "M-heading",
+      "groupId": "G-books-0",
+      "selector": "#demo-books-h",
+      "config": {
+        "text": "Our books",
+        "level": "h2",
+        "align": "left",
+        "color": null,
+        "size": "large"
+      },
+      "metadata": { "originalWidgetType": "heading", "dataId": "books-h" }
+    },
+    {
+      "id": "MI-books-p",
+      "moduleId": "M-paragraph",
+      "groupId": "G-books-1",
+      "selector": "#demo-books-p",
+      "config": {
+        "text": "Beautifully illustrated, curriculum-aligned resources that make learning about trees fun.",
+        "size": "medium",
+        "align": "left",
+        "color": null,
+        "maxWidth": "normal"
+      },
+      "metadata": { "originalWidgetType": "text-editor", "dataId": "books-p" }
+    },
+    {
+      "id": "MI-books-card1",
+      "moduleId": "M-cta-box",
+      "groupId": "G-books-2",
+      "selector": "#demo-books-card1",
+      "config": {
+        "title": "Learning with Trees",
+        "body": "Curriculum (species recognition identifying a range of native and introduced species)",
+        "buttonText": "Read More",
+        "buttonHref": "/book/learning-with-trees/",
+        "background": null,
+        "layout": "centered"
+      },
+      "metadata": { "originalWidgetType": "eael-cta-box", "dataId": "books-card1" }
+    },
+    {
+      "id": "MI-books-card2",
+      "moduleId": "M-cta-box",
+      "groupId": "G-books-3",
+      "selector": "#demo-books-card2",
+      "config": {
+        "title": "The Colouring Book",
+        "body": "Contains more than 40 ideas for inspiration. Learning in Nature's Classroom is increasingly popular.",
+        "buttonText": "Read More",
+        "buttonHref": "/book/the-colouring-book/",
+        "background": null,
+        "layout": "centered"
+      },
+      "metadata": { "originalWidgetType": "eael-cta-box", "dataId": "books-card2" }
+    },
+    {
+      "id": "MI-books-card3",
+      "moduleId": "M-cta-box",
+      "groupId": "G-books-4",
+      "selector": "#demo-books-card3",
+      "config": {
+        "title": "The Tree Manual",
+        "body": "Designed for teachers and educators, but also useful for those who work with trees.",
+        "buttonText": "Read More",
+        "buttonHref": "/book/the-tree-manual/",
+        "background": null,
+        "layout": "centered"
+      },
+      "metadata": { "originalWidgetType": "eael-cta-box", "dataId": "books-card3" }
+    },
+
+    {
+      "id": "MI-news-h",
+      "moduleId": "M-heading",
+      "groupId": "G-news-0",
+      "selector": "#demo-news-h",
+      "config": {
+        "text": "Stay in the loop",
+        "level": "h2",
+        "align": "left",
+        "color": null,
+        "size": "large"
+      },
+      "metadata": { "originalWidgetType": "heading", "dataId": "news-h" }
+    },
+    {
+      "id": "MI-news-form",
+      "moduleId": "M-contact-form",
+      "groupId": "G-news-1",
+      "selector": "#demo-news-form",
+      "config": {
+        "fields": [
+          { "name": "name",  "label": "Your name",   "type": "text",     "required": true,  "options": "" },
+          { "name": "email", "label": "Email",        "type": "email",    "required": true,  "options": "" },
+          { "name": "optin", "label": "Subscribe to updates", "type": "checkbox", "required": false, "options": "" }
+        ],
+        "submitLabel": "Join the list",
+        "submitEndpoint": null,
+        "successMessage": "Thanks! You're on the list.",
+        "layout": "stacked"
+      },
+      "metadata": { "originalWidgetType": "form", "dataId": "news-form" }
+    }
+  ],
+  "meta": {
+    "totalPages": 1,
+    "totalRegions": 3,
+    "totalGroups": 11,
+    "totalModules": 11,
+    "unsupportedWidgets": []
+  }
+}

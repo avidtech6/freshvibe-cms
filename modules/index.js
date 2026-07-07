@@ -1,6 +1,5 @@
 // modules/index.js — canonical module library barrel
-// Importing this file loads the 10 starter modules.
-// Add new modules here as the library grows.
+// v0.4: 15 modules total.
 
 import { headingModule } from './heading.js';
 import { ctaModule } from './cta.js';
@@ -12,6 +11,11 @@ import { menuModule } from './menu.js';
 import { socialIconsModule } from './social-icons.js';
 import { accordionModule } from './accordion.js';
 import { iconListModule } from './icon-list.js';
+import { infoBoxModule } from './info-box.js';
+import { contactFormModule } from './contact-form.js';
+import { breadcrumbModule } from './breadcrumb.js';
+import { testimonialModule } from './testimonial.js';
+import { ctaBoxModule } from './cta-box.js';
 
 export const CANONICAL_MODULES = [
   headingModule,
@@ -24,10 +28,18 @@ export const CANONICAL_MODULES = [
   socialIconsModule,
   accordionModule,
   iconListModule,
+  infoBoxModule,
+  contactFormModule,
+  breadcrumbModule,
+  testimonialModule,
+  ctaBoxModule,
 ];
 
+export const CANONICAL_MODULES_BY_ID = {};
+for (const m of CANONICAL_MODULES) CANONICAL_MODULES_BY_ID[m.id] = m;
+
 export function getModuleDef(id) {
-  return CANONICAL_MODULES.find(m => m.id === id) || null;
+  return CANONICAL_MODULES_BY_ID[id] || null;
 }
 
 export function listModuleDefs() {

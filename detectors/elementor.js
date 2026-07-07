@@ -326,6 +326,64 @@ function mapWidgetToModule(widget) {
         },
       };
 
+    case 'eael-info-box':
+      return {
+        moduleId: 'M-info-box',
+        config: {
+          icon: s.icon?.value || 'info',
+          title: s.title || '',
+          body: stripHtml(s.description || ''),
+          link: s.link?.url || null,
+          linkLabel: s.read_more_text || 'Learn more',
+          variant: 'info',
+        },
+      };
+
+    case 'eael-cta-box':
+      return {
+        moduleId: 'M-cta-box',
+        config: {
+          title: s.title || '',
+          body: stripHtml(s.description || ''),
+          buttonText: s.button_text || s.cta_text || '',
+          buttonHref: s.button_url?.url || s.link?.url || '/',
+          background: s.background_color || null,
+          layout: 'centered',
+        },
+      };
+
+    case 'eael-breadcrumbs':
+      return {
+        moduleId: 'M-breadcrumb',
+        config: {
+          items: parseBreadcrumbItems(s),
+          separator: '/',
+          homeLabel: 'Home',
+        },
+      };
+
+    case 'premium-addon-testimonials':
+    case 'eael-testimonial':
+      return {
+        moduleId: 'M-testimonial',
+        config: {
+          quote: stripHtml(s.description || s.testimonial_content || s.content || ''),
+          authorName: s.name || s.author || '',
+          authorRole: s.role || s.position || '',
+          authorImage: s.image?.url ? { url: s.image.url } : null,
+          rating: '5',
+          style: 'card',
+        },
+      };
+
+    case 'form':
+    case 'eael-weform':
+    case 'eael-fluentform':
+      return {
+        moduleId: 'M-contact-form',
+        config: extractFormFields(s),
+      };
+
     default:
       // Widget type we don't have a canonical module for yet.
       // Return null so it's skipped from the annotation but the
@@ -424,6 +482,43 @@ function stripHtml(html) {
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .trim();
+}
+
+function parseBreadcrumbItems(s) {
+  if (!Array.isArray(s.breadcrumb_trail)) return [];
+  return s.breadcrumb_trail.map(item => ({
+    label: item.text || item.label || item.title || '',
+    href: item.link || item.url || '/',
+  }));
+}
+
+function extractFormFields(s) {
+  if (Array.isArray(s.form_fields) && s.form_fields.length > 0) {
+    return {
+      fields: s.form_fields.map(f => ({
+        name: f.field_name || f.name || '',
+        label: f.field_label || f.label || '',
+        type: f.field_type || f.type || 'text',
+        required: !!f.required,
+        options: Array.isArray(f.options) ? f.options.join(',') : (f.options || ''),
+      })),
+      submitLabel: s.submit_button_text || 'Send',
+      submitEndpoint: s.form_action || null,
+      successMessage: s.success_message || 'Thanks!',
+      layout: 'stacked',
+    };
+  }
+  return {
+    fields: [
+      { name: 'name', label: 'Your name', type: 'text', required: true, options: '' },
+      { name: 'email', label: 'Email', type: 'email', required: true, options: '' },
+      { name: 'message', label: 'Message', type: 'textarea', required: false, options: '' },
+    ],
+    submitLabel: 'Send',
+    submitEndpoint: null,
+    successMessage: 'Thanks!',
+    layout: 'stacked',
+  };
 }
 
 function slug(s) {
