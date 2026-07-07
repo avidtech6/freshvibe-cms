@@ -595,17 +595,18 @@
           }
           // A real drag. Decide whether to leave the pill in view
           // (operator slid it in) or snap it back to parked.
+          // Threshold: if the final position is closer to fully
+          // shown than to fully parked, leave it shown. Otherwise
+          // snap back.
           const cs2 = getComputedStyle(pill);
           const finalTx = (new DOMMatrixReadOnly(cs2.transform)).m41 || 0;
-          if (isLeftDock && finalTx > -10) {
-            // Operator dragged it most of the way in — keep it shown.
-            // Remove the inline transform so the active class / hover
-            // CSS can take over. The pill stays at translateX(0).
+          // PARK = 30, FULL = 0. Midpoint = -15. If finalTx > -15,
+          // the operator pulled it past the midpoint, leave it shown.
+          if (isLeftDock && finalTx > -15) {
             pill.style.transform = '';
-          } else if (isRightDock && finalTx < 10) {
+          } else if (isRightDock && finalTx < 15) {
             pill.style.transform = '';
           } else {
-            // Not far enough in — snap back to parked.
             pill.style.transform = '';
           }
         }
