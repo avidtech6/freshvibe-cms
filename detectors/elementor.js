@@ -22,13 +22,12 @@
  * @returns {AnnotationResult}
  */
 export function detectElementor({ pathname, html }) {
-  const pageId = 'p-' + pathname.replace(/\//g, '_').replace(/^_|_$/g, '') || 'p-root';
+  const pageId = 'p-' + (pathname.replace(/\//g, '_').replace(/^_|_$/g, '') || 'root');
   const regions = [];
   const groups = [];
   const modules = [];
 
   // 1. Find top-level .e-con containers — these become Regions
-  //    Elementor v4 uses .e-con; v3 uses .elementor-section.
   const eConMatches = findTopLevelContainers(html);
   eConMatches.forEach((container, i) => {
     const regionId = `R-${slug(container.label)}-${i}`;
@@ -38,7 +37,6 @@ export function detectElementor({ pathname, html }) {
       label: container.label || `Section ${i + 1}`,
       selector: container.selector,
       order: i,
-      // Thread B: empty for v1
       metadata: {},
     });
 
@@ -53,12 +51,11 @@ export function detectElementor({ pathname, html }) {
         regionId,
         selector: widget.selector,
         order: j,
-        isModule: true,                  // every detected widget becomes a module in v1
+        isModule: true,
         moduleInstanceId,
         metadata: { detector: 'elementor', rawClass: widget.rawClass },
       });
 
-      // 3. Map Elementor widget type → canonical module id + extract config
       const mapped = mapWidgetToModule(widget);
       if (mapped) {
         modules.push({
@@ -76,7 +73,7 @@ export function detectElementor({ pathname, html }) {
   const pages = [{
     id: pageId,
     pathname,
-    label: pathname === '/' ? 'Home' : pathname.replace(/\//g, '').replace(/-/g, ' '),
+    label: pathname === '/' ? 'Home' : pathname.replace(/^\/|\/$/g, '').replace(/-/g, ' ') || 'Page',
     regionIds: regions.map(r => r.id),
     metadata: {},
   }];
@@ -87,11 +84,8 @@ export function detectElementor({ pathname, html }) {
 // ---- internals ----
 
 function findTopLevelContainers(html) {
-  // Match each top-level .e-con with its inner HTML.
-  // We use a regex approximation here; for production this should
-  // parse the HTML properly (use DOMParser in browser context).
   const containers = [];
-  const re = /<div[^>]*class="[^"]*\be-con\b[^"]*"[^>]*>([\s\S]*?)<\/div>/g;
+  const re = /<div[^>]*class="[^"]*\be-con\b[^"]*"[^>]*>([\s\S]*?)<\/div>\s*(?=<div[^>]*class="[^"]*\be-con\b|$)/g;
   let m;
   let i = 0;
   while ((m = re.exec(html)) !== null) {
@@ -115,7 +109,6 @@ function findTopLevelContainers(html) {
 }
 
 function findWidgetsInContainer(containerHtml) {
-  // Elementor widget wrappers: <div class="elementor-widget elementor-widget-heading ...">
   const widgets = [];
   const re = /<div[^>]*class="([^"]*elementor-widget\s[^"]*)"[^>]*>([\s\S]*?)<\/div>\s*<\/div>/g;
   let m;
@@ -125,7 +118,7 @@ function findWidgetsInContainer(containerHtml) {
     const type = typeClass ? typeClass.replace('elementor-widget-', '') : 'unknown';
     widgets.push({
       type,
-      selector: `.${classes[0]}`,
+      selector: `.${classes.find(c => c.startsWith('elementor-widget-') && c !== 'elementor-widget-container') || classes[0]}`,
       rawClass: m[1],
       settings: extractDataSettings(containerHtml),
     });
@@ -133,7 +126,6 @@ function findWidgetsInContainer(containerHtml) {
   return widgets;
 }
 
-// Elementor serializes widget config in data-settings="..." attribute
 function extractDataSettings(html) {
   const m = html.match(/data-settings="([^"]+)"/);
   if (!m) return {};
@@ -144,15 +136,16 @@ function extractDataSettings(html) {
   }
 }
 
-// Map Elementor widget types to canonical module ids + config
+// Map Elementor widget types to canonical module ids + extract config
 function mapWidgetToModule(widget) {
   const s = widget.settings || {};
   switch (widget.type) {
     case 'heading':
+    case 'animated-headline':
       return {
         moduleId: 'M-heading',
         config: {
-          text: s.title || '',
+          text: s.title || s.animated_text || '',
           level: 'h' + (s.header_size || '2'),
           align: s.align || 'left',
           color: null,
@@ -191,10 +184,197 @@ function mapWidgetToModule(widget) {
         },
       };
 
+    case 'text-editor':
+      return {
+        moduleId: 'M-paragraph',
+        config: {
+          text: stripHtml(s.editor || ''),
+          size: 'medium',
+          align: s.align || 'left',
+          color: null,
+          maxWidth: 'normal',
+        },
+      };
+
+    case 'video':
+    case 'eael-video':
+      return {
+        moduleId: 'M-video',
+        config: {
+          source: detectVideoSource(s.youtube_url || s.vimeo_url || s.hosted_url || ''),
+          url: s.youtube_url || s.vimeo_url || s.hosted_url || '',
+          poster: s.cover_image?.url ? { url: s.cover_image.url } : null,
+          autoplay: !!s.autoplay,
+          loop: !!s.loop,
+          muted: !!s.mute,
+          aspectRatio: s.aspect_ratio || '16:9',
+          caption: '',
+        },
+      };
+
+    case 'eael-post-carousel':
+    case 'eael-team-member-carousel':
+    case 'eael-stacked-cards':
+      return {
+        moduleId: 'M-carousel',
+        config: {
+          items: extractCarouselItems(s),
+          visibleCount: parseInt(s.slides_to_show || '3', 10),
+          autoRotate: !!s.autoplay,
+          rotateInterval: (parseInt(s.autoplay_speed || '5000', 10)),
+          showDots: s.dots !== 'no',
+          showArrows: s.arrows !== 'no',
+          cardStyle: 'shadowed',
+          imageAspect: '4:3',
+        },
+      };
+
+    case 'eael-simple-menu':
+      return {
+        moduleId: 'M-menu',
+        config: {
+          items: extractMenuItems(s),
+          layout: s.menu_layout === 'horizontal' ? 'horizontal' : 'vertical',
+          align: 'left',
+          showIcons: false,
+          separator: 'none',
+        },
+      };
+
+    case 'social-icons':
+      return {
+        moduleId: 'M-social-icons',
+        config: {
+          platforms: extractSocialPlatforms(s),
+          shape: 'circle',
+          size: 'medium',
+          color: null,
+          align: 'left',
+          layout: 'horizontal',
+        },
+      };
+
+    case 'eael-adv-accordion':
+    case 'eael-toggle':
+      return {
+        moduleId: 'M-accordion',
+        config: {
+          items: extractAccordionItems(s),
+          multiOpen: !!s.accordion_toggle,
+          style: 'separated',
+          iconPosition: 'right',
+        },
+      };
+
+    case 'icon-list':
+      return {
+        moduleId: 'M-icon-list',
+        config: {
+          items: extractIconListItems(s),
+          layout: 'vertical',
+          iconColor: null,
+          spacing: 'normal',
+        },
+      };
+
     default:
-      // Widget type we don't have a canonical module for yet
+      // Widget type we don't have a canonical module for yet.
+      // Return null so it's skipped from the annotation but the
+      // group still exists for visibility in the navigator.
       return null;
   }
+}
+
+// ---- widget config extractors ----
+
+function detectVideoSource(url) {
+  if (!url) return 'youtube';
+  if (/youtube|youtu\.be/.test(url)) return 'youtube';
+  if (/vimeo/.test(url)) return 'vimeo';
+  return 'file';
+}
+
+function extractCarouselItems(s) {
+  // Real Elementor serializes this as posts query args; the resulting
+  // HTML contains rendered cards. Without DOM access we get the query.
+  return Array.isArray(s.posts) ? s.posts.map(p => ({
+    title: p.title || '',
+    subtitle: '',
+    image: p.image ? { url: p.image } : null,
+    link: p.link || null,
+    description: '',
+  })) : [];
+}
+
+function extractMenuItems(s) {
+  if (Array.isArray(s.menu_items)) {
+    return s.menu_items.map(i => ({
+      label: i.label || i.title || '',
+      href: i.link?.url || '/',
+      openInNewTab: !!i.link?.is_external,
+    }));
+  }
+  return [];
+}
+
+function extractSocialPlatforms(s) {
+  const iconToPlatform = {
+    'fa-twitter': 'twitter', 'fa-x-twitter': 'twitter',
+    'fa-facebook': 'facebook', 'fa-facebook-f': 'facebook',
+    'fa-instagram': 'instagram',
+    'fa-youtube': 'youtube',
+    'fa-linkedin': 'linkedin', 'fa-linkedin-in': 'linkedin',
+    'fa-pinterest': 'pinterest', 'fa-pinterest-p': 'pinterest',
+    'fa-tiktok': 'tiktok',
+    'fa-threads': 'threads',
+    'fa-mastodon': 'mastodon',
+    'fa-github': 'github',
+    'fa-envelope': 'email',
+    'fa-phone': 'phone',
+  };
+  if (!Array.isArray(s.social_icon_list)) return [];
+  return s.social_icon_list.map(item => {
+    const iconClass = item?.social_icon?.value || '';
+    const platform = iconToPlatform[iconClass] || 'custom';
+    return {
+      platform,
+      url: item?.link?.url || '',
+      customLabel: platform === 'custom' ? (item?.social_icon?.title || iconClass) : '',
+    };
+  });
+}
+
+function extractAccordionItems(s) {
+  if (!Array.isArray(s.tabs) && !Array.isArray(s.items)) return [];
+  const arr = s.tabs || s.items || [];
+  return arr.map(t => ({
+    title: t.tab_title || t.title || '',
+    content: stripHtml(t.tab_content || t.content || ''),
+    defaultOpen: !!t.tab_default_active,
+    icon: t.tab_icon?.value || '',
+  }));
+}
+
+function extractIconListItems(s) {
+  if (!Array.isArray(s.icon_list)) return [];
+  return s.icon_list.map(i => ({
+    icon: i?.selected_icon?.value || '',
+    label: i?.text || '',
+    href: i?.link?.url || null,
+  }));
+}
+
+function stripHtml(html) {
+  return (html || '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .trim();
 }
 
 function slug(s) {

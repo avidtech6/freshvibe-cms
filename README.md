@@ -5,8 +5,20 @@ reconstructed static site. Oscar's Tree Academy is the first consumer.
 
 ## Status
 
-**v0.1.0 — foundation only.** Data model + 3 canonical modules
-(Heading, CTA, Image) + Elementor detector stub. UI not wired yet.
+**v0.2.0 — annotate + edit what's there.**
+
+- 10 canonical modules (Heading, CTA, Image, Paragraph, Video, Carousel,
+  Menu, Social icons, Accordion, Icon list)
+- Store with IndexedDB persistence + scope resolver
+- Elementor + EAEL detector (10 widget types mapped)
+- Annotation script that scans a dist → JSON
+- Annotation loader for runtime use
+- Generic form editor for any module schema
+- Inline text editor with field-level scope safety
+- Bootstrap module that wires everything into a host page
+- Annotation of Oscar's dist: **25 pages, 249 regions, 418 groups, 265 modules**
+- v0.2 items remaining: full region navigator in dev panel, more inline
+  edit coverage, module re-renderer, tests
 
 ## Architecture
 
@@ -21,8 +33,9 @@ reconstructed static site. Oscar's Tree Academy is the first consumer.
                     │ uses
 ┌─────────────────────────────────────────────────┐
 │           Modules (typed components)            │
-│  Heading, CTA, Image (v1).                      │
-│  Each: schema + defaultConfig + variants.       │
+│  Heading, CTA, Image, Paragraph, Video,         │
+│  Carousel, Menu, Social icons, Accordion,       │
+│  Icon list.                                     │
 │  → Universal. Stack-agnostic.                   │
 └─────────────────────────────────────────────────┘
                     ▲
@@ -45,93 +58,68 @@ reconstructed static site. Oscar's Tree Academy is the first consumer.
 
 ## Data model
 
-See `schemas/data-model.md` for the full shapes. Summary:
-
-- **Page** — keyed by URL pathname, contains ordered regions.
-- **Region** — top-level container on a page (`.e-con`, `<section>`, etc.).
-- **Group** — wrapper inside a region. May or may not be a module.
-- **ModuleDef** — typed component (Heading, CTA, Image). Has schema + defaults + variants.
-- **ModuleInstance** — one occurrence of a module on a page.
-- **Skin** — bundle of module-default overrides + CSS tokens.
-- **Scope** — addressable query used by AI + UI navigation.
-
-The data model has fields for Thread B (Oscar platform):
-`Region.gating`, `Module.progress`, `Runtime.currentUser`, etc.
-These exist in v1 shape but are not implemented in v1 UI.
+See `schemas/data-model.md` for the full shapes.
 
 ## Use it
 
-```js
-import { initCms, detectPage, getStore, resolveScope } from './runtime/index.js';
-import { detectElementor } from './detectors/elementor.js';
+### Step 1: annotate your dist
 
-await initCms();
-
-await detectPage({
-  pathname: location.pathname,
-  html: document.documentElement.outerHTML,
-  detect: detectElementor,
-});
-
-// Now store has the annotation.
-const store = getStore();
-const page = store.getPageByPathname(location.pathname);
-console.log('regions on this page:', store.listRegionsForPage(page.id));
-
-// Resolve a scope (used by AI safety + UI navigation)
-const { targets, ops } = resolveScope({ type: 'page', pageId: page.id });
-console.log('editable targets:', targets.length, 'ops:', ops);
+```bash
+node scripts/annotate.js /path/to/your/dist ./annotation.json
 ```
 
-## Roadmap
+Generates `annotation.json` with all pages, regions, groups, modules.
 
-### v0.1 — foundation (THIS WEEK)
-- [x] Data model (`schemas/data-model.md`)
-- [x] 3 canonical modules: Heading, CTA, Image
-- [x] Store with IndexedDB persistence
-- [x] Scope resolver with ops policy
-- [x] Elementor detector (stub — needs refinement)
+### Step 2: serve annotation.json alongside your pages
 
-### v0.2 — annotate + edit what's there
-- [ ] Add 7 more modules (paragraph, accordion, video, carousel, menu, social, contact-form)
-- [ ] Annotation script: scan dist, generate JSON, embed in build
-- [ ] Module editor panel (reuses existing panel manager)
-- [ ] Inline text editor on page
-- [ ] Region navigator in dev panel
+E.g. `dist/annotation.json` or any URL your pages can fetch.
 
-### v0.3 — skins + manual toggle
-- [ ] Group isModule manual toggle (operator UI)
-- [ ] Skin switcher UI
-- [ ] 2 sample skins: Reign-style, BuddyX-style
+### Step 3: boot the CMS in your page
 
-### v1.0 — production-ready
-- [ ] Tests for store, scope, detector
-- [ ] Documentation for adding a new detector
-- [ ] Documentation for adding a new module
-- [ ] AI integration spec (how an AI agent uses scopes)
+```html
+<script type="module">
+  import { bootFreshvibeCms } from './freshvibe-cms/bootstrap.js';
+  await bootFreshvibeCms({ annotationUrl: '/annotation.json' });
+</script>
+```
 
-### v2.0 (Thread B — Oscar platform)
-- [ ] Auth + currentUser wiring
-- [ ] Gating renderer (free vs Pro)
-- [ ] Progress tracking
-- [ ] Quiz + Certificate module types
-- [ ] Subscription gating
+That's it. The CMS:
+- Loads the annotation into IndexedDB
+- Wires inline editing on detected heading text
+- Exposes `window.__fvcmsOpenEditor(moduleInstanceId)` for opening the form editor
+
+### Step 4: integrate with your dev panel
+
+In your existing dev panel, call `host.mountNavigator(navigatorEl)` to
+get a region/group/module navigator mounted into your UI.
 
 ## Module library
 
-| ID | Label | Schema fields |
+| ID | Label | Elementor widgets mapped |
 |---|---|---|
-| `M-heading` | Heading | text, level, align, color, size |
-| `M-cta` | CTA button | text, href, variant, color, radius, size, openInNewTab, icon |
-| `M-image` | Image | src, alt, width, align, aspectRatio, caption, link |
+| `M-heading` | Heading | heading, animated-headline |
+| `M-cta` | CTA button | button, eael-creative-button |
+| `M-image` | Image | image, eael-image |
+| `M-paragraph` | Paragraph | text-editor |
+| `M-video` | Video | video, eael-video |
+| `M-carousel` | Carousel | eael-post-carousel, eael-team-member-carousel, eael-stacked-cards |
+| `M-menu` | Menu | eael-simple-menu |
+| `M-social-icons` | Social icons | social-icons |
+| `M-accordion` | Accordion | eael-adv-accordion, eael-toggle |
+| `M-icon-list` | Icon list | icon-list |
 
-## Detectors
+## Detected but not yet supported (Oscar inventory)
 
-| File | Stack | Status |
-|---|---|---|
-| `detectors/elementor.js` | Elementor + EAEL | stub |
-| `detectors/shopify.js` | Shopify Liquid | not started |
-| `detectors/raw-html.js` | Generic semantic HTML | not started |
+These widget types exist in Oscar's dist but don't have canonical modules
+yet — they'd need new modules added to the library:
+
+- `css`, `container`, `mobile`, `spacer` — chrome/layout, low priority
+- `form`, `eael-fluentform`, `eael-weform` — forms (different concern)
+- `eael-info-box`, `eael-cta-box`, `eael-countdown`, `eael-protected-content`,
+  `eael-data-table`, `eael-adv-tabs`, `eael-post-block`, `eael-breadcrumbs`,
+  `eael-testimonial` (premium-addon) — extras
+- `theme-post-title`, `theme-post-content`, `post-navigation` — WordPress theme widgets
+- `template`, `shortcode` — generic placeholders
 
 ## Repo layout
 
@@ -139,22 +127,43 @@ console.log('editable targets:', targets.length, 'ops:', ops);
 freshvibe-cms/
 ├── README.md                    # this file
 ├── schemas/
-│   └── data-model.md            # the canonical shapes
+│   └── data-model.md            # canonical shapes
 ├── modules/                     # universal module library
 │   ├── index.js                 # barrel
 │   ├── heading.js
 │   ├── cta.js
-│   └── image.js
+│   ├── image.js
+│   ├── paragraph.js
+│   ├── video.js
+│   ├── carousel.js
+│   ├── menu.js
+│   ├── social-icons.js
+│   ├── accordion.js
+│   └── icon-list.js
 ├── detectors/                   # stack-specific
 │   └── elementor.js
 ├── runtime/                     # universal runtime
 │   ├── index.js                 # public API
 │   ├── store.js                 # IndexedDB-backed store
-│   └── scope.js                 # scope resolver + ops policy
-├── skins/                       # sample skins (later)
-├── examples/                    # usage examples
-└── tests/                       # tests (later)
+│   ├── scope.js                 # scope resolver + ops policy
+│   ├── load-annotation.js       # JSON loader
+│   ├── form-editor.js           # generic form editor
+│   ├── inline-editor.js         # inline text edit
+│   └── styles.css               # scoped styles
+├── scripts/
+│   └── annotate.js              # dist → annotation.json
+├── bootstrap.js                 # entry point for host sites
+└── annotation.json              # generated by annotate.js (Oscar's dist)
 ```
+
+## Roadmap
+
+- [x] **v0.1** — foundation: data model + 3 modules + Elementor detector stub
+- [x] **v0.2** — annotate + edit what's there (annotation script, 10 modules,
+       form editor, inline editor, bootstrap)
+- [ ] **v0.3** — skins + manual group→module toggle + module re-renderer
+- [ ] **v1.0** — tests + docs + AI integration spec
+- [ ] **v2.0 (Thread B — Oscar platform)** — auth + gating + progress + quiz module
 
 ## License
 

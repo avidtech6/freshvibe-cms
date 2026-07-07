@@ -2,15 +2,17 @@
 // Public API for consumers (Oscar's dist, future Shopify/Webflow, etc.)
 //
 // Usage:
-//   import { initCms, getStore, detectPage, resolveScope } from './runtime/index.js';
+//   import { initCms, loadAnnotation, getStore, resolveScope } from './runtime/index.js';
+//   import annotation from './annotation.json';
 //   await initCms();
-//   await detectPage({ pathname: '/', html: document.documentElement.outerHTML });
+//   loadAnnotation(annotation);
 //
 // The runtime does NOT contain the words "Elementor", "WordPress", etc.
 // Stack-specific work happens in detectors/.
 
 export { getStore, Store } from './store.js';
 export { resolveScope, assertOp } from './scope.js';
+export { loadAnnotation, findPage } from './load-annotation.js';
 
 import { getStore } from './store.js';
 import { CANONICAL_MODULES } from '../modules/index.js';
@@ -21,11 +23,6 @@ export async function initCms() {
   if (_initialized) return;
   const store = getStore();
   await store.open();
-  // Register canonical module library in store
-  for (const def of CANONICAL_MODULES) {
-    // moduleDefs aren't stored in IndexedDB — they're loaded from code
-    // But we expose them via the context for editor UI to render forms.
-  }
   _initialized = true;
   return store;
 }
@@ -33,6 +30,9 @@ export async function initCms() {
 /**
  * Run a detector on a page's HTML and persist the annotation.
  * The detector is stack-specific; the runtime does the persistence.
+ *
+ * Most consumers should use loadAnnotation() instead — it's faster.
+ * Use this only when you need to detect on-the-fly.
  *
  * @param {Object} opts
  * @param {string} opts.pathname
@@ -57,4 +57,8 @@ export async function detectPage({ pathname, html, detect }) {
 
 export function getCanonicalModules() {
   return CANONICAL_MODULES.slice();
+}
+
+export function getModuleDef(id) {
+  return CANONICAL_MODULES.find(m => m.id === id) || null;
 }
