@@ -75,7 +75,7 @@
   }
 }
 
-/* ---------- pills (slim tab by default, slides out on hover) ---------- */
+/* ---------- pills (parked off-screen by default, slide into view on hover) ---------- */
 .fvcms-dock-pill {
   display: flex;
   align-items: center;
@@ -91,15 +91,18 @@
   cursor: grab;
   user-select: none;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  transition: width 0.18s ease, transform 0.12s ease, box-shadow 0.12s ease, background 0.18s ease;
+  transition: transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.12s ease,
+              background 0.18s ease,
+              filter 0.12s ease;
   white-space: nowrap;
   overflow: hidden;
   position: relative;
+  will-change: transform;
 }
 
-/* Panel-type-specific default colours.
-   Operators can tell at a glance which dock slot belongs to which
-   kind of panel, even with the slim tab state. */
+/* Panel-type-specific default colours so operators can tell at a
+   glance which dock slot belongs to which kind of panel. */
 .fvcms-dock-pill[data-pm-panel-id="fvcms-cms-panel"] {
   background: rgba(46, 60, 50, 0.95);     /* CMS — deep forest */
   border: 1px solid rgba(140, 180, 140, 0.5);
@@ -116,9 +119,8 @@
 .fvcms-dock-pill:hover,
 .fvcms-dock-pill:focus-visible,
 .fvcms-dock-pill:active {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  filter: brightness(1.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  filter: brightness(1.18);
 }
 .fvcms-dock-pill.active {
   background: rgba(255, 220, 100, 1) !important;
@@ -128,25 +130,34 @@
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6), 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
-/* Vertical pills on left/right docks — slim tab by default,
-   slide out to full width on hover. The dock stays 44px wide
-   so neighbouring pills don't shift. */
+/* Vertical pills on left/right docks — full size, but parked
+   off-screen by default. On hover, focus, or active state, the
+   pill slides back into the dock so the operator can see what
+   it is. The dock itself stays 44px wide so neighbouring pills
+   don't shift around. */
 .fvcms-dock-left .fvcms-dock-pill,
 .fvcms-dock-right .fvcms-dock-pill {
-  width: 12px;                              /* slim tab */
+  width: 36px;
   height: auto;
   min-height: 80px;
   max-height: 200px;
   writing-mode: vertical-rl;  /* rotated text */
   text-orientation: mixed;
-  padding: 12px 2px;
+  padding: 12px 4px;
+}
+.fvcms-dock-left .fvcms-dock-pill {
+  transform: translateX(-30px);  /* park to the left, ~6px visible */
+}
+.fvcms-dock-right .fvcms-dock-pill {
+  transform: translateX(30px);   /* park to the right, ~6px visible */
 }
 .fvcms-dock-left .fvcms-dock-pill:hover,
 .fvcms-dock-right .fvcms-dock-pill:hover,
+.fvcms-dock-left .fvcms-dock-pill:focus-visible,
+.fvcms-dock-right .fvcms-dock-pill:focus-visible,
 .fvcms-dock-left .fvcms-dock-pill.active,
 .fvcms-dock-right .fvcms-dock-pill.active {
-  width: 36px;                              /* slide out */
-  padding: 12px 4px;
+  transform: translateX(0);      /* slide into view */
 }
 .fvcms-dock-left .fvcms-dock-pill .fvcms-dock-pill-label,
 .fvcms-dock-right .fvcms-dock-pill .fvcms-dock-pill-label {
@@ -156,14 +167,6 @@
   max-height: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
-  opacity: 0;                               /* hidden when pill is slim */
-  transition: opacity 0.18s ease;
-}
-.fvcms-dock-left .fvcms-dock-pill:hover .fvcms-dock-pill-label,
-.fvcms-dock-right .fvcms-dock-pill:hover .fvcms-dock-pill-label,
-.fvcms-dock-left .fvcms-dock-pill.active .fvcms-dock-pill-label,
-.fvcms-dock-right .fvcms-dock-pill.active .fvcms-dock-pill-label {
-  opacity: 1;
 }
 .fvcms-dock-left .fvcms-dock-pill .fvcms-dock-pill-grip,
 .fvcms-dock-right .fvcms-dock-pill .fvcms-dock-pill-grip {
@@ -174,36 +177,34 @@
   margin-bottom: 4px;
 }
 
-/* Horizontal pills on top/bottom docks — slim tab by default,
-   slide out to full width on hover. */
+/* Horizontal pills on top/bottom docks — full size, parked
+   off-screen by default. On hover, focus, or active, the pill
+   slides into the dock. */
 .fvcms-dock-top .fvcms-dock-pill,
 .fvcms-dock-bottom .fvcms-dock-pill {
-  height: 18px;                              /* slim tab */
-  padding: 2px 6px;
-  transition: height 0.18s ease, width 0.18s ease, padding 0.18s ease, box-shadow 0.12s ease, background 0.18s ease;
-}
-.fvcms-dock-top .fvcms-dock-pill:hover,
-.fvcms-dock-bottom .fvcms-dock-pill:hover,
-.fvcms-dock-top .fvcms-dock-pill.active,
-.fvcms-dock-bottom .fvcms-dock-pill.active {
   height: 30px;
   padding: 4px 10px;
 }
+.fvcms-dock-top .fvcms-dock-pill {
+  transform: translateY(-22px);   /* park upward, ~8px visible */
+}
+.fvcms-dock-bottom .fvcms-dock-pill {
+  transform: translateY(22px);    /* park downward, ~8px visible */
+}
+.fvcms-dock-top .fvcms-dock-pill:hover,
+.fvcms-dock-bottom .fvcms-dock-pill:hover,
+.fvcms-dock-top .fvcms-dock-pill:focus-visible,
+.fvcms-dock-bottom .fvcms-dock-pill:focus-visible,
+.fvcms-dock-top .fvcms-dock-pill.active,
+.fvcms-dock-bottom .fvcms-dock-pill.active {
+  transform: translate(0, 0);
+}
 .fvcms-dock-top .fvcms-dock-pill .fvcms-dock-pill-label,
 .fvcms-dock-bottom .fvcms-dock-pill .fvcms-dock-pill-label {
-  max-width: 0;
+  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
-  opacity: 0;
-  transition: opacity 0.18s ease, max-width 0.18s ease;
   white-space: nowrap;
-}
-.fvcms-dock-top .fvcms-dock-pill:hover .fvcms-dock-pill-label,
-.fvcms-dock-bottom .fvcms-dock-pill:hover .fvcms-dock-pill-label,
-.fvcms-dock-top .fvcms-dock-pill.active .fvcms-dock-pill-label,
-.fvcms-dock-bottom .fvcms-dock-pill.active .fvcms-dock-pill-label {
-  max-width: 140px;
-  opacity: 1;
 }
 
 /* ---------- panel DOM ---------- */

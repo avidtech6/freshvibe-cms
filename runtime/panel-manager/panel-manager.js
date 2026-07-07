@@ -502,45 +502,117 @@
           '<span class="fvcms-dock-pill-label">' + escapeHtml(panel.title) + '</span>' +
         '</div>'
       );
-      // Pill interactions: click anywhere except the grip span should
-      // activate the panel. The drag system already calls preventDefault
-      // on mousedown, which suppresses the synthetic click — so we hook
-      // the activate logic into the pill's mousedown directly and
-      // short-circuit _startDrag when the user isn't actually dragging.
-      // We also still want grip-only drags to detach.
+      // Pill interactions:
+      //  - Click anywhere except the grip span activates the panel.
+      //  - Click on the grip starts a real drag that can detach or
+      //    move the pill to a different edge.
+      //  - Touch on a non-grip part starts a drag-to-reveal: the
+      //    pill follows the finger; releasing in the shown position
+      //    leaves it there for a follow-up tap. A tap (no drag)
+      //    activates the panel.
+      // The drag system already calls preventDefault on mousedown,
+      // which suppresses the synthetic click — so we hook the
+      // activate logic into the mousedown directly.
       const isGripTarget = function (e) {
         return e.target && e.target.closest && e.target.closest('.fvcms-dock-pill-grip');
       };
+      const me2 = this;
       pill.addEventListener('mousedown', function (e) {
         if (!isGripTarget(e)) {
-          // Pure click: activate (or collapse if already active).
-          // preventDefault so the click event doesn't double-fire and
-          // so text-selection doesn't start.
           e.preventDefault();
           if (panel.state === 'docked-active') {
-            this.collapse(panelId);
+            me2.collapse(panelId);
           } else {
-            this.activate(panelId);
+            me2.activate(panelId);
           }
           return;
         }
-        // Grip: start a real drag that can detach or move edge.
         e.preventDefault();
-        this._startDrag(e, panel, 'pill');
-      }.bind(this));
+        me2._startDrag(e, panel, 'pill');
+      });
+
+      // ---- Touch drag-to-reveal for mobile ----
+      // On touch devices :hover is sticky and unreliable, so we
+      // implement the slide-in interaction directly: the pill
+      // follows the finger, and on release the operator can tap
+      // again to activate.
       pill.addEventListener('touchstart', function (e) {
-        if (!isGripTarget(e)) {
+        if (isGripTarget(e)) {
+          // Grip drag: same as mouse — detach or move edge
           e.preventDefault();
-          if (panel.state === 'docked-active') {
-            this.collapse(panelId);
-          } else {
-            this.activate(panelId);
-          }
+          me2._startDrag(e, panel, 'pill');
           return;
         }
+        // Non-grip touch: start a drag-to-reveal.
         e.preventDefault();
-        this._startDrag(e, panel, 'pill');
-      }.bind(this), { passive: false });
+        const t = e.touches[0];
+        const startX = t.clientX;
+        const startY = t.clientY;
+        // Read the current transform so we start from the actual
+        // parked position (CSS default or a previous in-line value).
+        const cs = getComputedStyle(pill);
+        const matrix = new DOMMatrixReadOnly(cs.transform);
+        const startTx = matrix.m41 || 0;
+        const isLeftDock = pill.closest('.fvcms-dock-left') !== null;
+        const isRightDock = pill.closest('.fvcms-dock-right') !== null;
+        // Parked offset depends on edge (defined in CSS).
+        const PARK = isLeftDock ? -30 : isRightDock ? 30 : 0;
+        let moved = false;
+        let lastDx = 0;
+        function onTouchMove(ev) {
+          const t2 = ev.touches[0];
+          const dx = t2.clientX - startX;
+          const dy = t2.clientY - startY;
+          // Only treat as a slide-reveal when motion is dominantly
+          // horizontal. Vertical motion means the user is scrolling
+          // the page, not revealing the pill — let the browser handle
+          // the scroll.
+          if (Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+            ev.preventDefault();
+            moved = true;
+            lastDx = dx;
+            // Clamp between PARK (or further) and 0
+            let tx = startTx + dx;
+            if (isLeftDock) tx = Math.min(0, Math.max(PARK - 4, tx));
+            else if (isRightDock) tx = Math.max(0, Math.min(-PARK + 4, tx));
+            pill.style.transform = 'translateX(' + tx + 'px)';
+            pill.style.transition = 'none';
+          }
+        }
+        function onTouchEnd(ev) {
+          pill.removeEventListener('touchmove', onTouchMove);
+          pill.removeEventListener('touchend', onTouchEnd);
+          pill.removeEventListener('touchcancel', onTouchEnd);
+          pill.style.transition = '';
+          if (!moved) {
+            // It was a tap, not a drag. Activate the panel.
+            if (panel.state === 'docked-active') me2.collapse(panelId);
+            else me2.activate(panelId);
+            // The active class on the panel will translate the
+            // pill back to 0 via CSS.
+            pill.style.transform = '';
+            return;
+          }
+          // A real drag. Decide whether to leave the pill in view
+          // (operator slid it in) or snap it back to parked.
+          const cs2 = getComputedStyle(pill);
+          const finalTx = (new DOMMatrixReadOnly(cs2.transform)).m41 || 0;
+          if (isLeftDock && finalTx > -10) {
+            // Operator dragged it most of the way in — keep it shown.
+            // Remove the inline transform so the active class / hover
+            // CSS can take over. The pill stays at translateX(0).
+            pill.style.transform = '';
+          } else if (isRightDock && finalTx < 10) {
+            pill.style.transform = '';
+          } else {
+            // Not far enough in — snap back to parked.
+            pill.style.transform = '';
+          }
+        }
+        pill.addEventListener('touchmove', onTouchMove, { passive: false });
+        pill.addEventListener('touchend', onTouchEnd);
+        pill.addEventListener('touchcancel', onTouchEnd);
+      }, { passive: false });
       container.appendChild(pill);
     }.bind(this));
   };
