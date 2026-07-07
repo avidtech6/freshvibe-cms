@@ -75,47 +75,77 @@
   }
 }
 
-/* ---------- pills (green rounded buttons) ---------- */
+/* ---------- pills (slim tab by default, slides out on hover) ---------- */
 .fvcms-dock-pill {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  background: rgba(76, 175, 80, 1);
+  background: rgba(60, 60, 68, 0.95);
   color: #fff;
   font-weight: 600;
   font-size: 11px;
   letter-spacing: 0.3px;
-  padding: 8px 6px;
+  padding: 8px 4px;
   border-radius: 6px;
   cursor: grab;
   user-select: none;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  transition: width 0.18s ease, transform 0.12s ease, box-shadow 0.12s ease, background 0.18s ease;
   white-space: nowrap;
   overflow: hidden;
   position: relative;
 }
-.fvcms-dock-pill:hover {
+
+/* Panel-type-specific default colours.
+   Operators can tell at a glance which dock slot belongs to which
+   kind of panel, even with the slim tab state. */
+.fvcms-dock-pill[data-pm-panel-id="fvcms-cms-panel"] {
+  background: rgba(46, 60, 50, 0.95);     /* CMS — deep forest */
+  border: 1px solid rgba(140, 180, 140, 0.5);
+}
+.fvcms-dock-pill[data-pm-panel-id^="fvcms-region-"] {
+  background: rgba(118, 96, 158, 0.95);   /* Region — soft purple */
+  border: 1px solid rgba(180, 160, 220, 0.55);
+}
+.fvcms-dock-pill[data-pm-panel-id^="fvcms-edit-"] {
+  background: rgba(170, 132, 60, 0.95);   /* Editor — muted amber */
+  border: 1px solid rgba(220, 180, 110, 0.55);
+}
+
+.fvcms-dock-pill:hover,
+.fvcms-dock-pill:focus-visible,
+.fvcms-dock-pill:active {
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  filter: brightness(1.15);
 }
 .fvcms-dock-pill.active {
-  background: rgba(255, 220, 100, 1);
+  background: rgba(255, 220, 100, 1) !important;
   color: #1a1a1a;
   font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6), 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
-/* Vertical pills on left/right docks */
+/* Vertical pills on left/right docks — slim tab by default,
+   slide out to full width on hover. The dock stays 44px wide
+   so neighbouring pills don't shift. */
 .fvcms-dock-left .fvcms-dock-pill,
 .fvcms-dock-right .fvcms-dock-pill {
-  width: 32px;
+  width: 12px;                              /* slim tab */
   height: auto;
   min-height: 80px;
   max-height: 200px;
   writing-mode: vertical-rl;  /* rotated text */
   text-orientation: mixed;
+  padding: 12px 2px;
+}
+.fvcms-dock-left .fvcms-dock-pill:hover,
+.fvcms-dock-right .fvcms-dock-pill:hover,
+.fvcms-dock-left .fvcms-dock-pill.active,
+.fvcms-dock-right .fvcms-dock-pill.active {
+  width: 36px;                              /* slide out */
   padding: 12px 4px;
 }
 .fvcms-dock-left .fvcms-dock-pill .fvcms-dock-pill-label,
@@ -126,27 +156,54 @@
   max-height: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
+  opacity: 0;                               /* hidden when pill is slim */
+  transition: opacity 0.18s ease;
+}
+.fvcms-dock-left .fvcms-dock-pill:hover .fvcms-dock-pill-label,
+.fvcms-dock-right .fvcms-dock-pill:hover .fvcms-dock-pill-label,
+.fvcms-dock-left .fvcms-dock-pill.active .fvcms-dock-pill-label,
+.fvcms-dock-right .fvcms-dock-pill.active .fvcms-dock-pill-label {
+  opacity: 1;
 }
 .fvcms-dock-left .fvcms-dock-pill .fvcms-dock-pill-grip,
 .fvcms-dock-right .fvcms-dock-pill .fvcms-dock-pill-grip {
   /* Grip shown horizontally at the top of vertical pill */
   writing-mode: horizontal-tb;
   font-size: 10px;
-  opacity: 0.7;
+  opacity: 0.85;
   margin-bottom: 4px;
 }
 
-/* Horizontal pills on top/bottom docks */
+/* Horizontal pills on top/bottom docks — slim tab by default,
+   slide out to full width on hover. */
 .fvcms-dock-top .fvcms-dock-pill,
 .fvcms-dock-bottom .fvcms-dock-pill {
+  height: 18px;                              /* slim tab */
+  padding: 2px 6px;
+  transition: height 0.18s ease, width 0.18s ease, padding 0.18s ease, box-shadow 0.12s ease, background 0.18s ease;
+}
+.fvcms-dock-top .fvcms-dock-pill:hover,
+.fvcms-dock-bottom .fvcms-dock-pill:hover,
+.fvcms-dock-top .fvcms-dock-pill.active,
+.fvcms-dock-bottom .fvcms-dock-pill.active {
   height: 30px;
   padding: 4px 10px;
 }
 .fvcms-dock-top .fvcms-dock-pill .fvcms-dock-pill-label,
 .fvcms-dock-bottom .fvcms-dock-pill .fvcms-dock-pill-label {
-  max-width: 140px;
+  max-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 0.18s ease, max-width 0.18s ease;
+  white-space: nowrap;
+}
+.fvcms-dock-top .fvcms-dock-pill:hover .fvcms-dock-pill-label,
+.fvcms-dock-bottom .fvcms-dock-pill:hover .fvcms-dock-pill-label,
+.fvcms-dock-top .fvcms-dock-pill.active .fvcms-dock-pill-label,
+.fvcms-dock-bottom .fvcms-dock-pill.active .fvcms-dock-pill-label {
+  max-width: 140px;
+  opacity: 1;
 }
 
 /* ---------- panel DOM ---------- */
