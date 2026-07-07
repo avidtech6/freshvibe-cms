@@ -48,9 +48,9 @@ async function main() {
 
     // Track unsupported widget types so we know what to add next.
     const types = new Set();
-    const re = /elementor-widget-([a-z0-9-]+)/g;
+    const re = /data-widget_type="([a-z0-9_-]+)/g;
     let m;
-    while ((m = re.exec(html)) !== null) types.add(m[1]);
+    while ((m = re.exec(html)) !== null) types.add(m[1].split('.')[0]);
     types.forEach(t => {
       const mapped = ['heading','button','image','text-editor','video',
         'animated-headline','eael-creative-button','eael-image','eael-video',

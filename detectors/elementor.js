@@ -43,8 +43,15 @@ export function detectElementor({ pathname, html }) {
     // 2. Find elementor widgets inside each container — these become Groups + Modules
     const widgets = findWidgetsInContainer(container.html);
     widgets.forEach((widget, j) => {
-      const groupId = `G-${slug(container.label)}-${i}-${j}`;
-      const moduleInstanceId = `MI-${slug(widget.type)}-${i}-${j}`;
+      // Composite ID: pageId + dataId ensures uniqueness across pages.
+      // (Same header menu on every page has the same data-id; we want
+      //  a separate annotation per page so editing one page doesn't
+      //  silently affect all others.)
+      const idSuffix = widget.dataId
+        ? `${pageId.replace(/^p-/, '')}_${widget.dataId}`
+        : `${i}-${j}`;
+      const groupId = `G-${idSuffix}`;
+      const moduleInstanceId = `MI-${idSuffix}`;
 
       groups.push({
         id: groupId,
@@ -53,7 +60,7 @@ export function detectElementor({ pathname, html }) {
         order: j,
         isModule: true,
         moduleInstanceId,
-        metadata: { detector: 'elementor', rawClass: widget.rawClass },
+        metadata: { detector: 'elementor', rawClass: widget.rawClass, dataId: widget.dataId },
       });
 
       const mapped = mapWidgetToModule(widget);
@@ -64,7 +71,7 @@ export function detectElementor({ pathname, html }) {
           groupId,
           selector: widget.selector,
           config: mapped.config,
-          metadata: { originalWidgetType: widget.type, originalSettings: widget.settings },
+          metadata: { originalWidgetType: widget.type, originalSettings: widget.settings, dataId: widget.dataId },
         });
       }
     });
@@ -84,50 +91,92 @@ export function detectElementor({ pathname, html }) {
 // ---- internals ----
 
 function findTopLevelContainers(html) {
+  // Find the OUTERMOST e-con containers only. Nested e-cons become
+  // part of the parent's content (and their widgets are detected
+  // recursively by findWidgetsInContainer).
   const containers = [];
-  const re = /<div[^>]*class="[^"]*\be-con\b[^"]*"[^>]*>([\s\S]*?)<\/div>\s*(?=<div[^>]*class="[^"]*\be-con\b|$)/g;
+  const openTagRe = /<div\b[^>]*class="[^"]*\be-con\b[^"]*"[^>]*>/g;
   let m;
-  let i = 0;
-  while ((m = re.exec(html)) !== null) {
-    const fullMatch = m[0];
-    const innerHtml = m[1];
-    const classMatch = fullMatch.match(/class="([^"]+)"/);
+  const openPositions = [];
+  while ((m = openTagRe.exec(html)) !== null) {
+    openPositions.push({ start: m.index, openTagEnd: m.index + m[0].length, tag: m[0] });
+  }
+  for (let i = 0; i < openPositions.length; i++) {
+    const start = openPositions[i].openTagEnd;
+    // Walk forward counting <div> / </div> to find this container's matching close
+    let depth = 1;
+    let pos = start;
+    const closeRe = /<\/?div\b/g;
+    closeRe.lastIndex = pos;
+    while (depth > 0) {
+      closeRe.lastIndex = pos;
+      const next = closeRe.exec(html);
+      if (!next) break;
+      if (next[0].startsWith('</')) {
+        depth--;
+        pos = next.index + next[0].length;
+      } else {
+        depth++;
+        pos = next.index + next[0].length;
+      }
+    }
+    const innerHtml = html.substring(start, pos - 6);
+    const tag = openPositions[i].tag;
+    const classMatch = tag.match(/class="([^"]+)"/);
     const classes = classMatch ? classMatch[1].split(/\s+/) : [];
-    const hasElementChildren = innerHtml.includes('e-con');
     const label = classes.find(c => c.startsWith('e-con-') && !c.match(/^e-con-\d+$/)) ||
-                  classes.find(c => c.startsWith('elementor-section')) ||
                   `region-${i}`;
+    // Check: is this e-con nested INSIDE a previously-captured container?
+    const isNested = containers.some(c =>
+      openPositions[i].start > c.startOffset && openPositions[i].start < c.endOffset
+    );
+    if (isNested) continue; // skip — handled by parent's walker
     containers.push({
-      selector: hasElementChildren ? `.e-con:nth-of-type(${i + 1})` : `.${classes[0]}`,
+      selector: `.${classes[0]}`,
       html: innerHtml,
       label,
-      nested: hasElementChildren,
+      startOffset: openPositions[i].start,
+      endOffset: pos,
     });
-    i++;
   }
   return containers;
 }
 
 function findWidgetsInContainer(containerHtml) {
   const widgets = [];
-  const re = /<div[^>]*class="([^"]*elementor-widget\s[^"]*)"[^>]*>([\s\S]*?)<\/div>\s*<\/div>/g;
+  const seen = new Set();
+  // Elementor widget wrapper: <div class="elementor-element ..." data-id="abc123" ... data-widget_type="image.default">
+  const re = /<div\s[^>]*?class="([^"]*elementor-element[^"]*)"([^>]*)>/g;
   let m;
   while ((m = re.exec(containerHtml)) !== null) {
-    const classes = m[1].split(/\s+/);
-    const typeClass = classes.find(c => c.startsWith('elementor-widget-'));
-    const type = typeClass ? typeClass.replace('elementor-widget-', '') : 'unknown';
+    const fullAttrs = m[2];
+    // Extract data-id
+    const dataIdMatch = fullAttrs.match(/data-id="([a-z0-9]+)"/);
+    if (!dataIdMatch) continue;
+    const dataId = dataIdMatch[1];
+    if (seen.has(dataId)) continue;
+    // Extract data-widget_type
+    const widgetTypeMatch = fullAttrs.match(/data-widget_type="([^"]+)"/);
+    const widgetType = widgetTypeMatch ? widgetTypeMatch[1] : '';
+    // Skip non-widget element types (sections, columns, containers)
+    if (!widgetType || widgetType === 'global') continue;
+    const type = widgetType.split('.')[0]; // 'image.default' → 'image'
+    if (!type) continue;
+    seen.add(dataId);
+    const settings = extractDataSettings(fullAttrs);
     widgets.push({
       type,
-      selector: `.${classes.find(c => c.startsWith('elementor-widget-') && c !== 'elementor-widget-container') || classes[0]}`,
+      dataId,
+      selector: `[data-id="${dataId}"]`,
       rawClass: m[1],
-      settings: extractDataSettings(containerHtml),
+      settings,
     });
   }
   return widgets;
 }
 
-function extractDataSettings(html) {
-  const m = html.match(/data-settings="([^"]+)"/);
+function extractDataSettings(attrsString) {
+  const m = attrsString.match(/data-settings="([^"]+)"/);
   if (!m) return {};
   try {
     return JSON.parse(m[1].replace(/&quot;/g, '"'));
