@@ -42,7 +42,7 @@
   .fvcms-dock {
     background: transparent !important;
     box-shadow: none !important;
-    padding: 6px 6px !important;
+    padding: 0 !important;
     /* Allow taps to pass through the empty space between pills */
     pointer-events: none;
   }
@@ -56,6 +56,22 @@
   .fvcms-dock-left .fvcms-dock-pill .fvcms-dock-pill-label,
   .fvcms-dock-right .fvcms-dock-pill .fvcms-dock-pill-label {
     opacity: 1 !important;
+  }
+  /* Mobile: pills have no border-radius (they sit flush against
+     the viewport edge — there's no screen to "round into"). */
+  .fvcms-dock-left .fvcms-dock-pill,
+  .fvcms-dock-right .fvcms-dock-pill,
+  .fvcms-dock-top .fvcms-dock-pill,
+  .fvcms-dock-bottom .fvcms-dock-pill,
+  .fvcms-dock-left .fvcms-dock-pill.focused,
+  .fvcms-dock-left .fvcms-dock-pill.in-play,
+  .fvcms-dock-right .fvcms-dock-pill.focused,
+  .fvcms-dock-right .fvcms-dock-pill.in-play,
+  .fvcms-dock-top .fvcms-dock-pill.focused,
+  .fvcms-dock-top .fvcms-dock-pill.in-play,
+  .fvcms-dock-bottom .fvcms-dock-pill.focused,
+  .fvcms-dock-bottom .fvcms-dock-pill.in-play {
+    border-radius: 0 !important;
   }
 }
 .fvcms-dock-left {
