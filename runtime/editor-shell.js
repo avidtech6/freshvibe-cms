@@ -64,8 +64,11 @@ export function openEditorShell({ moduleInstance, moduleDef, onSave, store }) {
     content: body,
     position: { x: 60, y: 80, w: 480, h: 540 },
   });
+  // dock() already sets state='docked-active' and focuses the panel.
+  // Don't call activate() afterwards — it would see
+  // docked-active + isFocused and call collapse() on the
+  // freshly-opened panel (hiding it instead of showing it).
   mgr.dock(id, 'right');
-  mgr.activate(id);
 
   return mgr.list().panels.find(p => p.id === id);
 }
