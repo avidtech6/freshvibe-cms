@@ -160,16 +160,20 @@
       return;
     }
 
-    // If floating, dock it first (default edge = left)
+    // If floating, dock it first. Prefer the panel's remembered
+    // home edge so it returns to the same dock it came from,
+    // otherwise default to left.
     if (panel.state === 'floating') {
-      this.dock(id, 'left');
+      const home = (panel.dockEdge === 'right') ? 'right' : 'left';
+      this.dock(id, home);
       this.activate(id);
       return;
     }
 
-    // If hidden, dock then activate
+    // If hidden, dock then activate to the remembered edge
     if (panel.state === 'hidden') {
-      this.dock(id, 'left');
+      const home = (panel.dockEdge === 'right') ? 'right' : 'left';
+      this.dock(id, home);
       this.activate(id);
     }
   };
@@ -253,10 +257,10 @@
     const panel = this.panels[id];
     if (!panel) return;
     if (panel.state === 'floating') return;
-    const edge = panel.dockEdge;
-    this._removePillFromDock(edge, id);
+    // KEEP the pill in the dock — every visible (non-closed) panel
+    // gets a dock pill so the operator can summon it back or see
+    // its type colour. The panel body just stops being pinned.
     panel.state = 'floating';
-    panel.dockEdge = null;
     this._renderPanelState(panel);
   };
 
