@@ -152,15 +152,6 @@
 
     if (panel.state === 'docked-collapsed') {
       // Parked pill clicked — bring the panel in to play.
-      // On mobile, route through dock() so the panel is set up
-      // as a true floating box (state=floating) with the right
-      // size + position. Otherwise it stays docked-active and the
-      // drag handler runs the wrong path.
-      if (window.innerWidth <= 600) {
-        const edge = panel.dockEdge || 'left';
-        this.dock(id, edge);
-        return;
-      }
       panel.state = 'docked-active';
       this._setFocus(panel);
       this._renderPanelState(panel);
