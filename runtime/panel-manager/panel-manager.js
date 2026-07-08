@@ -633,102 +633,20 @@
         me2._startDrag(e, panel, 'pill');
       });
 
-      // ---- Touch drag-to-reveal for mobile ----
-      // On touch devices :hover is sticky and unreliable, so we
-      // implement the slide-in interaction directly: the pill
-      // follows the finger, and on release the operator can tap
-      // again to activate.
+      // Touch handler: tap a pill = immediately switch to that panel.
+      // No drag-to-reveal — pills are always visible on mobile, and
+      // the drag-then-tap flow often swallowed the first tap when
+      // the finger moved a few pixels.
       pill.addEventListener('touchstart', function (e) {
         if (isGripTarget(e)) {
-          // Grip drag: same as mouse — detach or move edge
           e.preventDefault();
           me2._startDrag(e, panel, 'pill');
           return;
         }
-        // Non-grip touch: start a drag-to-reveal.
         e.preventDefault();
-        const t = e.touches[0];
-        const startX = t.clientX;
-        const startY = t.clientY;
-        // Read the current transform so we start from the actual
-        // parked position (CSS default or a previous in-line value).
-        const cs = getComputedStyle(pill);
-        const matrix = new DOMMatrixReadOnly(cs.transform);
-        const startTx = matrix.m41 || 0;
-        const isLeftDock = pill.closest('.fvcms-dock-left') !== null;
-        const isRightDock = pill.closest('.fvcms-dock-right') !== null;
-        // Parked offset depends on edge (defined in CSS).
-        const PARK = isLeftDock ? -30 : isRightDock ? 30 : 0;
-        let moved = false;
-        let lastDx = 0;
-        function onTouchMove(ev) {
-          const t2 = ev.touches[0];
-          const dx = t2.clientX - startX;
-          const dy = t2.clientY - startY;
-          // Only treat as a slide-reveal when motion is dominantly
-          // horizontal. Vertical motion means the user is scrolling
-          // the page, not revealing the pill — let the browser handle
-          // the scroll.
-          if (Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-            ev.preventDefault();
-            moved = true;
-            lastDx = dx;
-            // Clamp between PARK (or further) and 0
-            let tx = startTx + dx;
-            if (isLeftDock) tx = Math.min(0, Math.max(PARK - 4, tx));
-            else if (isRightDock) tx = Math.max(0, Math.min(-PARK + 4, tx));
-            pill.style.transform = 'translateX(' + tx + 'px)';
-            pill.style.transition = 'none';
-          }
-        }
-        function onTouchEnd(ev) {
-          pill.removeEventListener('touchmove', onTouchMove);
-          pill.removeEventListener('touchend', onTouchEnd);
-          pill.removeEventListener('touchcancel', onTouchEnd);
-          pill.style.transition = '';
-          if (!moved) {
-            // It was a tap, not a drag. Always route through
-            // activate() — the activate() logic decides whether
-            // to expand, focus-shift, or collapse based on the
-            // panel's current state. Don't special-case
-            // docked-active here or we lose the focus-shift
-            // behaviour for taps on non-focused panels.
-            me2.activate(panelId);
-            // The active class on the panel will translate the
-            // pill back to 0 via CSS.
-            pill.style.transform = '';
-            return;
-          }
-          // A real drag. Decide whether to leave the pill in view
-          // (operator slid it in) or snap it back to parked.
-          // Threshold: if the final position is closer to fully
-          // shown than to fully parked, leave it shown — set the
-          // inline transform to translateX(0) so it stays fully
-          // visible after the finger lifts. Otherwise clear the
-          // inline transform and let CSS snap it back to parked.
-          const cs2 = getComputedStyle(pill);
-          const finalTx = (new DOMMatrixReadOnly(cs2.transform)).m41 || 0;
-          if (isLeftDock && finalTx > -15) {
-            // Operator pulled it most of the way in — leave it
-            // fully shown so a follow-up tap can activate.
-            pill.style.transition = 'transform 0.18s ease';
-            pill.style.transform = 'translateX(0)';
-            setTimeout(function () { pill.style.transition = ''; }, 200);
-          } else if (isRightDock && finalTx < 15) {
-            pill.style.transition = 'transform 0.18s ease';
-            pill.style.transform = 'translateX(0)';
-            setTimeout(function () { pill.style.transition = ''; }, 200);
-          } else {
-            // Not far enough in — snap back to parked.
-            pill.style.transition = 'transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-            pill.style.transform = '';
-            setTimeout(function () { pill.style.transition = ''; }, 240);
-          }
-        }
-        pill.addEventListener('touchmove', onTouchMove, { passive: false });
-        pill.addEventListener('touchend', onTouchEnd);
-        pill.addEventListener('touchcancel', onTouchEnd);
+        me2.activate(panelId);
       }, { passive: false });
+
       container.appendChild(pill);
     }.bind(this));
   };
