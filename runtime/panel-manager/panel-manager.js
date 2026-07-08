@@ -444,7 +444,10 @@
       const bottomH = bottomActive ? (bottomActive.position.h || 420) + DOCK_HEIGHT : 0;
 
       if (panel.dockEdge === 'left') {
-        el.style.left = DOCK_WIDTH + 'px';
+        // Flush with the left edge. The pill overlays the panel at
+        // x=0..DOCK_WIDTH; the body has padding-left so text content
+        // doesn't sit behind the pill.
+        el.style.left = '0px';
         el.style.top = topH + 'px';
         el.style.right = 'auto';
         el.style.width = w + 'px';
@@ -452,23 +455,25 @@
         el.style.bottom = bottomH + 'px';
         el.style.height = 'auto';
         el.style.maxHeight = (window.innerHeight - topH - bottomH) + 'px';
+        el.style.paddingLeft = DOCK_WIDTH + 'px';
         if (overlay) {
           document.documentElement.style.setProperty('--fvcms-pm-pinned-w', '0px');
         } else {
-          document.documentElement.style.setProperty('--fvcms-pm-pinned-w', (w + DOCK_WIDTH) + 'px');
+          document.documentElement.style.setProperty('--fvcms-pm-pinned-w', w + 'px');
         }
       } else if (panel.dockEdge === 'right') {
-        el.style.right = DOCK_WIDTH + 'px';
+        el.style.right = '0px';
         el.style.top = topH + 'px';
         el.style.left = 'auto';
         el.style.width = w + 'px';
         el.style.bottom = bottomH + 'px';
         el.style.height = 'auto';
         el.style.maxHeight = (window.innerHeight - topH - bottomH) + 'px';
+        el.style.paddingRight = DOCK_WIDTH + 'px';
         if (overlay) {
           document.documentElement.style.setProperty('--fvcms-pm-pinned-w', '0px');
         } else {
-          document.documentElement.style.setProperty('--fvcms-pm-pinned-w', (w + DOCK_WIDTH) + 'px');
+          document.documentElement.style.setProperty('--fvcms-pm-pinned-w', w + 'px');
         }
       } else if (panel.dockEdge === 'top' || panel.dockEdge === 'bottom') {
         // Top/bottom docks retired. Force re-dock to left.
