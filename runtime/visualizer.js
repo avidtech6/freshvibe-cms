@@ -55,6 +55,70 @@ export function showRegionOverlays() {
     }
     // If already docked-active or floating, leave as-is.
   }
+
+  // Pin a yellow REGION: X label to the top of each region on the
+  // page itself. The label follows the region as the user scrolls.
+  showRegionTags();
+}
+
+/**
+ * Pin a yellow region tag to the top of each region on the page.
+ * The tag is position:fixed and repositioned via rAF against the
+ * region's live rect so it stays glued to the region even as the
+ * page scrolls. Click a tag to focus the matching region panel.
+ */
+let _activeRegionTags = [];   // [{ regionId, target, tagEl, rafHandle }]
+function showRegionTags() {
+  hideRegionTags();
+  const store = getStore();
+  const page = store.getPage(store.activeContext.page);
+  if (!page) return;
+  const mgr = (window.PanelManager || window.OscarPanelManager).get();
+
+  for (const regionId of page.regionIds) {
+    const region = store.getRegion(regionId);
+    if (!region) continue;
+    const target = document.querySelector(region.selector);
+    if (!target) continue;
+
+    const tagEl = document.createElement('div');
+    tagEl.className = 'fvcms-region-tag';
+    const label = document.createElement('span');
+    label.textContent = 'REGION: ' + (region.label || regionId);
+    tagEl.appendChild(label);
+    tagEl.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const panelId = regionPanelId(regionId);
+      if (mgr && mgr.panels[panelId]) {
+        mgr.activate(panelId);
+      }
+    });
+    document.body.appendChild(tagEl);
+
+    function position() {
+      const r = target.getBoundingClientRect();
+      const top = Math.max(8, r.top);
+      tagEl.style.left = Math.max(8, r.left) + 'px';
+      tagEl.style.top = (top + 4) + 'px';
+    }
+    position();
+    const handle = requestAnimationFrame(function tick() {
+      if (!_activeRegionTags.find(t => t.tagEl === tagEl)) return;
+      position();
+      tagEl._raf = requestAnimationFrame(tick);
+    });
+
+    _activeRegionTags.push({ regionId, target, tagEl, rafHandle: handle });
+  }
+}
+
+function hideRegionTags() {
+  for (const t of _activeRegionTags) {
+    if (t.rafHandle) cancelAnimationFrame(t.rafHandle);
+    if (t.tagEl && t.tagEl.parentNode) t.tagEl.parentNode.removeChild(t.tagEl);
+  }
+  _activeRegionTags = [];
 }
 
 /**
@@ -74,6 +138,8 @@ export function hideRegionOverlays() {
     const p = mgr.list().panels.find(x => x.id === panelId);
     if (p && p.state === 'docked-active') mgr.collapse(panelId);
   }
+  // Remove the on-page REGION: X tags too.
+  hideRegionTags();
 }
 
 export function isOverlaysActive() {

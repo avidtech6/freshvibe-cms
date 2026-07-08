@@ -344,6 +344,38 @@ h1, h2, h3, h4, h5, h6 {
   outline-offset: 2px;
 }
 
+/* On-page REGION: X tag (pinned to each region's top-left corner
+   while region overlays are active). position:fixed + rAF
+   reposition so it follows the region as the user scrolls. */
+.fvcms-region-tag {
+  position: fixed;
+  z-index: 2147483645;
+  background: rgba(40, 50, 25, 0.96);
+  color: #ffdc64;
+  border: 1px solid rgba(255, 220, 100, 0.7);
+  border-radius: 4px;
+  padding: 5px 10px;
+  font: 600 11px ui-monospace, Menlo, monospace;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  pointer-events: auto;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fvcms-region-tag::before {
+  content: '◆';
+  color: #ffdc64;
+  font-size: 9px;
+}
+.fvcms-region-tag:hover {
+  background: rgba(60, 80, 35, 0.98);
+  border-color: rgba(255, 220, 100, 1);
+}
+
 /* Region being edited — yellow tag pinned to the top-left corner
    of the region, plus a glowing outline. The tag follows the
    region as the page scrolls because it's position:fixed and
