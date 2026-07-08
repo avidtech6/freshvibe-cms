@@ -143,6 +143,34 @@
   border: 1px solid rgba(255, 255, 255, 0.7) !important;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6), 0 4px 12px rgba(0, 0, 0, 0.5);
 }
+/* When a pill is active, it sits flush against the viewport edge.
+   Remove the border-radius on the side that meets the edge so the
+   pill looks like it grows out of the page boundary, not stuck on
+   top of it. */
+.fvcms-dock-left .fvcms-dock-pill.active {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: none;
+  padding-left: 5px;          /* compensate for the missing left border */
+}
+.fvcms-dock-right .fvcms-dock-pill.active {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;
+  padding-right: 5px;
+}
+.fvcms-dock-top .fvcms-dock-pill.active {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top: none;
+  padding-top: 5px;
+}
+.fvcms-dock-bottom .fvcms-dock-pill.active {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom: none;
+  padding-bottom: 5px;
+}
 
 /* Vertical pills on left/right docks — full size, but parked
    off-screen by default. On hover, focus, or active state, the
