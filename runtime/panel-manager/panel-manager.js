@@ -271,13 +271,19 @@
     // Retired: only left/right docks are supported now (vertical edges only).
     if (edge !== 'left' && edge !== 'right') return;
     this.lastUsedEdge = edge;  // remember for smart-dock from floating
-    // If already docked on same edge, just activate
-    if (panel.dockEdge === edge) {
+    // If already docked-active on the same edge, just activate
+    // (the panel body is already on the edge; refreshing the focus
+    // is enough). A floating panel whose home edge matches the
+    // request FALLS THROUGH to the normal dock path below.
+    if (panel.dockEdge === edge && panel.state === 'docked-active') {
       this.activate(id);
       return;
     }
-    // Remove from current dock if any
-    if (panel.dockEdge) this._removePillFromDock(panel.dockEdge, id);
+    // Remove pill from old dock if any (pill stays when floating
+    // — see detach(); we don't remove pills for floating panels).
+    if (panel.dockEdge && panel.state !== 'floating') {
+      this._removePillFromDock(panel.dockEdge, id);
+    }
     // Add to new dock
     panel.dockEdge = edge;
     panel.state = 'docked-active';  // docking defaults to active
