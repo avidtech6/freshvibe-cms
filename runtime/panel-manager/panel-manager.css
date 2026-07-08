@@ -140,7 +140,10 @@
   color: #1a1a1a;
   font-weight: 700;
   border: 1px solid rgba(255, 255, 255, 0.7) !important;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6), 0 4px 12px rgba(0, 0, 0, 0.5);
+  /* Subtle inner ring only. No outer drop shadow — that was making
+     the pill's visual extent much wider than its 45px layout
+     width, making it look ~77px wide and confusing the operator. */
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
 }
 /* In-play but not focused: softer amber. The panel is still shown
    full, but it's a sibling — the operator's typing focus is
@@ -150,7 +153,9 @@
   color: #fff8e8;
   font-weight: 600;
   border: 1px solid rgba(220, 180, 110, 0.55) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  /* No outer drop shadow — keeps the pill's visual extent close
+     to its 45px layout width. */
+  box-shadow: none;
 }
 /* When a pill is in-play, it sits flush against the viewport edge.
    Remove the border-radius on the side that meets the edge so the
