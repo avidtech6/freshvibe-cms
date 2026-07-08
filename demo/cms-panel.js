@@ -209,19 +209,19 @@ function buildCmsContent(page) {
     rHead.textContent = region.label + ' →';
     rHead.title = 'Click to open the ' + region.label + ' panel';
     rHead.addEventListener('click', () => {
-      // Ensure the region panel exists, then activate + focus it.
+      // Ensure the region panel exists, then make it the focused one.
       const panelId = 'fvcms-region-' + region.id;
       const mgr = (window.PanelManager || window.OscarPanelManager).get();
       const exists = mgr.list().panels.find(p => p.id === panelId);
       if (!exists) {
-        // Region panel hasn't been created yet (visualizer never ran).
-        // Bootstrap a quick panel using the region renderer.
+        // Region panel hasn't been created yet. Bootstrap a quick
+        // panel using the region renderer.
         import('./runtime/visualizer.js').then((v) => {
           v.showRegionOverlays();
-          mgr.activate(panelId);
+          _focusPanel(panelId);
         });
       } else {
-        mgr.activate(panelId);
+        _focusPanel(panelId);
       }
       status.textContent = `Focused: ${region.label}`;
     });
@@ -298,6 +298,32 @@ function buildCmsContent(page) {
 export function refreshCmsPanel() {
   if (!document.querySelector('[data-panel-id="' + PANEL_ID + '"]')) return;
   _refreshPanelContent();
+}
+
+// Focus a panel by id without going through activate() (which would
+// collapse a panel that is already focused + active). Used by the
+// CMS region headings to switch focus to a region panel.
+function _focusPanel(panelId) {
+  const mgr = (window.PanelManager || window.OscarPanelManager).get();
+  const panel = mgr.panels[panelId];
+  if (!panel) return;
+  if (panel.state === 'hidden') {
+    // Bootstrap: dock it to the right by default.
+    mgr.dock(panelId, 'right');
+    return;
+  }
+  if (panel.state === 'docked-collapsed') {
+    // Bring it in to play.
+    panel.state = 'docked-active';
+  }
+  // floating state stays as-is.
+  mgr._setFocus(panel);
+  mgr._renderPanelState(panel);
+  // Re-render all docks so colours update
+  Object.keys(mgr.docks).forEach((edge) => {
+    const dock = mgr.docks[edge];
+    if (dock) mgr._updateDockPills(dock);
+  });
 }
 
 // Global API the panel-manager can re-render against
