@@ -20,6 +20,20 @@
   pointer-events: auto;
   box-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
 }
+/* Pills sit flush against the dock edge — no inner padding
+   between pill and viewport boundary. */
+.fvcms-dock-left {
+  padding-left: 0 !important;
+}
+.fvcms-dock-right {
+  padding-right: 0 !important;
+}
+.fvcms-dock-top {
+  padding-top: 0 !important;
+}
+.fvcms-dock-bottom {
+  padding-bottom: 0 !important;
+}
 /* On mobile: hide the dock background, only pills show */
 @media (max-width: 600px) {
   .fvcms-dock {
@@ -167,6 +181,16 @@
   max-height: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
+  opacity: 0;                 /* hidden when pill is parked off-screen */
+  transition: opacity 0.18s ease;
+}
+.fvcms-dock-left .fvcms-dock-pill:hover .fvcms-dock-pill-label,
+.fvcms-dock-right .fvcms-dock-pill:hover .fvcms-dock-pill-label,
+.fvcms-dock-left .fvcms-dock-pill:focus-visible .fvcms-dock-pill-label,
+.fvcms-dock-right .fvcms-dock-pill:focus-visible .fvcms-dock-pill-label,
+.fvcms-dock-left .fvcms-dock-pill.active .fvcms-dock-pill-label,
+.fvcms-dock-right .fvcms-dock-pill.active .fvcms-dock-pill-label {
+  opacity: 1;
 }
 .fvcms-dock-left .fvcms-dock-pill .fvcms-dock-pill-grip,
 .fvcms-dock-right .fvcms-dock-pill .fvcms-dock-pill-grip {
@@ -205,6 +229,16 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.fvcms-dock-top .fvcms-dock-pill:hover .fvcms-dock-pill-label,
+.fvcms-dock-bottom .fvcms-dock-pill:hover .fvcms-dock-pill-label,
+.fvcms-dock-top .fvcms-dock-pill:focus-visible .fvcms-dock-pill-label,
+.fvcms-dock-bottom .fvcms-dock-pill:focus-visible .fvcms-dock-pill-label,
+.fvcms-dock-top .fvcms-dock-pill.active .fvcms-dock-pill-label,
+.fvcms-dock-bottom .fvcms-dock-pill.active .fvcms-dock-pill-label {
+  opacity: 1;
 }
 
 /* ---------- panel DOM ---------- */
