@@ -3,12 +3,21 @@
 // smart minimise, full-height docked, no scrollbars, 6-dot grip,
 // invisible dock on mobile.
 
-import { getStore, getModuleDef } from '../runtime/index.js';
-import { renderSkinPicker } from '../runtime/skin.js';
-import { renderGroupToggleUI } from '../runtime/group-toggle.js';
-import { showRegionOverlays, hideRegionOverlays } from '../runtime/visualizer.js';
-import { openEditorShell } from '../runtime/editor-shell.js';
-import './panel-bridge.css';
+import { getStore, getModuleDef } from './runtime/index.js';
+import { renderSkinPicker } from './runtime/skin.js';
+import { renderGroupToggleUI } from './runtime/group-toggle.js';
+import { showRegionOverlays, hideRegionOverlays } from './runtime/visualizer.js';
+import { openEditorShell } from './runtime/editor-shell.js';
+// CSS injection (browsers can't ES-import stylesheets)
+function ensureBridgeCSS() {
+  if (document.getElementById('fvcms-bridge-styles')) return;
+  const link = document.createElement('link');
+  link.id = 'fvcms-bridge-styles';
+  link.rel = 'stylesheet';
+  link.href = './panel-bridge.css';
+  document.head.appendChild(link);
+}
+ensureBridgeCSS();
 
 const PANEL_ID = 'fvcms-cms-panel';
 
@@ -31,13 +40,38 @@ export function mountCmsPanel() {
   btn.textContent = '{ }';
   document.body.appendChild(btn);
 
-  // The toggle. If the panel is hidden/docked-collapsed/docked-active
-  // → make it active. If active → minimise to pill. Honour smart
-  // minimise when floating.
+  // The toggle. Acts as a master switch for the panel system:
+  //   - If any panel is currently visible (docked-active or floating),
+  //     collapse ALL of them to parked (docked-collapsed) pills.
+  //   - Otherwise, activate ALL docked-collapsed panels (the
+  //     docked-active state is restored, last focused panel
+  //     becomes the focus again).
+  //
+  // Each panel remembers its previous docked-active/floating state
+  // via the isHidden flag the manager sets; we just flip them all.
   window.__fvcmsTogglePanel = function () {
-    const list = _mgr.list();
-    const exists = list.panels.find(p => p.id === PANEL_ID);
-    if (!exists) {
+    const all = _mgr.list().panels;
+    const anyVisible = all.some(function (p) {
+      return p.state === 'docked-active' || p.state === 'floating';
+    });
+
+    if (anyVisible) {
+      // Hide everything: collapse to parked pills.
+      all.forEach(function (p) {
+        if (p.state === 'docked-active' || p.state === 'floating') {
+          if (p.state === 'docked-active') _mgr.collapse(p.id);
+          // (floating panels stay floating; they're not on the dock
+          // so the operator wouldn't see them as 'visible' anyway
+          // once their host dock pills are all parked)
+        }
+      });
+      return;
+    }
+
+    // Show everything: re-activate any docked-collapsed panels.
+    // If the CMS panel doesn't exist yet, create it first.
+    const cms = all.find(function (p) { return p.id === PANEL_ID; });
+    if (!cms) {
       _mgr.addPanel({
         id: PANEL_ID,
         title: 'FreshVibe CMS',
@@ -46,11 +80,20 @@ export function mountCmsPanel() {
       });
       _mgr.dock(PANEL_ID, 'left');
       _refreshPanelContent();
-      return;
+    } else if (cms.state === 'hidden') {
+      _mgr.dock(PANEL_ID, 'left');
+      _refreshPanelContent();
     }
-    if (exists.state === 'docked-active') _mgr.collapse(PANEL_ID);
-    else if (exists.state === 'floating') _mgr.dock(PANEL_ID, 'left');
-    else if (exists.state === 'hidden') _mgr.dock(PANEL_ID, 'left');
+
+    // Activate every other panel
+    all.forEach(function (p) {
+      if (p.id === PANEL_ID) return; // already handled above
+      if (p.state === 'docked-collapsed') {
+        _mgr.activate(p.id);
+      } else if (p.state === 'hidden' && p.dockEdge) {
+        _mgr.activate(p.id);
+      }
+    });
   };
 
   // On boot, the button is visible but the panel is hidden.
@@ -185,6 +228,38 @@ function buildCmsContent(page) {
     }
   }
   root.appendChild(modSec);
+
+  // Region panels button (regions are now first-class panels)
+  const regSec = document.createElement('div');
+  regSec.style.cssText = 'margin: 10px 0; padding-top: 10px; border-top: 1px solid rgba(120, 160, 120, 0.2);';
+  regSec.innerHTML = '<div style="font-size:11px;color:#c0e0c0;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Regions</div>';
+
+  const regBtnRow = document.createElement('div');
+  regBtnRow.style.cssText = 'display:flex;gap:6px;';
+  const regShow = document.createElement('button');
+  regShow.type = 'button';
+  regShow.textContent = 'Show region panels';
+  regShow.style.cssText = 'flex:1;padding:6px 10px;background:rgba(180,140,80,0.3);color:#fff;border:1px solid rgba(180,140,80,0.5);border-radius:4px;font:11px ui-monospace,monospace;cursor:pointer;';
+  regShow.addEventListener('click', () => {
+    window.__fvcmsShowOverlays();
+  });
+  const regHide = document.createElement('button');
+  regHide.type = 'button';
+  regHide.textContent = 'Hide';
+  regHide.style.cssText = 'flex:0;padding:6px 10px;background:rgba(80,80,80,0.3);color:#fff;border:1px solid rgba(120,120,120,0.5);border-radius:4px;font:11px ui-monospace,monospace;cursor:pointer;';
+  regHide.addEventListener('click', () => {
+    window.__fvcmsHideOverlays();
+  });
+  regBtnRow.appendChild(regShow);
+  regBtnRow.appendChild(regHide);
+  regSec.appendChild(regBtnRow);
+
+  const regHint = document.createElement('div');
+  regHint.style.cssText = 'font-size:10px;color:#a0b0a0;margin-top:6px;line-height:1.4;';
+  regHint.textContent = 'Each region becomes its own dockable panel — drag the header, dock to any edge, slim to a pill. No more CSS overlays.';
+  regSec.appendChild(regHint);
+
+  root.appendChild(regSec);
 
   // Group toggle
   const gtSec = document.createElement('div');
