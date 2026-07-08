@@ -124,7 +124,7 @@
   DockManager.prototype.activate = function (id) {
     const panel = this.panels[id];
     if (!panel) return;
-
+    console.log('[activate] called for', id, 'state:', panel.state, 'isFocused:', panel.isFocused);
     // The model the operator wants:
     //   - Multiple panels can be in-play (docked-active) at the
     //     same time. Both their pills and panels are visible.
@@ -154,10 +154,12 @@
     if (panel.state === 'docked-collapsed') {
       // Parked pill clicked — bring the panel in to play.
       panel.state = 'docked-active';
+      console.log('[activate] docked-collapsed branch, setting state=docked-active for', id);
       this._setFocus(panel);
       this._renderPanelState(panel);
       const dock = this.docks[panel.dockEdge];
       if (dock) this._updateDockPills(dock);
+      console.log('[activate] after docked-collapsed branch, state:', panel.state, 'isFocused:', panel.isFocused);
       return;
     }
 
