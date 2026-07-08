@@ -136,36 +136,50 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
   filter: brightness(1.18);
 }
-.fvcms-dock-pill.active {
+.fvcms-dock-pill.focused {
   background: rgba(255, 220, 100, 1) !important;
   color: #1a1a1a;
   font-weight: 700;
   border: 1px solid rgba(255, 255, 255, 0.7) !important;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6), 0 4px 12px rgba(0, 0, 0, 0.5);
 }
-/* When a pill is active, it sits flush against the viewport edge.
+/* In-play but not focused: softer amber. The panel is still shown
+   full, but it's a sibling — the operator's typing focus is
+   elsewhere. */
+.fvcms-dock-pill.in-play {
+  background: rgba(200, 150, 70, 0.9) !important;
+  color: #fff8e8;
+  font-weight: 600;
+  border: 1px solid rgba(220, 180, 110, 0.55) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+/* When a pill is in-play, it sits flush against the viewport edge.
    Remove the border-radius on the side that meets the edge so the
    pill looks like it grows out of the page boundary, not stuck on
-   top of it. */
-.fvcms-dock-left .fvcms-dock-pill.active {
+   top of it. (Same applies for both .focused and .in-play.) */
+.fvcms-dock-left .fvcms-dock-pill.focused,
+.fvcms-dock-left .fvcms-dock-pill.in-play {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border-left: none;
-  padding-left: 5px;          /* compensate for the missing left border */
+  padding-left: 5px;
 }
-.fvcms-dock-right .fvcms-dock-pill.active {
+.fvcms-dock-right .fvcms-dock-pill.focused,
+.fvcms-dock-right .fvcms-dock-pill.in-play {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
   border-right: none;
   padding-right: 5px;
 }
-.fvcms-dock-top .fvcms-dock-pill.active {
+.fvcms-dock-top .fvcms-dock-pill.focused,
+.fvcms-dock-top .fvcms-dock-pill.in-play {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
   border-top: none;
   padding-top: 5px;
 }
-.fvcms-dock-bottom .fvcms-dock-pill.active {
+.fvcms-dock-bottom .fvcms-dock-pill.focused,
+.fvcms-dock-bottom .fvcms-dock-pill.in-play {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   border-bottom: none;
@@ -216,8 +230,10 @@
 .fvcms-dock-right .fvcms-dock-pill:hover .fvcms-dock-pill-label,
 .fvcms-dock-left .fvcms-dock-pill:focus-visible .fvcms-dock-pill-label,
 .fvcms-dock-right .fvcms-dock-pill:focus-visible .fvcms-dock-pill-label,
-.fvcms-dock-left .fvcms-dock-pill.active .fvcms-dock-pill-label,
-.fvcms-dock-right .fvcms-dock-pill.active .fvcms-dock-pill-label {
+.fvcms-dock-left .fvcms-dock-pill.focused .fvcms-dock-pill-label,
+.fvcms-dock-right .fvcms-dock-pill.focused .fvcms-dock-pill-label,
+.fvcms-dock-left .fvcms-dock-pill.in-play .fvcms-dock-pill-label,
+.fvcms-dock-right .fvcms-dock-pill.in-play .fvcms-dock-pill-label {
   opacity: 1;
 }
 .fvcms-dock-left .fvcms-dock-pill .fvcms-dock-pill-grip,
@@ -265,7 +281,11 @@
 .fvcms-dock-top .fvcms-dock-pill:focus-visible .fvcms-dock-pill-label,
 .fvcms-dock-bottom .fvcms-dock-pill:focus-visible .fvcms-dock-pill-label,
 .fvcms-dock-top .fvcms-dock-pill.active .fvcms-dock-pill-label,
-.fvcms-dock-bottom .fvcms-dock-pill.active .fvcms-dock-pill-label {
+.fvcms-dock-bottom .fvcms-dock-pill.active .fvcms-dock-pill-label,
+.fvcms-dock-top .fvcms-dock-pill.focused .fvcms-dock-pill-label,
+.fvcms-dock-bottom .fvcms-dock-pill.focused .fvcms-dock-pill-label,
+.fvcms-dock-top .fvcms-dock-pill.in-play .fvcms-dock-pill-label,
+.fvcms-dock-bottom .fvcms-dock-pill.in-play .fvcms-dock-pill-label {
   opacity: 1;
 }
 
@@ -533,12 +553,16 @@ body:has(.fvcms-dock-bottom) .fvcms-dock-right {
 }
 
 
-/* On mobile, docked panel fits inside remaining viewport so Open buttons stay visible */
+/* On mobile, docked panel is narrower so the operator can still
+   see the webpage behind. The dock takes 44px on the panel edge;
+   we want the panel to occupy about 78% of the viewport width
+   (e.g. ~300px on a 390px phone), leaving a slice of the page
+   visible on the opposite side. */
 @media (max-width: 600px) {
   .fvcms-pm-panel[data-state="docked-active"][data-dock-edge="left"],
   .fvcms-pm-panel[data-state="docked-active"][data-dock-edge="right"] {
-    width: calc(100vw - 44px) !important;
-    max-width: calc(100vw - 44px) !important;
+    width: 78vw !important;
+    max-width: 78vw !important;
   }
 }
 
