@@ -366,8 +366,8 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  /* Lower z than the dock so the dock + pills always sit on top */
-  z-index: 2147483640;
+  /* Above region tags and the dev button, below the dock itself. */
+  z-index: 2147483647;
   pointer-events: auto;
 }
 

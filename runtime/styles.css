@@ -387,7 +387,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .fvcms-editing-region-tag {
   position: fixed;
-  z-index: 2147483646;       /* below the panel manager (one less) */
+  z-index: 2147483646;
   background: rgba(40, 50, 25, 0.96);
   color: #ffdc64;
   border: 1px solid rgba(255, 220, 100, 0.7);
