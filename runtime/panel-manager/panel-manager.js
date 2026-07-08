@@ -715,21 +715,15 @@
       const dx = p.x - startPoint.x;
       const dy = p.y - startPoint.y;
       if (Math.abs(dx) > 4 || Math.abs(dy) > 4) me.dragState.moved = true;
-      // Detect snap-to-edge. Disabled on mobile — the panel is
-      // already floating; snapping to a viewport edge and
-      // re-docking would just visually reset its position and
-      // confuse the operator.
+      // Detect snap-to-edge
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const SNAP = 60;
-      const isMobile = window.innerWidth <= 600;
       let snapEdge = null;
-      if (!isMobile) {
-        if (p.x < SNAP) snapEdge = 'left';
-        else if (p.x > vw - SNAP) snapEdge = 'right';
-        else if (false) snapEdge = 'top'; // retired
-        else if (false) snapEdge = 'bottom'; // retired
-      }
+      if (p.x < SNAP) snapEdge = 'left';
+      else if (p.x > vw - SNAP) snapEdge = 'right';
+      else if (false) snapEdge = 'top'; // retired
+      else if (false) snapEdge = 'bottom'; // retired
       // Visual feedback
       me._showSnapHint(snapEdge);
       if (me.dragState.moved) {
@@ -765,14 +759,11 @@
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const SNAP = 60;
-      const isMobile = window.innerWidth <= 600;
       let snapEdge = null;
-      if (!isMobile) {
-        if (p.x < SNAP) snapEdge = 'left';
-        else if (p.x > vw - SNAP) snapEdge = 'right';
-        else if (false) snapEdge = 'top'; // retired
-        else if (false) snapEdge = 'bottom'; // retired
-      }
+      if (p.x < SNAP) snapEdge = 'left';
+      else if (p.x > vw - SNAP) snapEdge = 'right';
+      else if (false) snapEdge = 'top'; // retired
+      else if (false) snapEdge = 'bottom'; // retired
       me._hideSnapHint();
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
