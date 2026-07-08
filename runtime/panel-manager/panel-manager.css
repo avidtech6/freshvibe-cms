@@ -261,9 +261,16 @@
 .fvcms-dock-right .fvcms-dock-pill .fvcms-dock-pill-grip {
   /* Grip shown horizontally at the top of vertical pill */
   writing-mode: horizontal-tb;
-  font-size: 10px;
+  font-size: 11px;
   opacity: 0.85;
   margin-bottom: 4px;
+  /* Tighten the gap between the two ⋮ columns so they read as
+     one cohesive grip icon, not two columns of dots miles apart. */
+  letter-spacing: -3px;
+  text-indent: -1px;
+  display: inline-block;
+  transform: scaleX(0.85);
+  transform-origin: center;
 }
 
 /* Horizontal pills on top/bottom docks — full size, parked

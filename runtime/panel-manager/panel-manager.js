@@ -482,7 +482,7 @@
         // Push the body content past the pill on the left side.
         const body = el.querySelector('.fvcms-pm-body');
         if (body) {
-          body.style.paddingLeft = DOCK_WIDTH + 'px';
+          body.style.paddingLeft = (DOCK_WIDTH + 8) + 'px';
           body.style.paddingRight = '';
         }
         if (overlay) {
@@ -503,7 +503,7 @@
         const body = el.querySelector('.fvcms-pm-body');
         if (body) {
           body.style.paddingLeft = '';
-          body.style.paddingRight = DOCK_WIDTH + 'px';
+          body.style.paddingRight = (DOCK_WIDTH + 8) + 'px';
         }
         if (overlay) {
           document.documentElement.style.setProperty('--fvcms-pm-pinned-w', '0px');
