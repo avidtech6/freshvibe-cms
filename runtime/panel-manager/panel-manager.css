@@ -49,6 +49,50 @@
   .fvcms-dock-pill {
     pointer-events: auto;
   }
+  /* On mobile: pills are HORIZONTAL so the label can be read.
+     Slimmed pills collapse to a square (12px) but when focused
+     or in-play they expand to show the label inline. */
+  .fvcms-dock-left .fvcms-dock-pill,
+  .fvcms-dock-right .fvcms-dock-pill {
+    writing-mode: horizontal-tb;
+    width: auto;
+    min-width: 12px;
+    min-height: 12px;
+    max-height: 32px;
+    padding: 6px 8px;
+    transform: none !important;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 6px;
+  }
+  .fvcms-dock-left .fvcms-dock-pill .fvcms-dock-pill-label,
+  .fvcms-dock-right .fvcms-dock-pill .fvcms-dock-pill-label {
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+    max-height: none;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 1;          /* always visible on mobile */
+    display: inline-block;
+    white-space: nowrap;
+  }
+  /* Hide the grip on mobile (no drag — pills are tap targets only) */
+  .fvcms-dock-left .fvcms-dock-pill .fvcms-dock-pill-grip,
+  .fvcms-dock-right .fvcms-dock-pill .fvcms-dock-pill-grip {
+    display: none;
+  }
+  /* Stacked vertically on left/right edges (each pill on its own row) */
+  .fvcms-dock-left, .fvcms-dock-right {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .fvcms-dock-left .fvcms-dock-pills,
+  .fvcms-dock-right .fvcms-dock-pills {
+    flex-direction: column;
+    gap: 4px;
+  }
 }
 .fvcms-dock-left {
   left: 0;
