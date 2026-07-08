@@ -1,13 +1,9 @@
 /* CMS panel bridge styles — runs alongside the panel-manager.css */
 
-/* Dev mode is off by default. The { } button is hidden until the
-   operator explicitly enters dev mode (keyboard shortcut or
-   programmatically). This makes the website look clean when the
-   operator isn't actively editing it. */
-body:not(.fvcms-dev-on) #fvcms-dev-btn {
-  display: none;
-}
-
+/* The { } dev button is always present so the operator can find it.
+   When dev mode is OFF, it has a subtle appearance (smaller, dimmer)
+   so it doesn't dominate the page. When dev mode is ON, it's the
+   familiar bright button (master switch for the panel system). */
 #fvcms-dev-btn {
   position: fixed;
   bottom: 16px;
@@ -22,9 +18,28 @@ body:not(.fvcms-dev-on) #fvcms-dev-btn {
   font: 700 14px ui-monospace, monospace;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+              width 0.18s ease, height 0.18s ease,
+              opacity 0.18s ease, background 0.18s ease;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Dev mode OFF: subtle "I'm here" affordance — small, dim, but
+   findable. Click to enter dev mode. */
+body:not(.fvcms-dev-on) #fvcms-dev-btn {
+  width: 32px;
+  height: 32px;
+  font-size: 11px;
+  border-color: rgba(180, 160, 130, 0.5);
+  background: rgba(20, 28, 20, 0.6);
+  color: rgba(220, 200, 160, 0.85);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  opacity: 0.7;
+}
+body:not(.fvcms-dev-on) #fvcms-dev-btn:hover {
+  opacity: 1;
+  transform: scale(1.08);
 }
 #fvcms-dev-btn:hover {
   transform: scale(1.05);
