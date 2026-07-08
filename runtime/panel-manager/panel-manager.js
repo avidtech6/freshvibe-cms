@@ -176,11 +176,24 @@
 
   // Mark a single panel as the operator's current focus. Other
   // in-play panels remain in-play but lose the focus badge.
+  // Mark a panel as the operator's current focus AND collapse any
+  // other docked-active panel on the same edge. The previously
+  // focused panel becomes docked-collapsed (slim pill) — so on
+  // each edge, only one panel is "shown" at a time. Panels on
+  // different edges are not affected.
   DockManager.prototype._setFocus = function (panel) {
     Object.keys(this.panels).forEach(function (pid) {
       const p = this.panels[pid];
       if (!p) return;
+      const wasFocused = p.isFocused;
       p.isFocused = (p === panel);
+      // If we're focusing a different panel on the same edge and the
+      // previously focused panel was docked-active, collapse it.
+      if (!p.isFocused && wasFocused && p.dockEdge && p.dockEdge === panel.dockEdge
+          && p.state === 'docked-active') {
+        p.state = 'docked-collapsed';
+        this._renderPanelState(p);
+      }
     }.bind(this));
   };
 
