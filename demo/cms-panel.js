@@ -40,12 +40,14 @@ export function mountCmsPanel() {
   btn.textContent = '{ }';
   document.body.appendChild(btn);
 
-  // The toggle. Acts as a master switch for the panel system:
+  // The toggle. Acts as a master switch for the panel system AND
+  // the dev button itself:
   //   - If any panel is currently visible (docked-active or floating),
-  //     collapse ALL of them to parked (docked-collapsed) pills.
-  //   - Otherwise, activate ALL docked-collapsed panels (the
-  //     docked-active state is restored, last focused panel
-  //     becomes the focus again).
+  //     collapse ALL of them to parked (docked-collapsed) pills AND
+  //     hide the { } button. Dev mode is fully off; the operator
+  //     sees the raw website with no chrome.
+  //   - Otherwise, activate ALL docked-collapsed panels and show
+  //     the { } button. Dev mode is on.
   //
   // Each panel remembers its previous docked-active/floating state
   // via the isHidden flag the manager sets; we just flip them all.
@@ -56,20 +58,17 @@ export function mountCmsPanel() {
     });
 
     if (anyVisible) {
-      // Hide everything: collapse to parked pills.
+      // Dev mode OFF: hide everything and the { } button.
       all.forEach(function (p) {
         if (p.state === 'docked-active' || p.state === 'floating') {
           if (p.state === 'docked-active') _mgr.collapse(p.id);
-          // (floating panels stay floating; they're not on the dock
-          // so the operator wouldn't see them as 'visible' anyway
-          // once their host dock pills are all parked)
         }
       });
+      document.body.classList.remove('fvcms-dev-on');
       return;
     }
 
-    // Show everything: re-activate any docked-collapsed panels.
-    // If the CMS panel doesn't exist yet, create it first.
+    // Dev mode ON: activate all parked panels and show the { } button.
     const cms = all.find(function (p) { return p.id === PANEL_ID; });
     if (!cms) {
       _mgr.addPanel({
@@ -85,15 +84,15 @@ export function mountCmsPanel() {
       _refreshPanelContent();
     }
 
-    // Activate every other panel
     all.forEach(function (p) {
-      if (p.id === PANEL_ID) return; // already handled above
+      if (p.id === PANEL_ID) return;
       if (p.state === 'docked-collapsed') {
         _mgr.activate(p.id);
       } else if (p.state === 'hidden' && p.dockEdge) {
         _mgr.activate(p.id);
       }
     });
+    document.body.classList.add('fvcms-dev-on');
   };
 
   // On boot, the button is visible but the panel is hidden.
@@ -285,3 +284,23 @@ export function refreshCmsPanel() {
 
 // Global API the panel-manager can re-render against
 window.__fvcmsRefreshCmsPanel = refreshCmsPanel;
+
+// Keyboard shortcut to enter dev mode from a clean state.
+// Press the backtick (`) key, or Ctrl+Shift+D, to summon the
+// { } button and the panel system. Press again to dismiss.
+if (typeof window !== 'undefined' && !window.__fvcmsDevKeyBound) {
+  window.__fvcmsDevKeyBound = true;
+  window.addEventListener('keydown', function (ev) {
+    // Skip if operator is typing in an input/textarea
+    const tag = (ev.target && ev.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    const isToggleKey =
+      ev.key === '`' ||
+      (ev.ctrlKey && ev.shiftKey && (ev.key === 'D' || ev.key === 'd'));
+    if (!isToggleKey) return;
+    ev.preventDefault();
+    if (typeof window.__fvcmsTogglePanel === 'function') {
+      window.__fvcmsTogglePanel();
+    }
+  });
+}

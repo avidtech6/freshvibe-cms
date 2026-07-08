@@ -1,0 +1,57 @@
+/* CMS panel bridge styles — runs alongside the panel-manager.css */
+
+/* Dev mode is off by default. The { } button is hidden until the
+   operator explicitly enters dev mode (keyboard shortcut or
+   programmatically). This makes the website look clean when the
+   operator isn't actively editing it. */
+body:not(.fvcms-dev-on) #fvcms-dev-btn {
+  display: none;
+}
+
+#fvcms-dev-btn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 2147483647;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 220, 100, 0.7);
+  background: rgba(20, 28, 20, 0.95);
+  color: rgba(255, 220, 100, 1);
+  font: 700 14px ui-monospace, monospace;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+#fvcms-dev-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+#fvcms-dev-btn:active {
+  transform: scale(0.95);
+}
+
+/* Mobile: nudge away from safe area */
+@media (max-width: 600px) {
+  #fvcms-dev-btn {
+    bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    right: max(16px, env(safe-area-inset-right, 16px));
+  }
+}
+
+/* Inside the panel body — the FreshVibe CMS content */
+.fvcms-cms-host {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fvcms-status-line {
+  padding: 6px 10px;
+  background: rgba(76, 175, 80, 0.18);
+  border-radius: 4px;
+  font-size: 10px;
+  color: #c8e6c9;
+}
