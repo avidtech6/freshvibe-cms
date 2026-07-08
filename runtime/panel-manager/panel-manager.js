@@ -162,19 +162,18 @@
 
     // If floating, dock it first. Prefer the panel's remembered
     // home edge so it returns to the same dock it came from,
-    // otherwise default to left.
+    // otherwise default to left. dock() already sets state to
+    // docked-active and focuses, so no need to call activate().
     if (panel.state === 'floating') {
       const home = (panel.dockEdge === 'right') ? 'right' : 'left';
       this.dock(id, home);
-      this.activate(id);
       return;
     }
 
-    // If hidden, dock then activate to the remembered edge
+    // If hidden, dock to the remembered edge (no focus tweak)
     if (panel.state === 'hidden') {
       const home = (panel.dockEdge === 'right') ? 'right' : 'left';
       this.dock(id, home);
-      this.activate(id);
     }
   };
 
