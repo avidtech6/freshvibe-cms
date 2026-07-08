@@ -618,10 +618,25 @@ body:has(.fvcms-dock-bottom) .fvcms-dock-right {
    (e.g. ~300px on a 390px phone), leaving a slice of the page
    visible on the opposite side. */
 @media (max-width: 600px) {
-  .fvcms-pm-panel[data-state="docked-active"][data-dock-edge="left"],
-  .fvcms-pm-panel[data-state="docked-active"][data-dock-edge="right"] {
-    width: 78vw !important;
-    max-width: 78vw !important;
+  /* Mobile: panels always float and cap at half the screen so
+     the operator can still see the page behind. Operator can
+     still resize by dragging the inner-edge handle. */
+  .fvcms-pm-panel[data-state="docked-active"],
+  .fvcms-pm-panel[data-state="floating"] {
+    width: 50vw !important;
+    max-width: 50vw !important;
+    min-width: 240px;
+    /* Cap at 50vh so the panel never covers the whole screen. */
+    max-height: 50vh !important;
+    /* Override the docked full-height rule from desktop. */
+    height: auto !important;
+    bottom: auto !important;
+    top: 80px !important;
+    /* Float in the middle of the screen, not pinned to edge. */
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    border-radius: 10px !important;
   }
   /* Mobile: only the currently-focused docked panel shows its body.
      Pills stay visible (the operator needs them to switch panels)
@@ -631,6 +646,16 @@ body:has(.fvcms-dock-bottom) .fvcms-dock-right {
   .fvcms-pm-panel[data-state="docked-active"]:not([data-focused="1"]),
   .fvcms-pm-panel[data-state="floating"]:not([data-focused="1"]) {
     display: none !important;
+  }
+  /* Background preset swatch row: wrap on narrow panels. */
+  .fvcms-region-field > div[style*="display: flex"] {
+    flex-wrap: wrap !important;
+  }
+  .fvcms-region-field button.fvcms-bg-preset {
+    flex: 0 0 auto !important;
+    min-width: 50px !important;
+    font-size: 8px !important;
+    padding: 3px 5px !important;
   }
 }
 
