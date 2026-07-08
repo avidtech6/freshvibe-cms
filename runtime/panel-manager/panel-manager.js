@@ -456,6 +456,7 @@
         el.style.height = 'auto';
         el.style.maxHeight = (window.innerHeight - topH - bottomH) + 'px';
         el.style.paddingLeft = DOCK_WIDTH + 'px';
+        el.style.paddingRight = '0px';
         if (overlay) {
           document.documentElement.style.setProperty('--fvcms-pm-pinned-w', '0px');
         } else {
@@ -469,6 +470,7 @@
         el.style.bottom = bottomH + 'px';
         el.style.height = 'auto';
         el.style.maxHeight = (window.innerHeight - topH - bottomH) + 'px';
+        el.style.paddingLeft = '0px';
         el.style.paddingRight = DOCK_WIDTH + 'px';
         if (overlay) {
           document.documentElement.style.setProperty('--fvcms-pm-pinned-w', '0px');
