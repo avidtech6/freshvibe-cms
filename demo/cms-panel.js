@@ -205,8 +205,26 @@ function buildCmsContent(page) {
     const region = store.listRegionsForPage(page.id).find(x => x.id === regionId);
     if (!region) continue;
     const rHead = document.createElement('div');
-    rHead.style.cssText = 'font-size:10px;color:#b0c0b0;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-top:8px;padding-top:6px;border-top:1px solid rgba(120,160,120,0.2);';
-    rHead.textContent = region.label;
+    rHead.style.cssText = 'font-size:10px;color:#b0c0b0;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-top:8px;padding-top:6px;border-top:1px solid rgba(120,160,120,0.2);cursor:pointer;';
+    rHead.textContent = region.label + ' →';
+    rHead.title = 'Click to open the ' + region.label + ' panel';
+    rHead.addEventListener('click', () => {
+      // Ensure the region panel exists, then activate + focus it.
+      const panelId = 'fvcms-region-' + region.id;
+      const mgr = (window.PanelManager || window.OscarPanelManager).get();
+      const exists = mgr.list().panels.find(p => p.id === panelId);
+      if (!exists) {
+        // Region panel hasn't been created yet (visualizer never ran).
+        // Bootstrap a quick panel using the region renderer.
+        import('./runtime/visualizer.js').then((v) => {
+          v.showRegionOverlays();
+          mgr.activate(panelId);
+        });
+      } else {
+        mgr.activate(panelId);
+      }
+      status.textContent = `Focused: ${region.label}`;
+    });
     modSec.appendChild(rHead);
     for (const group of store.listGroupsForRegion(region.id)) {
       for (const m of store.listModulesForGroup(group.id)) {
