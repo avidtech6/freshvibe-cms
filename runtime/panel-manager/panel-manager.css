@@ -209,7 +209,11 @@
 .fvcms-dock-left .fvcms-dock-pill:focus-visible,
 .fvcms-dock-right .fvcms-dock-pill:focus-visible,
 .fvcms-dock-left .fvcms-dock-pill.active,
-.fvcms-dock-right .fvcms-dock-pill.active {
+.fvcms-dock-right .fvcms-dock-pill.active,
+.fvcms-dock-left .fvcms-dock-pill.focused,
+.fvcms-dock-right .fvcms-dock-pill.focused,
+.fvcms-dock-left .fvcms-dock-pill.in-play,
+.fvcms-dock-right .fvcms-dock-pill.in-play {
   transform: translateX(0);      /* slide into view */
 }
 .fvcms-dock-left .fvcms-dock-pill .fvcms-dock-pill-label,
@@ -261,7 +265,11 @@
 .fvcms-dock-top .fvcms-dock-pill:focus-visible,
 .fvcms-dock-bottom .fvcms-dock-pill:focus-visible,
 .fvcms-dock-top .fvcms-dock-pill.active,
-.fvcms-dock-bottom .fvcms-dock-pill.active {
+.fvcms-dock-bottom .fvcms-dock-pill.active,
+.fvcms-dock-top .fvcms-dock-pill.focused,
+.fvcms-dock-bottom .fvcms-dock-pill.focused,
+.fvcms-dock-top .fvcms-dock-pill.in-play,
+.fvcms-dock-bottom .fvcms-dock-pill.in-play {
   transform: translate(0, 0);
 }
 .fvcms-dock-top .fvcms-dock-pill .fvcms-dock-pill-label,
