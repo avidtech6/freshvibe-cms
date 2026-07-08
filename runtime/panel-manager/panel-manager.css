@@ -54,14 +54,14 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 44px;
+  width: 45px;  /* matches unslimmed pill width */
   flex-direction: column;
 }
 .fvcms-dock-right {
   right: 0;
   top: 0;
   bottom: 0;
-  width: 44px;
+  width: 45px;  /* matches unslimmed pill width */
   flex-direction: column;
 }
 .fvcms-dock-top {
@@ -192,27 +192,26 @@
    don't shift around. */
 .fvcms-dock-left .fvcms-dock-pill,
 .fvcms-dock-right .fvcms-dock-pill {
-  width: 44px;
-  /* Slimmed (default / parked) state: a small 30px tab. The
-     label is hidden via opacity (see below). The pill expands
-     to 45px when the panel is in-play or focused. */
-  height: 30px;
-  min-height: 30px;
+  /* Slimmed (default / parked) state: 30px wide. The label
+     is hidden via opacity (see below). The pill expands to
+     45px when the panel is in-play or focused. */
+  width: 30px;
+  height: auto;
+  min-height: 80px;
   max-height: 200px;
   writing-mode: vertical-rl;  /* rotated text */
   text-orientation: mixed;
-  padding: 6px 4px;
-  transition: height 0.18s ease, min-height 0.18s ease, padding 0.18s ease;
+  padding: 12px 4px;
+  transition: width 0.18s ease, padding 0.18s ease;
 }
-/* Unslimmed: in-play or focused panels get a taller pill so the
+/* Unslimmed: in-play or focused panels get a wider pill so the
    label is comfortably visible. */
 .fvcms-dock-left .fvcms-dock-pill.focused,
 .fvcms-dock-left .fvcms-dock-pill.in-play,
 .fvcms-dock-right .fvcms-dock-pill.focused,
 .fvcms-dock-right .fvcms-dock-pill.in-play {
-  height: 45px;
-  min-height: 45px;
-  padding: 10px 4px;
+  width: 45px;
+  padding: 12px 6px;
 }
 .fvcms-dock-left .fvcms-dock-pill {
   transform: translateX(-30px);  /* park to the left, ~6px visible */

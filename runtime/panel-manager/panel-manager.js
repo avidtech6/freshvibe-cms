@@ -52,7 +52,7 @@
 
   // ---------- DockManager ----------
 
-  const DOCK_WIDTH = 44;          // CSS px wide on vertical edges (max 45)
+  const DOCK_WIDTH = 45;          // CSS px wide on vertical edges (matches unslimmed pill)
   const DOCK_HEIGHT = 44;         // CSS px tall on horizontal edges
   const EDGES = ['left', 'right', 'top', 'bottom'];
 
