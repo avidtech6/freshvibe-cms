@@ -54,14 +54,14 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 22px;  /* matches unslimmed pill width */
+  width: 16px;  /* matches unslimmed pill width */
   flex-direction: column;
 }
 .fvcms-dock-right {
   right: 0;
   top: 0;
   bottom: 0;
-  width: 22px;  /* matches unslimmed pill width */
+  width: 16px;  /* matches unslimmed pill width */
   flex-direction: column;
 }
 .fvcms-dock-top {
@@ -197,16 +197,16 @@
    don't shift around. */
 .fvcms-dock-left .fvcms-dock-pill,
 .fvcms-dock-right .fvcms-dock-pill {
-  /* Slimmed (default / parked) state: 16px wide. The label
+  /* Slimmed (default / parked) state: 12px wide. The label
      is hidden via opacity (see below). The pill expands to
-     22px when the panel is in-play or focused. */
-  width: 16px;
+     16px when the panel is in-play or focused. */
+  width: 12px;
   height: auto;
   min-height: 80px;
   max-height: 200px;
   writing-mode: vertical-rl;  /* rotated text */
   text-orientation: mixed;
-  padding: 12px 2px;
+  padding: 12px 1px;
   transition: width 0.18s ease, padding 0.18s ease;
 }
 /* Unslimmed: in-play or focused panels get a wider pill so the
@@ -215,8 +215,8 @@
 .fvcms-dock-left .fvcms-dock-pill.in-play,
 .fvcms-dock-right .fvcms-dock-pill.focused,
 .fvcms-dock-right .fvcms-dock-pill.in-play {
-  width: 22px;
-  padding: 12px 3px;
+  width: 16px;
+  padding: 12px 2px;
 }
 .fvcms-dock-left .fvcms-dock-pill {
   transform: translateX(-30px);  /* park to the left, ~6px visible */
