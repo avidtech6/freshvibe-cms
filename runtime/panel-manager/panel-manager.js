@@ -419,7 +419,8 @@
     el.dataset.state = panel.state;
     el.dataset.dockEdge = panel.dockEdge || '';
     if (panel.state === 'floating') {
-      // Position absolutely
+      // Position absolutely. No padding on body — the panel is no
+      // longer docked, so the pill isn't overlaying anything.
       el.style.position = 'fixed';
       el.style.left = panel.position.x + 'px';
       el.style.top = panel.position.y + 'px';
@@ -427,6 +428,13 @@
       el.style.height = panel.position.h + 'px';
       el.style.right = 'auto';
       el.style.bottom = 'auto';
+      el.style.paddingLeft = '0px';
+      el.style.paddingRight = '0px';
+      const body = el.querySelector('.fvcms-pm-body');
+      if (body) {
+        body.style.paddingLeft = '';
+        body.style.paddingRight = '';
+      }
       el.classList.add('fvcms-pm-floating');
       el.classList.remove('fvcms-pm-docked');
       document.body.appendChild(el);
@@ -457,9 +465,10 @@
       const bottomH = bottomActive ? (bottomActive.position.h || 420) + DOCK_HEIGHT : 0;
 
       if (panel.dockEdge === 'left') {
-        // Flush with the left edge. The pill overlays the panel at
-        // x=0..DOCK_WIDTH; the body has padding-left so text content
-        // doesn't sit behind the pill.
+        // Flush with the left edge. The pill overlays the panel body
+        // (not the header) at x=0..DOCK_WIDTH. The body has padding-
+        // left so text content doesn't sit behind the pill. The header
+        // extends edge-to-edge (no padding).
         el.style.left = '0px';
         el.style.top = topH + 'px';
         el.style.right = 'auto';
@@ -468,8 +477,14 @@
         el.style.bottom = bottomH + 'px';
         el.style.height = 'auto';
         el.style.maxHeight = (window.innerHeight - topH - bottomH) + 'px';
-        el.style.paddingLeft = DOCK_WIDTH + 'px';
+        el.style.paddingLeft = '0px';
         el.style.paddingRight = '0px';
+        // Push the body content past the pill on the left side.
+        const body = el.querySelector('.fvcms-pm-body');
+        if (body) {
+          body.style.paddingLeft = DOCK_WIDTH + 'px';
+          body.style.paddingRight = '';
+        }
         if (overlay) {
           document.documentElement.style.setProperty('--fvcms-pm-pinned-w', '0px');
         } else {
@@ -484,7 +499,12 @@
         el.style.height = 'auto';
         el.style.maxHeight = (window.innerHeight - topH - bottomH) + 'px';
         el.style.paddingLeft = '0px';
-        el.style.paddingRight = DOCK_WIDTH + 'px';
+        el.style.paddingRight = '0px';
+        const body = el.querySelector('.fvcms-pm-body');
+        if (body) {
+          body.style.paddingLeft = '';
+          body.style.paddingRight = DOCK_WIDTH + 'px';
+        }
         if (overlay) {
           document.documentElement.style.setProperty('--fvcms-pm-pinned-w', '0px');
         } else {

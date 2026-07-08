@@ -13,10 +13,12 @@
   position: fixed;
   background: transparent;
   display: flex;
-  align-items: center;
+  /* Pills start below the panel header (which is ~46px tall) so they
+     don't overlap the panel's green header bar. */
+  align-items: flex-start;
   justify-content: flex-start;
   gap: 6px;
-  padding: 6px 4px;
+  padding: 56px 4px 6px 4px;
   pointer-events: auto;
   box-shadow: none;
   border: none;
