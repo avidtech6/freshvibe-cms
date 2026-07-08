@@ -8,17 +8,18 @@
   z-index: 2147483646;
 }
 
-/* ---------- dock strip (thin black, max 45px) ---------- */
+/* ---------- dock strip (transparent — pills are the only visible part) ---------- */
 .fvcms-dock {
   position: fixed;
-  background: rgba(8, 8, 10, 0.98);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 6px;
   padding: 6px 4px;
   pointer-events: auto;
-  box-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
+  box-shadow: none;
+  border: none;
 }
 /* Pills sit flush against the dock edge — no inner padding
    between pill and viewport boundary. */
@@ -53,7 +54,6 @@
   bottom: 0;
   width: 44px;
   flex-direction: column;
-  border-right: 1px solid rgba(180, 140, 80, 0.55);
 }
 .fvcms-dock-right {
   right: 0;
@@ -61,21 +61,18 @@
   bottom: 0;
   width: 44px;
   flex-direction: column;
-  border-left: 1px solid rgba(180, 140, 80, 0.55);
 }
 .fvcms-dock-top {
   top: 0;
   left: 0;
   right: 0;
   height: 44px;
-  border-bottom: 1px solid rgba(180, 140, 80, 0.55);
 }
 .fvcms-dock-bottom {
   bottom: 0;
   left: 0;
   right: 0;
   height: 44px;
-  border-top: 1px solid rgba(180, 140, 80, 0.55);
 }
 @media (max-width: 600px) {
   /* Mobile: dock has no visible body, so pills get a small inset from edge */
