@@ -219,10 +219,12 @@
   padding: 12px 2px;
 }
 .fvcms-dock-left .fvcms-dock-pill {
-  transform: translateX(-30px);  /* park to the left, ~6px visible */
+  transform: translateX(0);  /* Always visible — minimised panels still
+                                 keep their pill in the dock so the
+                                 operator knows they're "in the system" */
 }
 .fvcms-dock-right .fvcms-dock-pill {
-  transform: translateX(30px);   /* park to the right, ~6px visible */
+  transform: translateX(0);  /* Same: always visible */
 }
 .fvcms-dock-left .fvcms-dock-pill:hover,
 .fvcms-dock-right .fvcms-dock-pill:hover,

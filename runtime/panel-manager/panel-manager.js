@@ -819,8 +819,10 @@
           me.activate(panel.id);
         }
       } else if (!wasMoved && wasMode === 'detach') {
-        // Click without drag on docked-active header = collapse
-        me.collapse(panel.id);
+        // Click without drag on docked-active header = NO-OP.
+        // Header is for dragging only. The × close button is the
+        // single way to remove a panel. Single-click on the panel
+        // body or header should never close/minimise the panel.
       }
     }
     document.addEventListener('mousemove', onMove);
