@@ -598,6 +598,15 @@ body:has(.fvcms-dock-bottom) .fvcms-dock-right {
     width: 78vw !important;
     max-width: 78vw !important;
   }
+  /* Mobile: only the currently-focused docked panel shows its body.
+     Pills stay visible (the operator needs them to switch panels)
+     but the panel bodies are stacked in a single visible slot.
+     Floating panels also stay hidden when not focused, since
+     mobile real estate is too tight for any two bodies. */
+  .fvcms-pm-panel[data-state="docked-active"]:not([data-focused="1"]),
+  .fvcms-pm-panel[data-state="floating"]:not([data-focused="1"]) {
+    display: none !important;
+  }
 }
 
 /* Region editor UI (inside region panels) */

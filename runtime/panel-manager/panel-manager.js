@@ -190,6 +190,11 @@
       if (!p) return;
       const wasFocused = p.isFocused;
       p.isFocused = (p === panel);
+      if (!p.isFocused && wasFocused) {
+        // Lost focus. Re-render the element so its data-focused
+        // attribute updates (mobile CSS hides non-focused panels).
+        this._renderPanelState(p);
+      }
       // If we're focusing a different panel on the same edge and the
       // previously focused panel was docked-active, collapse it.
       if (!p.isFocused && wasFocused && p.dockEdge && p.dockEdge === panel.dockEdge
@@ -427,6 +432,7 @@
     const el = panel.el;
     el.dataset.state = panel.state;
     el.dataset.dockEdge = panel.dockEdge || '';
+    el.dataset.focused = panel.isFocused ? '1' : '0';
     if (panel.state === 'floating') {
       // Position absolutely. No padding on body — the panel is no
       // longer docked, so the pill isn't overlaying anything.
