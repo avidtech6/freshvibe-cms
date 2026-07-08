@@ -114,15 +114,97 @@ export function mountCmsPanel() {
   };
   window.__fvcmsShowOverlays = showRegionOverlays;
   window.__fvcmsHideOverlays = hideRegionOverlays;
-  window.__fvcmsHighlightRegion = (regionId) => {
-    const store = getStore();
-    const region = store.getRegion(regionId);
-    if (!region) return;
-    const target = document.querySelector(region.selector);
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  };
+  window.__fvcmsHighlightRegion = highlightRegion;
+  window.__fvcmsClearHighlight = clearRegionHighlight;
 
   return true;
+}
+
+/**
+ * Highlight a single region on the page while editing it. Pins a
+ * yellow tag to the top-left corner of the region (follows scroll)
+ * and adds a glowing yellow outline. Pass null/undefined to clear.
+ *
+ * Implementation notes:
+ *   - Tag uses position:fixed; we re-position it every frame
+ *     (rAF) against the region's live rect so it stays glued to
+ *     the region even as the page scrolls.
+ *   - Only ONE region can be highlighted at a time — calling this
+ *     with a new regionId replaces the previous highlight.
+ *   - The "← back" button on the tag focuses the region panel so
+ *     the operator can switch from page-level scrolling back to
+ *     the dock panel.
+ */
+let _editingRegion = null;        // { regionId, target, tagEl, rafHandle }
+function highlightRegion(regionId) {
+  clearRegionHighlight();
+  if (!regionId) return;
+  const store = getStore();
+  const region = store.getRegion(regionId);
+  if (!region) return;
+  const target = document.querySelector(region.selector);
+  if (!target) return;
+
+  // Smoothly scroll the region into view (centred).
+  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Outline the region element.
+  target.classList.add('fvcms-editing-region');
+
+  // Pin a floating tag to the region's top-left corner.
+  const tagEl = document.createElement('div');
+  tagEl.className = 'fvcms-editing-region-tag';
+  const labelSpan = document.createElement('span');
+  labelSpan.textContent = 'Editing: ' + (region.label || regionId);
+  const backBtn = document.createElement('button');
+  backBtn.className = 'fvcms-editing-region-back';
+  backBtn.type = 'button';
+  backBtn.textContent = '← back to panel';
+  tagEl.appendChild(labelSpan);
+  tagEl.appendChild(backBtn);
+  document.body.appendChild(tagEl);
+  tagEl.querySelector('.fvcms-editing-region-back').addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Focus the corresponding region panel so the operator can
+    // hop back to it from the page view.
+    const mgr = (window.PanelManager || window.OscarPanelManager).get();
+    if (!mgr) return;
+    const panelId = 'fvcms-region-' + regionId;
+    const panel = mgr.panels[panelId];
+    if (panel) _focusPanel(panelId);
+  });
+
+  // Reposition the tag every frame against the live region rect.
+  function positionTag() {
+    if (!_editingRegion) return;
+    const r = target.getBoundingClientRect();
+    // Tag sits just above the region's top edge, left-aligned.
+    const tagRect = tagEl.getBoundingClientRect();
+    let left = r.left;
+    let top = r.top - tagRect.height - 6;
+    if (top < 8) top = r.top + 6;     // flip below if no room above
+    tagEl.style.left = Math.max(8, left) + 'px';
+    tagEl.style.top = Math.max(8, top) + 'px';
+  }
+  positionTag();
+  const raf = () => {
+    if (!_editingRegion) return;
+    positionTag();
+    _editingRegion.rafHandle = requestAnimationFrame(raf);
+  };
+  const handle = requestAnimationFrame(raf);
+
+  _editingRegion = { regionId, target, tagEl, rafHandle: handle };
+}
+
+function clearRegionHighlight() {
+  if (!_editingRegion) return;
+  const { target, tagEl, rafHandle } = _editingRegion;
+  _editingRegion = null;
+  if (rafHandle) cancelAnimationFrame(rafHandle);
+  if (target && target.parentNode) target.classList.remove('fvcms-editing-region');
+  if (tagEl && tagEl.parentNode) tagEl.parentNode.removeChild(tagEl);
 }
 
 async function _refreshPanelContent() {
@@ -324,6 +406,16 @@ function _focusPanel(panelId) {
     const dock = mgr.docks[edge];
     if (dock) mgr._updateDockPills(dock);
   });
+
+  // Page-level region highlight: when a region panel is focused,
+  // scroll to that region and pin a yellow tag to its top-left.
+  // Non-region panels (editor, cms) clear the highlight.
+  if (panelId.startsWith('fvcms-region-')) {
+    const regionId = panelId.replace('fvcms-region-', '');
+    highlightRegion(regionId);
+  } else {
+    clearRegionHighlight();
+  }
 }
 
 // Global API the panel-manager can re-render against

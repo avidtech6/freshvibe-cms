@@ -344,6 +344,54 @@ h1, h2, h3, h4, h5, h6 {
   outline-offset: 2px;
 }
 
+/* Region being edited — yellow tag pinned to the top-left corner
+   of the region, plus a glowing outline. The tag follows the
+   region as the page scrolls because it's position:fixed and
+   repositioned via rAF against the region element's rect. */
+.fvcms-editing-region {
+  outline: 3px solid rgba(255, 220, 100, 0.95);
+  outline-offset: 2px;
+  box-shadow: 0 0 24px rgba(255, 220, 100, 0.35);
+}
+.fvcms-editing-region-tag {
+  position: fixed;
+  z-index: 2147483646;       /* below the panel manager (one less) */
+  background: rgba(40, 50, 25, 0.96);
+  color: #ffdc64;
+  border: 1px solid rgba(255, 220, 100, 0.7);
+  border-radius: 4px;
+  padding: 5px 10px;
+  font: 600 11px ui-monospace, Menlo, monospace;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  pointer-events: none;       /* don't block clicks on the page */
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fvcms-editing-region-tag::before {
+  content: '◆';
+  color: #ffdc64;
+  font-size: 9px;
+}
+.fvcms-editing-region-tag .fvcms-editing-region-back {
+  pointer-events: auto;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid rgba(255, 220, 100, 0.6);
+  color: #ffdc64;
+  font: 600 10px ui-monospace, Menlo, monospace;
+  padding: 2px 8px;
+  border-radius: 3px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.fvcms-editing-region-tag .fvcms-editing-region-back:hover {
+  background: rgba(255, 220, 100, 0.18);
+}
+
 /* Info box */
 .fvcms-info-box {
   display: flex; gap: 12px;
