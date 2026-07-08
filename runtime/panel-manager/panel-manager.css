@@ -49,71 +49,13 @@
   .fvcms-dock-pill {
     pointer-events: auto;
   }
-  /* On mobile: pills are HORIZONTAL so the label can be read.
-     Slimmed pills collapse to a square (12px) but when focused
-     or in-play they expand to show the label inline. */
-  .fvcms-dock-left .fvcms-dock-pill,
-  .fvcms-dock-right .fvcms-dock-pill,
-  .fvcms-dock-left .fvcms-dock-pill.focused,
-  .fvcms-dock-right .fvcms-dock-pill.focused,
-  .fvcms-dock-left .fvcms-dock-pill.in-play,
-  .fvcms-dock-right .fvcms-dock-pill.in-play {
-    writing-mode: horizontal-tb !important;
-    width: auto !important;
-    min-width: 24px !important;
-    min-height: 24px !important;
-    max-height: 36px !important;
-    padding: 6px 10px !important;
-    transform: none !important;
-    display: flex !important;
-    align-items: center;
-    gap: 4px;
-    border-radius: 6px !important;
-  }
+  /* On mobile: don't hide the pill label — keep it visible
+     (label opacity stays at 1 instead of being hidden by the
+     default parked state). Pills stay slim vertical tabs as
+     on desktop. */
   .fvcms-dock-left .fvcms-dock-pill .fvcms-dock-pill-label,
   .fvcms-dock-right .fvcms-dock-pill .fvcms-dock-pill-label {
-    writing-mode: horizontal-tb !important;
-    text-orientation: mixed;
-    max-height: none !important;
-    max-width: 140px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    opacity: 1 !important;     /* always visible on mobile */
-    display: inline-block !important;
-    white-space: nowrap;
-  }
-  /* Hide the grip on mobile (no drag — pills are tap targets only) */
-  .fvcms-dock-left .fvcms-dock-pill .fvcms-dock-pill-grip,
-  .fvcms-dock-right .fvcms-dock-pill .fvcms-dock-pill-grip,
-  .fvcms-dock-left .fvcms-dock-pill.focused .fvcms-dock-pill-grip,
-  .fvcms-dock-right .fvcms-dock-pill.focused .fvcms-dock-pill-grip {
-    display: none !important;
-  }
-  /* Stacked vertically on left/right edges (each pill on its own row) */
-  .fvcms-dock-left, .fvcms-dock-right {
-    flex-direction: column !important;
-    gap: 4px;
-  }
-  .fvcms-dock-left .fvcms-dock-pills,
-  .fvcms-dock-right .fvcms-dock-pills {
-    flex-direction: column !important;
-    gap: 4px;
-  }
-  /* Override the focused/in-play edge-flush rules on mobile
-     (those assume a vertical pill glued to the edge). */
-  .fvcms-dock-left .fvcms-dock-pill.focused,
-  .fvcms-dock-left .fvcms-dock-pill.in-play {
-    border-top-left-radius: 6px !important;
-    border-bottom-left-radius: 6px !important;
-    border-left: 1px solid rgba(220, 180, 110, 0.55) !important;
-    padding-left: 10px !important;
-  }
-  .fvcms-dock-right .fvcms-dock-pill.focused,
-  .fvcms-dock-right .fvcms-dock-pill.in-play {
-    border-top-right-radius: 6px !important;
-    border-bottom-right-radius: 6px !important;
-    border-right: 1px solid rgba(220, 180, 110, 0.55) !important;
-    padding-right: 10px !important;
+    opacity: 1 !important;
   }
 }
 .fvcms-dock-left {
