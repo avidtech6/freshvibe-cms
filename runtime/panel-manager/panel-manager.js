@@ -85,7 +85,7 @@
       content: panelOpts.content || '',      // string HTML or HTMLElement
       state: 'floating',                       // floating | docked-collapsed | docked-active | hidden
       dockEdge: null,
-      position: panelOpts.position || { x: 80, y: 80, w: 380, h: 480 },
+      position: panelOpts.position || { x: 80, y: 80, w: 360, h: 460 },
       isFocused: false,                        // operator's current focus within in-play panels
       onClose: panelOpts.onClose || null
     };
@@ -237,8 +237,8 @@
   // 1) nearest edge by panel center distance
   // 2) tie-break: most recently used edge (this.lastUsedEdge)
   DockManager.prototype._pickSmartDockEdge = function (panel) {
-    const x = (panel.position.x || 0) + (panel.position.w || 380) / 2;
-    const y = (panel.position.y || 0) + (panel.position.h || 480) / 2;
+    const x = (panel.position.x || 0) + (panel.position.w || 360) / 2;
+    const y = (panel.position.y || 0) + (panel.position.h || 460) / 2;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const dLeft = x;
@@ -380,8 +380,8 @@
       const startResize = function (ev) {
         if (ev.cancelable) ev.preventDefault();
         const startPoint = self._getPoint(ev);
-        const startW = panel.position.w || 380;
-        const startH = panel.position.h || 480;
+        const startW = panel.position.w || 360;
+        const startH = panel.position.h || 460;
         function onMove(e) {
           const p = self._getPoint(e);
           const dx = p.x - startPoint.x;
@@ -453,7 +453,9 @@
       // data-overlayMode attribute (set by the squeeze button in the panel
       // header). When squeeze, body gets padding equal to panel width.
       el.style.position = 'fixed';
-      const requestedW = panel.position && panel.position.w ? panel.position.w : 380;
+      // Docked panels default to 340px — narrow enough that two
+      // stacked on the same edge still leave room for content.
+      const requestedW = panel.position && panel.position.w ? panel.position.w : 340;
       // On mobile, cap docked width to leave room for the dock strip itself.
       // Operator can still re-resize via the inner-edge drag handle.
       const isMobile = window.innerWidth <= 600;
@@ -468,8 +470,8 @@
       const rightActive = allPanels.find(function (p) { return p.id !== panel.id && p.state === 'docked-active' && p.dockEdge === 'right'; });
       const topActive = allPanels.find(function (p) { return p.id !== panel.id && p.state === 'docked-active' && p.dockEdge === 'top'; });
       const bottomActive = allPanels.find(function (p) { return p.id !== panel.id && p.state === 'docked-active' && p.dockEdge === 'bottom'; });
-      const leftW = leftActive ? (leftActive.position.w || 380) + DOCK_WIDTH : 0;
-      const rightW = rightActive ? (rightActive.position.w || 380) + DOCK_WIDTH : 0;
+      const leftW = leftActive ? (leftActive.position.w || 340) + DOCK_WIDTH : 0;
+      const rightW = rightActive ? (rightActive.position.w || 340) + DOCK_WIDTH : 0;
       const topH = topActive ? (topActive.position.h || 420) + DOCK_HEIGHT : 0;
       const bottomH = bottomActive ? (bottomActive.position.h || 420) + DOCK_HEIGHT : 0;
 

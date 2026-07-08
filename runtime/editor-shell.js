@@ -62,7 +62,7 @@ export function openEditorShell({ moduleInstance, moduleDef, onSave, store }) {
     id,
     title: `Edit: ${moduleDef.label}`,
     content: body,
-    position: { x: 60, y: 80, w: 480, h: 540 },
+    position: { x: 60, y: 80, w: 360, h: 520 },
   });
   // dock() already sets state='docked-active' and focuses the panel.
   // Don't call activate() afterwards — it would see
