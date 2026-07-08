@@ -85,11 +85,12 @@
   height: 44px;
 }
 @media (max-width: 600px) {
-  /* Mobile: dock has no visible body, so pills get a small inset from edge */
-  .fvcms-dock-left { left: 6px; width: auto; border-right: none; }
-  .fvcms-dock-right { right: 6px; width: auto; border-left: none; }
-  .fvcms-dock-top { top: 6px; height: auto; border-bottom: none; }
-  .fvcms-dock-bottom { bottom: 6px; height: auto; border-top: none; }
+  /* Mobile: dock has no visible body, pills sit flush against the
+     viewport edge (no inset) */
+  .fvcms-dock-left { left: 0; width: auto; border-right: none; }
+  .fvcms-dock-right { right: 0; width: auto; border-left: none; }
+  .fvcms-dock-top { top: 0; height: auto; border-bottom: none; }
+  .fvcms-dock-bottom { bottom: 0; height: auto; border-top: none; }
   /* Pills get a subtle drop shadow since they float now */
   .fvcms-dock-pill {
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);

@@ -687,9 +687,13 @@
           pill.removeEventListener('touchcancel', onTouchEnd);
           pill.style.transition = '';
           if (!moved) {
-            // It was a tap, not a drag. Activate the panel.
-            if (panel.state === 'docked-active') me2.collapse(panelId);
-            else me2.activate(panelId);
+            // It was a tap, not a drag. Always route through
+            // activate() — the activate() logic decides whether
+            // to expand, focus-shift, or collapse based on the
+            // panel's current state. Don't special-case
+            // docked-active here or we lose the focus-shift
+            // behaviour for taps on non-focused panels.
+            me2.activate(panelId);
             // The active class on the panel will translate the
             // pill back to 0 via CSS.
             pill.style.transform = '';
