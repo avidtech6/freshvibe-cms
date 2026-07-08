@@ -275,6 +275,33 @@
     // Retired: only left/right docks are supported now (vertical edges only).
     if (edge !== 'left' && edge !== 'right') return;
     this.lastUsedEdge = edge;  // remember for smart-dock from floating
+
+    // On mobile: dock() means "make this the active floating panel".
+    // The pill still gets added to the dock for tab-switching, but
+    // the panel body floats in the centre of the screen (not pinned
+    // to the edge). This lets the operator drag the panel around,
+    // resize it, and not lose the page behind.
+    if (window.innerWidth <= 600) {
+      // Add to pill dock so the operator can switch back via pill tap.
+      panel.dockEdge = edge;
+      this._addPillToDock(edge, id);
+      // Default position: centre of viewport at 50vw × 50vh.
+      panel.position.x = Math.max(8, Math.round((window.innerWidth - Math.min(panel.position.w || 240, window.innerWidth * 0.5)) / 2));
+      panel.position.y = 80;
+      if (!panel.position.w || panel.position.w > window.innerWidth * 0.5) {
+        panel.position.w = 240;  // matches the CSS min-width
+      }
+      if (!panel.position.h || panel.position.h > window.innerHeight * 0.5) {
+        panel.position.h = Math.round(window.innerHeight * 0.5);
+      }
+      panel.state = 'floating';
+      this._setFocus(panel);
+      const dock = this.docks[edge];
+      if (dock) this._updateDockPills(dock);
+      this._renderPanelState(panel);
+      return;
+    }
+
     // If already docked-active on the same edge, just activate
     // (the panel body is already on the edge; refreshing the focus
     // is enough). A floating panel whose home edge matches the

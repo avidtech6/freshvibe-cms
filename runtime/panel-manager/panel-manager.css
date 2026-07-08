@@ -618,31 +618,28 @@ body:has(.fvcms-dock-bottom) .fvcms-dock-right {
    (e.g. ~300px on a 390px phone), leaving a slice of the page
    visible on the opposite side. */
 @media (max-width: 600px) {
-  /* Mobile: panels always float and cap at half the screen so
-     the operator can still see the page behind. Operator can
-     still resize by dragging the inner-edge handle. */
-  .fvcms-pm-panel[data-state="docked-active"],
+  /* Mobile: panels are always floating (state=floating, not
+     docked-active). They cap at 50vw × 50vh so the operator can
+     always see the page behind. The body is scrollable inside the
+     panel. Operator can drag and resize freely. */
   .fvcms-pm-panel[data-state="floating"] {
     width: 50vw !important;
     max-width: 50vw !important;
     min-width: 240px;
-    /* Cap at 50vh so the panel never covers the whole screen. */
     max-height: 50vh !important;
-    /* Override the docked full-height rule from desktop. */
-    height: auto !important;
-    bottom: auto !important;
-    top: 80px !important;
-    /* Float in the middle of the screen, not pinned to edge. */
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%) !important;
     border-radius: 10px !important;
+    /* Fade in from the bottom of the screen — hints that the
+       panel body is scrollable. */
+    animation: fvcms-mobile-fadein 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transform: translateY(0) !important;
   }
-  /* Mobile: only the currently-focused docked panel shows its body.
+  @keyframes fvcms-mobile-fadein {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  /* Mobile: only the currently-focused panel shows its body.
      Pills stay visible (the operator needs them to switch panels)
-     but the panel bodies are stacked in a single visible slot.
-     Floating panels also stay hidden when not focused, since
-     mobile real estate is too tight for any two bodies. */
+     but the panel bodies are stacked in a single visible slot. */
   .fvcms-pm-panel[data-state="docked-active"]:not([data-focused="1"]),
   .fvcms-pm-panel[data-state="floating"]:not([data-focused="1"]) {
     display: none !important;
