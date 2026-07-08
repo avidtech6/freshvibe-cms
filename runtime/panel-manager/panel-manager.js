@@ -266,17 +266,12 @@
     panel.state = 'docked-active';  // docking defaults to active
     this._setFocus(panel);
     this._addPillToDock(edge, id);
-    // Collapse others on this dock and re-render them
+    // NOTE: the previous 'collapse others on this dock' rule is
+    // removed. The new model allows multiple in-play panels per
+    // dock. Each in-play panel keeps its docked-active state and
+    // shows as a soft amber pill (or bright yellow if focused).
     const dock = this.docks[edge];
     if (dock) {
-      dock.pills.forEach(function (pid) {
-        if (pid === id) return;
-        const p = this.panels[pid];
-        if (p && p.state === 'docked-active') {
-          p.state = 'docked-collapsed';
-          this._renderPanelState(p);
-        }
-      }.bind(this));
       this._updateDockPills(dock);
     }
     this._renderPanelState(panel);
