@@ -763,9 +763,26 @@
       if (me.dragState.moved) {
         // If docked-active or pill, detach first so the panel becomes floating
         if (panel.state !== 'floating') {
+          // CRITICAL: capture the panel's CURRENT rendered position
+          // BEFORE detach() runs. dock() never updates panel.position.x/y,
+          // so panel.position still holds whatever it had before docking
+          // (often the initial 80/80 default). Reading the live element
+          // rect gives us the actual on-screen position so the panel
+          // doesn't snap to the stale position.
+          const rect = panel.el ? panel.el.getBoundingClientRect() : null;
+          if (rect) {
+            panel.position.x = rect.x;
+            panel.position.y = rect.y;
+            if (panel.position.w !== rect.width)  panel.position.w = rect.width;
+            if (panel.position.h !== rect.height) panel.position.h = rect.height;
+            // Update startPos so the dx/dy math below is from the
+            // ACTUAL current on-screen position, not the stale one.
+            startPos.x = rect.x;
+            startPos.y = rect.y;
+          }
           me.detach(panel.id);
         }
-        // Move panel
+        // Move panel (relative to startPos which now matches reality)
         panel.position.x = Math.max(0, startPos.x + dx);
         panel.position.y = Math.max(0, startPos.y + dy);
         me._renderPanelState(panel);
