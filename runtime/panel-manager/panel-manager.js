@@ -123,7 +123,12 @@
   DockManager.prototype.activate = function (id) {
     const panel = this.panels[id];
     if (!panel) return;
-    if (panel.state === 'docked-active') return; // already active
+    if (panel.state === 'docked-active') {
+      // Already active — still mark as currentActive so the pill
+      // colour stays consistent if it later gets collapsed.
+      this._setCurrentActive(panel);
+      return;
+    }
     if (panel.state === 'docked-collapsed') {
       // Collapse currently-active on same dock, expand this one
       const dock = this.docks[panel.dockEdge];
@@ -137,8 +142,27 @@
           p.state = 'docked-collapsed';
         }
       }.bind(this));
+      this._setCurrentActive(panel);
+      // On mobile, also collapse any other panels docked-active on
+      // a different edge. The operator can only meaningfully view
+      // one panel at a time on a small screen, so we collapse the
+      // others to pills (they stay in the dock; they can be tapped
+      // to re-activate later).
+      if (this._isMobile()) {
+        Object.keys(this.panels).forEach(function (pid) {
+          if (pid === id) return;
+          const p = this.panels[pid];
+          if (p && p.state === 'docked-active') {
+            p.state = 'docked-collapsed';
+            this._renderPanelState(p);
+            const otherDock = this.docks[p.dockEdge];
+            if (otherDock) this._updateDockPills(otherDock);
+          }
+        }.bind(this));
+      }
       this._renderPanelState(panel);
-      this._renderPanelState(this.panels[dock.pills.find(function (x) { return x !== id; })]);
+      const other = dock.pills.find(function (x) { return x !== id; });
+      if (other) this._renderPanelState(this.panels[other]);
       this._updateDockPills(dock);
     }
     // If floating, dock it first (default edge = left)
@@ -146,6 +170,24 @@
       this.dock(id, 'left');
       this.activate(id);
     }
+  };
+
+  // Mark this panel as the operator's current focus. The pill
+  // colour follows this flag (not just state) so that collapsing
+  // the panel doesn't change the pill's colour — the parked slice
+  // and the docked-active pill look the same.
+  DockManager.prototype._setCurrentActive = function (panel) {
+    Object.keys(this.panels).forEach(function (pid) {
+      const p = this.panels[pid];
+      if (!p) return;
+      p.isCurrentActive = (p === panel);
+    }.bind(this));
+  };
+
+  // Lightweight mobile detection — the manager doesn't have a direct
+  // viewport handle, so we ask the window.
+  DockManager.prototype._isMobile = function () {
+    try { return window.innerWidth <= 600; } catch (e) { return false; }
   };
 
   DockManager.prototype.collapse = function (id) {
@@ -217,6 +259,7 @@
     // Add to new dock
     panel.dockEdge = edge;
     panel.state = 'docked-active';  // docking defaults to active
+    this._setCurrentActive(panel);
     this._addPillToDock(edge, id);
     // Collapse others on this dock and re-render them
     const dock = this.docks[edge];
@@ -495,7 +538,12 @@
     dock.pills.forEach(function (panelId, idx) {
       const panel = this.panels[panelId];
       if (!panel) return;
-      const isActive = panel.state === 'docked-active';
+      // The pill is 'active' (yellow) when its panel is the
+      // operator's current focus — either docked-active right
+      // now, or just collapsed from a docked-active state.
+      // This keeps the parked slice and the shown pill the same
+      // colour, so the operator has visual continuity.
+      const isActive = panel.state === 'docked-active' || panel.isCurrentActive;
       const pill = elFromHTML(
         '<div class="fvcms-dock-pill' + (isActive ? ' active' : '') + '" data-pm-panel-id="' + panelId + '" title="' + escapeHtml(panel.title) + '">' +
           '<span class="fvcms-dock-pill-grip" aria-hidden="true">⋮⋮</span>' +
