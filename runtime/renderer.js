@@ -73,29 +73,31 @@ export function connect(moduleInstanceId, el) {
 
 registerRenderer('M-heading', (m, def, skin) => {
   if (!m.el) return;
+  // Non-destructive: find existing h1-h6 and patch in place.
+  // Don't replace the heading element — that would destroy Elementor's
+  // <h5 class="elementor-heading-title"> styling. We only update
+  // textContent + style. Level mismatch is left as-is unless operator
+  // explicitly requested a level change in m.config.level.
   let heading = m.el.querySelector('h1, h2, h3, h4, h5, h6');
   if (!heading) {
     heading = document.createElement('h2');
     m.el.appendChild(heading);
   }
-  // Apply text
   if (m.config.text != null) heading.textContent = m.config.text;
-  // Apply level
-  const targetLevel = (m.config.level || 'h2').toLowerCase();
-  if (heading.tagName.toLowerCase() !== targetLevel) {
-    const newHeading = document.createElement(targetLevel);
+  // Level: ONLY change the tag if operator explicitly set level in config.
+  // If level is missing, preserve the existing tag (don't blow it away).
+  if (m.config.level && m.config.level.toLowerCase() !== heading.tagName.toLowerCase()) {
+    const newHeading = document.createElement(m.config.level.toLowerCase());
     newHeading.textContent = heading.textContent;
+    // Copy classes and styles from the original heading
+    newHeading.className = heading.className;
+    for (const s of heading.style) newHeading.style.setProperty(s, heading.style.getPropertyValue(s));
     heading.replaceWith(newHeading);
     heading = newHeading;
   }
-  // Apply alignment
-  if (m.config.align) {
-    heading.style.textAlign = m.config.align;
-  }
-  // Apply color (per-instance override, else skin)
+  if (m.config.align) heading.style.textAlign = m.config.align;
   const color = m.config.color || (skin && skin.cssTokens && skin.cssTokens['--heading-color']);
   if (color) heading.style.color = color;
-  // Apply size
   if (m.config.size && m.config.size !== 'inherit') {
     heading.style.fontSize = `var(--heading-size-${m.config.size}, inherit)`;
   }
@@ -103,113 +105,94 @@ registerRenderer('M-heading', (m, def, skin) => {
 
 registerRenderer('M-cta', (m, def, skin) => {
   if (!m.el) return;
-  let link = m.el.querySelector('a');
-  if (!link) {
-    link = document.createElement('a');
-    link.className = 'oscar-cta';
-    m.el.appendChild(link);
-  }
+  // Non-destructive: update existing anchor in place.
+  const link = m.el.querySelector('a');
+  if (!link) return;
   if (m.config.text != null) link.textContent = m.config.text;
   if (m.config.href) link.href = m.config.href;
   if (m.config.openInNewTab) link.target = '_blank';
   else link.removeAttribute('target');
-  // Variant class
-  link.classList.remove('oscar-variant-solid', 'oscar-variant-outline',
-    'oscar-variant-ghost', 'oscar-variant-link');
-  if (m.config.variant) link.classList.add('oscar-variant-' + m.config.variant);
-  // Radius
-  link.classList.remove('oscar-radius-sharp', 'oscar-radius-small',
-    'oscar-radius-medium', 'oscar-radius-large', 'oscar-radius-pill');
-  if (m.config.radius) link.classList.add('oscar-radius-' + m.config.radius);
-  // Size
-  link.classList.remove('oscar-size-small', 'oscar-size-medium', 'oscar-size-large');
-  if (m.config.size) link.classList.add('oscar-size-' + m.config.size);
+  // Variant / radius / size: add oscar-* classes alongside any existing
+  // framework classes (eael-*, elementor-button, etc.) so styling
+  // survives and our tweaks layer on top.
+  if (m.config.variant) {
+    link.classList.remove('oscar-variant-solid', 'oscar-variant-outline',
+      'oscar-variant-ghost', 'oscar-variant-link');
+    link.classList.add('oscar-variant-' + m.config.variant);
+  }
+  if (m.config.radius) {
+    link.classList.remove('oscar-radius-sharp', 'oscar-radius-small',
+      'oscar-radius-medium', 'oscar-radius-large', 'oscar-radius-pill');
+    link.classList.add('oscar-radius-' + m.config.radius);
+  }
+  if (m.config.size) {
+    link.classList.remove('oscar-size-small', 'oscar-size-medium', 'oscar-size-large');
+    link.classList.add('oscar-size-' + m.config.size);
+  }
 });
 
 registerRenderer('M-button', (m, def, skin) => {
   if (!m.el) return;
-  // Buttons in Elementor/EAEL can be: <a class="...creative-button..."> or <button>
-  let link = m.el.querySelector('a.eael-creative-button__link, a.elementor-button-link, a.elementor-button, a');
-  if (!link) {
-    link = document.createElement('a');
-    link.className = 'elementor-button-link elementor-button';
-    m.el.appendChild(link);
-  }
+  // Non-destructive: update existing button anchor in place.
+  // Elementor/EAEL have many class variants — match the broadest set.
+  const link = m.el.querySelector('a.eael-creative-button, a.eael-creative-button__link, a.elementor-button, a.elementor-button-link, a.elementor-button__link, a, button');
+  if (!link) return;
   if (m.config.text != null) link.textContent = m.config.text;
   if (m.config.href) link.href = m.config.href;
   if (m.config.openInNewTab) link.target = '_blank';
   else link.removeAttribute('target');
-  // Variant
-  link.classList.remove(
-    'eael-creative-button--default', 'eael-creative-button--outline',
-    'eael-creative-button--trail', 'eael-creative-button--invert',
-    'oscar-variant-solid', 'oscar-variant-outline', 'oscar-variant-ghost'
-  );
-  if (m.config.variant === 'outline') {
-    link.classList.add('eael-creative-button--outline');
-  } else if (m.config.variant === 'ghost') {
-    link.classList.add('eael-creative-button--trail');
-  } else {
-    link.classList.add('eael-creative-button--default');
+  // Variant — toggle EAEL's classes (which determine actual styling)
+  if (m.config.variant) {
+    link.classList.remove(
+      'eael-creative-button--default', 'eael-creative-button--outline',
+      'eael-creative-button--trail', 'eael-creative-button--invert'
+    );
+    if (m.config.variant === 'outline') link.classList.add('eael-creative-button--outline');
+    else if (m.config.variant === 'ghost') link.classList.add('eael-creative-button--trail');
+    else link.classList.add('eael-creative-button--default');
   }
   // Size
-  link.classList.remove('eael-creative-button--small', 'eael-creative-button--medium', 'eael-creative-button--large',
-    'oscar-size-small', 'oscar-size-medium', 'oscar-size-large');
-  const sizeClass = 'eael-creative-button--' + (m.config.size || 'medium');
-  link.classList.add(sizeClass);
-  // Color (per-instance override)
-  if (m.config.color) {
-    link.style.backgroundColor = m.config.color;
+  if (m.config.size) {
+    link.classList.remove('eael-creative-button--small', 'eael-creative-button--medium', 'eael-creative-button--large');
+    link.classList.add('eael-creative-button--' + m.config.size);
   }
+  // Color
+  if (m.config.color) link.style.backgroundColor = m.config.color;
   // Alignment
   if (m.config.alignment) {
     const align = m.config.alignment;
-    if (align === 'center') m.el.style.textAlign = 'center';
-    else if (align === 'right') m.el.style.textAlign = 'right';
-    else m.el.style.textAlign = 'left';
+    m.el.style.textAlign = align === 'center' ? 'center' : align === 'right' ? 'right' : 'left';
   }
 });
 
 registerRenderer('M-image', (m, def, skin) => {
   if (!m.el) return;
-  let img = m.el.querySelector('img');
-  if (!img) {
-    img = document.createElement('img');
-    m.el.appendChild(img);
-  }
+  // Non-destructive: patch existing img in place.
+  const img = m.el.querySelector('img');
+  if (!img) return;
   if (m.config.src) img.src = m.config.src;
   if (m.config.alt !== undefined) img.alt = m.config.alt || '';
-  if (m.config.link) {
-    if (!img.parentElement.matches('a')) {
-      const wrapper = document.createElement('a');
-      wrapper.href = m.config.link;
-      img.replaceWith(wrapper);
-      wrapper.appendChild(img);
-    }
+  // Link wrapping — preserve existing wrap if present.
+  if (m.config.link && !img.parentElement.matches('a')) {
+    const wrapper = document.createElement('a');
+    wrapper.href = m.config.link;
+    img.replaceWith(wrapper);
+    wrapper.appendChild(img);
   }
-  // Width
   if (m.config.width && m.config.width !== 'auto') {
     img.style.width = m.config.width === 'full' ? '100%' : m.config.width;
-  } else {
-    img.style.width = '';
   }
-  // Aspect ratio
   if (m.config.aspectRatio && m.config.aspectRatio !== 'natural') {
     img.style.aspectRatio = m.config.aspectRatio.replace(':', ' / ');
     img.style.objectFit = 'cover';
-  } else {
-    img.style.aspectRatio = '';
-    img.style.objectFit = '';
   }
 });
 
 registerRenderer('M-paragraph', (m, def, skin) => {
   if (!m.el) return;
-  let p = m.el.querySelector('p');
-  if (!p) {
-    p = document.createElement('p');
-    m.el.appendChild(p);
-  }
+  // Non-destructive: update existing <p> in place.
+  const p = m.el.querySelector('p');
+  if (!p) return;
   if (m.config.text != null) p.innerHTML = m.config.text;
   if (m.config.align) p.style.textAlign = m.config.align;
   if (m.config.size && m.config.size !== 'medium') {
@@ -454,50 +437,65 @@ registerRenderer('M-breadcrumb', (m, def, skin) => {
 
 registerRenderer('M-testimonial', (m, def, skin) => {
   if (!m.el) return;
-  let card = m.el.querySelector('.oscar-testimonial');
-  if (!card) {
-    card = document.createElement('div');
-    card.className = 'oscar-testimonial';
-    m.el.appendChild(card);
+  // Non-destructive: update the existing DOM in place. Each canonical
+  // field has a known class name pattern. If not found, append a
+  // hidden element so the inspector at least has something to read
+  // back. NEVER wipe innerHTML — that destroys EAEL/Elementor styling.
+  const findFirst = (...sels) => {
+    for (const s of sels) {
+      const el = m.el.querySelector(s);
+      if (el) return el;
+    }
+    return null;
+  };
+
+  // Quote: try EAEL first, then Elementor blockquote, then any p inside content
+  if (m.config.quote != null) {
+    const q = findFirst(
+      '.eael-testimonial-text',          // EAEL
+      '.elementor-blockquote__content',  // Elementor
+      '.oscar-testimonial-quote',         // generic
+      'blockquote',                       // standard
+      '.eael-testimonial-content p'      // fallback
+    );
+    if (q) q.textContent = m.config.quote;
   }
-  card.className = 'oscar-testimonial oscar-testimonial-' + (m.config.style || 'card');
-  card.innerHTML = '';
-  if (m.config.rating && m.config.rating !== '0') {
-    const stars = document.createElement('div');
-    stars.className = 'oscar-testimonial-stars';
-    stars.textContent = '★'.repeat(parseInt(m.config.rating, 10));
-    card.appendChild(stars);
+  // Author name
+  if (m.config.authorName != null) {
+    const a = findFirst(
+      '.eael-testimonial-user',
+      '.elementor-testimonial-name',
+      '.oscar-testimonial-name',
+      'cite'
+    );
+    if (a) a.textContent = m.config.authorName;
   }
-  if (m.config.quote) {
-    const q = document.createElement('blockquote');
-    q.className = 'oscar-testimonial-quote';
-    q.textContent = m.config.quote;
-    card.appendChild(q);
+  // Author role
+  if (m.config.authorRole != null) {
+    const r = findFirst(
+      '.eael-testimonial-position',
+      '.elementor-testimonial-job',
+      '.elementor-testimonial-title',
+      '.oscar-testimonial-role'
+    );
+    if (r) r.textContent = m.config.authorRole;
   }
-  const attribution = document.createElement('div');
-  attribution.className = 'oscar-testimonial-attribution';
+  // Author image
   if (m.config.authorImage && m.config.authorImage.url) {
-    const img = document.createElement('img');
-    img.src = m.config.authorImage.url;
-    img.alt = m.config.authorName || '';
-    img.className = 'oscar-testimonial-avatar';
-    attribution.appendChild(img);
+    const img = findFirst('.eael-testimonial-image img', '.oscar-testimonial-avatar', 'img');
+    if (img) {
+      img.src = m.config.authorImage.url;
+      if (m.config.authorImage.alt) img.alt = m.config.authorImage.alt;
+    }
   }
-  const authorText = document.createElement('div');
-  if (m.config.authorName) {
-    const name = document.createElement('div');
-    name.className = 'oscar-testimonial-name';
-    name.textContent = m.config.authorName;
-    authorText.appendChild(name);
+  // Rating
+  if (m.config.rating != null) {
+    const stars = findFirst('.eael-testimonial-rating', '.oscar-testimonial-stars');
+    if (stars) {
+      const n = parseInt(m.config.rating, 10) || 0;
+      stars.textContent = '★'.repeat(n) + '☆'.repeat(Math.max(0, 5 - n));
+    }
   }
-  if (m.config.authorRole) {
-    const role = document.createElement('div');
-    role.className = 'oscar-testimonial-role';
-    role.textContent = m.config.authorRole;
-    authorText.appendChild(role);
-  }
-  attribution.appendChild(authorText);
-  card.appendChild(attribution);
 });
 
 registerRenderer('M-cta-box', (m, def, skin) => {
