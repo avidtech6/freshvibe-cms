@@ -28,6 +28,10 @@ export { renderGroupToggleUI, toggleGroupToModule } from './group-toggle.js';
 export { openEditorShell } from './editor-shell.js';
 export { renderRegion, renderAllRegions, applyRegionToStore, updateRegionConfig, subscribeRegionRenderer } from './region-renderer.js';
 export { renderRegionEditor } from './region-editor.js';
+export {
+  registerConfigAdapter, populateConfigFromDOM, populateAll
+} from './config-from-dom.js';
+export { ensureDefaultAdapters } from './default-config-adapters.js';
 
 import { getStore } from './store.js';
 import { CANONICAL_MODULES } from '../modules/index.js';
@@ -63,5 +67,8 @@ export function getCanonicalModules() {
 }
 
 export function getModuleDef(id) {
-  return CANONICAL_MODULES.find(m => m.id === id) || null;
+  if (!id) return null;
+  // Match by id with or without 'M-' prefix (heading vs M-heading).
+  const bare = id.replace(/^M-/, '');
+  return CANONICAL_MODULES.find(m => m.id === id || m.id === 'M-' + bare || m.id === bare) || null;
 }

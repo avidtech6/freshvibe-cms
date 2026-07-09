@@ -2,6 +2,7 @@
 // v0.4: 15 modules total.
 
 import { headingModule } from './heading.js';
+import { buttonModule } from './button.js';
 import { ctaModule } from './cta.js';
 import { imageModule } from './image.js';
 import { paragraphModule } from './paragraph.js';
@@ -19,6 +20,7 @@ import { ctaBoxModule } from './cta-box.js';
 
 export const CANONICAL_MODULES = [
   headingModule,
+  buttonModule,
   ctaModule,
   imageModule,
   paragraphModule,
@@ -39,7 +41,11 @@ export const CANONICAL_MODULES_BY_ID = {};
 for (const m of CANONICAL_MODULES) CANONICAL_MODULES_BY_ID[m.id] = m;
 
 export function getModuleDef(id) {
-  return CANONICAL_MODULES_BY_ID[id] || null;
+  if (!id) return null;
+  // Match by id with or without 'M-' prefix (heading vs M-heading).
+  if (CANONICAL_MODULES_BY_ID[id]) return CANONICAL_MODULES_BY_ID[id];
+  const bare = id.replace(/^M-/, '');
+  return CANONICAL_MODULES_BY_ID['M-' + bare] || CANONICAL_MODULES_BY_ID[bare] || null;
 }
 
 export function listModuleDefs() {

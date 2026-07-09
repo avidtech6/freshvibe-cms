@@ -9,6 +9,7 @@ import { applySkin, registerSkin, renderSkinPicker } from './runtime/skin.js';
 import { showRegionOverlays, hideRegionOverlays, startOverlayTracking } from './runtime/visualizer.js';
 import { renderGroupToggleUI, toggleGroupToModule } from './runtime/group-toggle.js';
 import { openEditorShell } from './runtime/editor-shell.js';
+import { ensureDefaultAdapters, populateAll } from './runtime/index.js';
 import { SAMPLE_SKINS } from './skins/index.js';
 
 // Side-effect import for CSS. Inject <link> rather than ES-importing
@@ -54,6 +55,15 @@ export async function bootFreshvibeCms({ annotation, annotationUrl, host, regist
     return;
   }
   store.setActivePage(page.id);
+
+  // Auto-register default config-from-DOM adapters and populate any
+  // empty module configs from the live DOM. This makes the inspector
+  // show meaningful fields the first time you open it.
+  ensureDefaultAdapters();
+  const populated = populateAll(store);
+  if (populated > 0) {
+    console.info('[fvcms] populated', populated, 'module configs from live DOM');
+  }
 
   // Connect each module instance to its DOM element so the renderer
   // can re-render it when config changes.

@@ -1,43 +1,43 @@
 /* FreshVibe CMS — runtime styles
-   Scoped via .fvcms-* class names. No global pollution.
+   Scoped via .oscar-* class names. No global pollution.
    Designed to work alongside Oscar's existing dev panel CSS. */
 
-.fvcms-editor {
+.oscar-editor {
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 8px 0;
 }
-.fvcms-editor-header {
+.oscar-editor-header {
   font-weight: 700;
   font-size: 12px;
   color: #c0e0c0;
   padding-bottom: 4px;
   border-bottom: 1px solid rgba(120, 160, 120, 0.3);
 }
-.fvcms-editor-fields {
+.oscar-editor-fields {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-.fvcms-field {
+.oscar-field {
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
-.fvcms-field-label {
+.oscar-field-label {
   font-size: 11px;
   color: #b0c0b0;
   font-weight: 600;
 }
-.fvcms-required {
+.oscar-required {
   color: #ff8060;
 }
-.fvcms-field input[type=text],
-.fvcms-field input[type=url],
-.fvcms-field input[type=number],
-.fvcms-field textarea,
-.fvcms-field select {
+.oscar-field input[type=text],
+.oscar-field input[type=url],
+.oscar-field input[type=number],
+.oscar-field textarea,
+.oscar-field select {
   background: rgba(0, 0, 0, 0.3);
   color: #e8e8e0;
   border: 1px solid rgba(120, 160, 120, 0.3);
@@ -47,7 +47,7 @@
   width: 100%;
   box-sizing: border-box;
 }
-.fvcms-field input[type=color] {
+.oscar-field input[type=color] {
   width: 36px;
   height: 28px;
   border: 1px solid rgba(120, 160, 120, 0.3);
@@ -55,7 +55,7 @@
   background: transparent;
   cursor: pointer;
 }
-.fvcms-boolean-field {
+.oscar-boolean-field {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -63,22 +63,22 @@
   font-size: 12px;
   color: #d0d8d0;
 }
-.fvcms-editor-variants {
+.oscar-editor-variants {
   margin-top: 6px;
   padding-top: 6px;
   border-top: 1px dashed rgba(120, 160, 120, 0.3);
 }
-.fvcms-editor-label {
+.oscar-editor-label {
   font-size: 11px;
   color: #b0c0b0;
   margin-bottom: 4px;
 }
-.fvcms-editor-variant-buttons {
+.oscar-editor-variant-buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
 }
-.fvcms-variant-btn {
+.oscar-variant-btn {
   background: rgba(60, 100, 60, 0.4);
   border: 1px solid rgba(120, 160, 120, 0.4);
   color: #e8e8e0;
@@ -87,16 +87,16 @@
   font: 11px ui-monospace, monospace;
   cursor: pointer;
 }
-.fvcms-variant-btn:hover {
+.oscar-variant-btn:hover {
   background: rgba(80, 130, 80, 0.6);
 }
-.fvcms-editor-actions {
+.oscar-editor-actions {
   display: flex;
   gap: 6px;
   margin-top: 6px;
 }
-.fvcms-save-btn,
-.fvcms-reset-btn {
+.oscar-save-btn,
+.oscar-reset-btn {
   flex: 1;
   padding: 6px 10px;
   border-radius: 5px;
@@ -105,35 +105,35 @@
   cursor: pointer;
   border: 1px solid;
 }
-.fvcms-save-btn {
+.oscar-save-btn {
   background: rgba(76, 175, 80, 0.6);
   border-color: rgba(120, 200, 120, 0.7);
   color: #fff;
 }
-.fvcms-save-btn:hover {
+.oscar-save-btn:hover {
   background: rgba(76, 175, 80, 0.85);
 }
-.fvcms-reset-btn {
+.oscar-reset-btn {
   background: rgba(80, 80, 80, 0.4);
   border-color: rgba(160, 160, 160, 0.4);
   color: #d0d0d0;
 }
-.fvcms-reset-btn:hover {
+.oscar-reset-btn:hover {
   background: rgba(100, 100, 100, 0.5);
 }
 
 /* Region navigator */
-.fvcms-navigator {
+.oscar-navigator {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
-.fvcms-nav-region {
+.oscar-nav-region {
   border-left: 2px solid rgba(120, 160, 120, 0.4);
   padding-left: 8px;
   margin: 2px 0;
 }
-.fvcms-nav-region-label {
+.oscar-nav-region-label {
   font-size: 11px;
   color: #c0e0c0;
   font-weight: 700;
@@ -141,12 +141,12 @@
   letter-spacing: 0.4px;
   padding: 2px 0;
 }
-.fvcms-nav-group {
+.oscar-nav-group {
   margin-left: 8px;
   font-size: 11px;
   color: #b0c0b0;
 }
-.fvcms-nav-module {
+.oscar-nav-module {
   display: inline-block;
   margin: 1px 3px 1px 0;
   padding: 2px 6px;
@@ -156,36 +156,36 @@
   cursor: pointer;
   font: 10px ui-monospace, monospace;
 }
-.fvcms-nav-module:hover {
+.oscar-nav-module:hover {
   background: rgba(80, 130, 80, 0.6);
   border-color: rgba(180, 140, 80, 0.7);
 }
 
 /* Tab bar */
-.fvcms-tab-active {
+.oscar-tab-active {
   border-bottom: 2px solid rgba(180, 140, 80, 0.9) !important;
   color: #c0e0c0 !important;
 }
 
 /* Group toggle UI */
-.fvcms-group-toggle {
+.oscar-group-toggle {
   display: flex; flex-direction: column; gap: 12px;
   padding: 8px 0;
 }
-.fvcms-group-section {
+.oscar-group-section {
   border-left: 2px solid rgba(120, 160, 120, 0.4);
   padding-left: 8px;
 }
-.fvcms-group-section-head {
+.oscar-group-section-head {
   font-size: 11px; color: #c0e0c0; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.4px;
   margin-bottom: 4px;
 }
-.fvcms-group-row {
+.oscar-group-row {
   display: flex; align-items: center; gap: 6px;
   padding: 3px 0; font-size: 10px;
 }
-.fvcms-group-moduleselect {
+.oscar-group-moduleselect {
   background: rgba(0, 0, 0, 0.3); color: #e8e8e0;
   border: 1px solid rgba(120, 160, 120, 0.3);
   border-radius: 3px; padding: 2px 4px;
@@ -193,14 +193,14 @@
 }
 
 /* Skin picker */
-.fvcms-skin-picker {
+.oscar-skin-picker {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 0;
 }
-.fvcms-skin-picker-label {
+.oscar-skin-picker-label {
   font-size: 11px; color: #b0c0b0; font-weight: 600;
 }
-.fvcms-skin-select {
+.oscar-skin-select {
   flex: 1;
   background: rgba(0, 0, 0, 0.3); color: #e8e8e0;
   border: 1px solid rgba(120, 160, 120, 0.3);
@@ -209,7 +209,7 @@
 }
 
 /* Module defaults */
-.fvcms-cta {
+.oscar-cta {
   display: inline-block;
   padding: 10px 22px;
   background: var(--cta-bg, #2d4f2d);
@@ -219,39 +219,39 @@
   font-weight: 600;
   transition: filter 0.15s ease, transform 0.1s ease;
 }
-.fvcms-cta:hover {
+.oscar-cta:hover {
   filter: brightness(1.1);
   transform: translateY(-1px);
 }
-.fvcms-variant-solid {
+.oscar-variant-solid {
   background: var(--cta-bg, #2d4f2d);
   color: var(--cta-color, #fff);
   border: 1.5px solid var(--cta-bg, #2d4f2d);
 }
-.fvcms-variant-outline {
+.oscar-variant-outline {
   background: transparent;
   color: var(--cta-bg, #2d4f2d);
   border: 1.5px solid var(--cta-bg, #2d4f2d);
 }
-.fvcms-variant-ghost {
+.oscar-variant-ghost {
   background: transparent;
   color: var(--cta-bg, #2d4f2d);
   border: 1.5px solid transparent;
 }
-.fvcms-variant-link {
+.oscar-variant-link {
   background: transparent;
   color: var(--cta-bg, #2d4f2d);
   border: none;
   text-decoration: underline;
 }
-.fvcms-radius-sharp   { border-radius: 0 !important; }
-.fvcms-radius-small   { border-radius: 4px !important; }
-.fvcms-radius-medium  { border-radius: 8px !important; }
-.fvcms-radius-large   { border-radius: 16px !important; }
-.fvcms-radius-pill    { border-radius: 999px !important; }
-.fvcms-size-small     { padding: 5px 12px !important; font-size: 11px !important; }
-.fvcms-size-medium    { padding: 10px 22px !important; font-size: 13px !important; }
-.fvcms-size-large     { padding: 14px 30px !important; font-size: 15px !important; }
+.oscar-radius-sharp   { border-radius: 0 !important; }
+.oscar-radius-small   { border-radius: 4px !important; }
+.oscar-radius-medium  { border-radius: 8px !important; }
+.oscar-radius-large   { border-radius: 16px !important; }
+.oscar-radius-pill    { border-radius: 999px !important; }
+.oscar-size-small     { padding: 5px 12px !important; font-size: 11px !important; }
+.oscar-size-medium    { padding: 10px 22px !important; font-size: 13px !important; }
+.oscar-size-large     { padding: 14px 30px !important; font-size: 15px !important; }
 
 /* Heading sizes via tokens */
 h1, h2, h3, h4, h5, h6 {
@@ -260,32 +260,32 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Paragraph sizes */
-.fvcms-paragraph-small  { font-size: 12px !important; }
-.fvcms-paragraph-medium { font-size: 14px !important; }
-.fvcms-paragraph-large  { font-size: 17px !important; line-height: 1.6; }
+.oscar-paragraph-small  { font-size: 12px !important; }
+.oscar-paragraph-medium { font-size: 14px !important; }
+.oscar-paragraph-large  { font-size: 17px !important; line-height: 1.6; }
 
 /* Menu */
-.fvcms-menu {
+.oscar-menu {
   list-style: none;
   margin: 0; padding: 0;
 }
-.fvcms-menu li { padding: 4px 0; }
-.fvcms-menu li a {
+.oscar-menu li { padding: 4px 0; }
+.oscar-menu li a {
   color: var(--heading-color, inherit);
   text-decoration: none;
   transition: opacity 0.15s ease;
 }
-.fvcms-menu li a:hover { opacity: 0.7; }
-.fvcms-menu-vertical   { display: block; }
-.fvcms-menu-horizontal { display: flex; gap: 16px; }
+.oscar-menu li a:hover { opacity: 0.7; }
+.oscar-menu-vertical   { display: block; }
+.oscar-menu-horizontal { display: flex; gap: 16px; }
 
 /* Social icons */
-.fvcms-social-icons {
+.oscar-social-icons {
   display: flex; gap: 12px;
   align-items: center;
 }
-.fvcms-social-vertical { flex-direction: column; }
-.fvcms-social-icon {
+.oscar-social-vertical { flex-direction: column; }
+.oscar-social-icon {
   display: inline-flex; align-items: center; justify-content: center;
   width: 32px; height: 32px;
   border-radius: 50%;
@@ -295,51 +295,51 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 10px;
   transition: background 0.15s ease;
 }
-.fvcms-social-icon:hover {
+.oscar-social-icon:hover {
   background: rgba(120, 160, 120, 0.7);
 }
 
 /* Accordion */
-.fvcms-accordion-item {
+.oscar-accordion-item {
   margin: 4px 0;
   border-radius: 4px;
 }
-.fvcms-accordion-separated .fvcms-accordion-item {
+.oscar-accordion-separated .oscar-accordion-item {
   background: rgba(60, 100, 60, 0.15);
   border: 1px solid rgba(120, 160, 120, 0.3);
 }
-.fvcms-accordion-bordered .fvcms-accordion-item {
+.oscar-accordion-bordered .oscar-accordion-item {
   border: 1px solid rgba(120, 160, 120, 0.4);
 }
-.fvcms-accordion-flush .fvcms-accordion-item {
+.oscar-accordion-flush .oscar-accordion-item {
   border-bottom: 1px solid rgba(120, 160, 120, 0.3);
 }
-.fvcms-accordion-item summary {
+.oscar-accordion-item summary {
   padding: 10px 14px;
   font-weight: 600;
   cursor: pointer;
 }
-.fvcms-accordion-content {
+.oscar-accordion-content {
   padding: 0 14px 10px;
   color: rgba(232, 232, 224, 0.85);
 }
 
 /* Icon list */
-.fvcms-icon-list {
+.oscar-icon-list {
   list-style: none; padding: 0; margin: 0;
 }
-.fvcms-icon-list li {
+.oscar-icon-list li {
   padding: 4px 0;
   display: flex; align-items: center; gap: 6px;
 }
-.fvcms-icon-list li::before {
+.oscar-icon-list li::before {
   content: '✓';
   color: var(--heading-color, inherit);
   opacity: 0.7;
 }
 
 /* Region navigator region-hover highlight */
-.fvcms-region-hovered {
+.oscar-region-hovered {
   outline: 2px solid rgba(255, 220, 100, 0.9);
   outline-offset: 2px;
 }
@@ -347,7 +347,7 @@ h1, h2, h3, h4, h5, h6 {
 /* On-page REGION: X tag (pinned to each region's top-left corner
    while region overlays are active). position:fixed + rAF
    reposition so it follows the region as the user scrolls. */
-.fvcms-region-tag {
+.oscar-region-tag {
   position: fixed;
   z-index: 2147483645;
   background: rgba(40, 50, 25, 0.96);
@@ -359,6 +359,52 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.4px;
   text-transform: uppercase;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+/* Sub-tags for individual modules within a focused region. Smaller,
+   distinct colour so the operator can tell them apart from the
+   region tag at a glance. Click to open that module in the
+   inspector. */
+.oscar-module-subtag {
+  position: fixed;
+  z-index: 2147483646;
+  background: rgba(20, 28, 20, 0.95);
+  color: #d0e8d0;
+  border: 1px solid rgba(180, 220, 140, 0.6);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font: 10px ui-monospace, Menlo, monospace;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  user-select: none;
+  pointer-events: auto;
+  max-width: 240px;
+}
+.oscar-module-subtag:hover {
+  background: rgba(255, 220, 100, 0.2);
+  color: #ffdc64;
+  border-color: rgba(255, 220, 100, 0.9);
+}
+.oscar-module-subtag .ost {
+  background: rgba(255, 220, 100, 0.25);
+  color: #ffdc64;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+}
+.oscar-module-subtag .osl {
+  color: #d0e8d0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
   pointer-events: auto;
   cursor: pointer;
   white-space: nowrap;
@@ -366,12 +412,12 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   gap: 8px;
 }
-.fvcms-region-tag::before {
+.oscar-region-tag::before {
   content: '◆';
   color: #ffdc64;
   font-size: 9px;
 }
-.fvcms-region-tag:hover {
+.oscar-region-tag:hover {
   background: rgba(60, 80, 35, 0.98);
   border-color: rgba(255, 220, 100, 1);
 }
@@ -380,12 +426,12 @@ h1, h2, h3, h4, h5, h6 {
    of the region, plus a glowing outline. The tag follows the
    region as the page scrolls because it's position:fixed and
    repositioned via rAF against the region element's rect. */
-.fvcms-editing-region {
+.oscar-editing-region {
   outline: 3px solid rgba(255, 220, 100, 0.95);
   outline-offset: 2px;
   box-shadow: 0 0 24px rgba(255, 220, 100, 0.35);
 }
-.fvcms-editing-region-tag {
+.oscar-editing-region-tag {
   position: fixed;
   z-index: 2147483646;
   background: rgba(40, 50, 25, 0.96);
@@ -403,12 +449,12 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   gap: 8px;
 }
-.fvcms-editing-region-tag::before {
+.oscar-editing-region-tag::before {
   content: '◆';
   color: #ffdc64;
   font-size: 9px;
 }
-.fvcms-editing-region-tag .fvcms-editing-region-back {
+.oscar-editing-region-tag .oscar-editing-region-back {
   pointer-events: auto;
   cursor: pointer;
   background: transparent;
@@ -420,12 +466,12 @@ h1, h2, h3, h4, h5, h6 {
   text-transform: none;
   letter-spacing: 0;
 }
-.fvcms-editing-region-tag .fvcms-editing-region-back:hover {
+.oscar-editing-region-tag .oscar-editing-region-back:hover {
   background: rgba(255, 220, 100, 0.18);
 }
 
 /* Info box */
-.fvcms-info-box {
+.oscar-info-box {
   display: flex; gap: 12px;
   padding: 14px 16px;
   margin: 10px 0;
@@ -433,11 +479,11 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(100, 140, 200, 0.12);
   border-left: 4px solid rgba(100, 140, 200, 0.6);
 }
-.fvcms-info-info    { background: rgba(100, 140, 200, 0.12); border-left-color: rgba(100, 140, 200, 0.6); }
-.fvcms-info-success { background: rgba(80, 160, 80, 0.12); border-left-color: rgba(80, 160, 80, 0.7); }
-.fvcms-info-warning { background: rgba(200, 160, 60, 0.12); border-left-color: rgba(200, 160, 60, 0.7); }
-.fvcms-info-tip     { background: rgba(180, 120, 200, 0.12); border-left-color: rgba(180, 120, 200, 0.6); }
-.fvcms-info-icon {
+.oscar-info-info    { background: rgba(100, 140, 200, 0.12); border-left-color: rgba(100, 140, 200, 0.6); }
+.oscar-info-success { background: rgba(80, 160, 80, 0.12); border-left-color: rgba(80, 160, 80, 0.7); }
+.oscar-info-warning { background: rgba(200, 160, 60, 0.12); border-left-color: rgba(200, 160, 60, 0.7); }
+.oscar-info-tip     { background: rgba(180, 120, 200, 0.12); border-left-color: rgba(180, 120, 200, 0.6); }
+.oscar-info-icon {
   flex: 0 0 auto;
   width: 28px; height: 28px;
   display: flex; align-items: center; justify-content: center;
@@ -446,42 +492,42 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   text-transform: uppercase;
 }
-.fvcms-info-body { flex: 1; }
-.fvcms-info-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
-.fvcms-info-content { font-size: 12px; opacity: 0.85; }
-.fvcms-info-link { display: inline-block; margin-top: 6px; font-size: 11px; color: rgba(180, 140, 80, 1); }
+.oscar-info-body { flex: 1; }
+.oscar-info-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+.oscar-info-content { font-size: 12px; opacity: 0.85; }
+.oscar-info-link { display: inline-block; margin-top: 6px; font-size: 11px; color: rgba(180, 140, 80, 1); }
 
 /* Forms */
-.fvcms-form {
+.oscar-form {
   display: flex; flex-direction: column; gap: 10px;
   padding: 12px 0;
 }
-.fvcms-form-inline {
+.oscar-form-inline {
   flex-direction: row; flex-wrap: wrap; gap: 8px;
   align-items: end;
 }
-.fvcms-form-field {
+.oscar-form-field {
   display: flex; flex-direction: column; gap: 3px;
   flex: 1 1 200px;
 }
-.fvcms-form-field label { font-size: 11px; color: #b0c0b0; font-weight: 600; }
-.fvcms-form-field input,
-.fvcms-form-field textarea,
-.fvcms-form-field select {
+.oscar-form-field label { font-size: 11px; color: #b0c0b0; font-weight: 600; }
+.oscar-form-field input,
+.oscar-form-field textarea,
+.oscar-form-field select {
   background: rgba(0, 0, 0, 0.3); color: #e8e8e0;
   border: 1px solid rgba(120, 160, 120, 0.3);
   border-radius: 4px; padding: 6px 8px;
   font: 12px ui-monospace, monospace;
 }
-.fvcms-form-field textarea { min-height: 80px; resize: vertical; }
-.fvcms-form-submit {
+.oscar-form-field textarea { min-height: 80px; resize: vertical; }
+.oscar-form-submit {
   background: var(--cta-bg, #2d4f2d); color: var(--cta-color, #fff);
   border: none; padding: 10px 22px; border-radius: 8px;
   font: 13px ui-monospace, monospace; font-weight: 700;
   cursor: pointer;
   flex: 0 0 auto;
 }
-.fvcms-form-success {
+.oscar-form-success {
   background: rgba(80, 160, 80, 0.7); color: #fff;
   padding: 8px 12px; border-radius: 4px;
   font-size: 12px;
@@ -489,73 +535,133 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Breadcrumb */
-.fvcms-breadcrumb { font-size: 12px; }
-.fvcms-breadcrumb-list {
+.oscar-breadcrumb { font-size: 12px; }
+.oscar-breadcrumb-list {
   list-style: none; margin: 0; padding: 0;
   display: flex; flex-wrap: wrap;
 }
-.fvcms-breadcrumb-list li { display: inline-flex; align-items: center; }
-.fvcms-breadcrumb-list li a {
+.oscar-breadcrumb-list li { display: inline-flex; align-items: center; }
+.oscar-breadcrumb-list li a {
   color: var(--heading-color, inherit);
   text-decoration: none;
   opacity: 0.7;
 }
-.fvcms-breadcrumb-list li a:hover { opacity: 1; }
-.fvcms-breadcrumb-sep {
+.oscar-breadcrumb-list li a:hover { opacity: 1; }
+.oscar-breadcrumb-sep {
   padding: 0 8px;
   opacity: 0.4;
 }
 
 /* Testimonial */
-.fvcms-testimonial {
+.oscar-testimonial {
   padding: 16px;
   margin: 10px 0;
 }
-.fvcms-testimonial-card { background: rgba(60, 100, 60, 0.15); border-radius: 8px; border: 1px solid rgba(120, 160, 120, 0.3); }
-.fvcms-testimonial-bordered {
+.oscar-testimonial-card { background: rgba(60, 100, 60, 0.15); border-radius: 8px; border: 1px solid rgba(120, 160, 120, 0.3); }
+.oscar-testimonial-bordered {
   border-left: 4px solid rgba(180, 140, 80, 0.8);
   background: rgba(180, 140, 80, 0.06);
 }
-.fvcms-testimonial-plain {
+.oscar-testimonial-plain {
   font-style: italic;
 }
-.fvcms-testimonial-stars {
+.oscar-testimonial-stars {
   color: rgba(220, 180, 60, 1);
   margin-bottom: 6px;
   font-size: 16px;
 }
-.fvcms-testimonial-quote {
+.oscar-testimonial-quote {
   margin: 0; padding: 0;
   font-size: 14px; line-height: 1.6;
   font-style: italic;
 }
-.fvcms-testimonial-attribution {
+.oscar-testimonial-attribution {
   display: flex; align-items: center; gap: 10px;
   margin-top: 10px;
   font-size: 11px;
 }
-.fvcms-testimonial-avatar {
+.oscar-testimonial-avatar {
   width: 36px; height: 36px;
   border-radius: 50%;
   object-fit: cover;
 }
-.fvcms-testimonial-name { font-weight: 700; }
-.fvcms-testimonial-role { opacity: 0.7; }
+.oscar-testimonial-name { font-weight: 700; }
+.oscar-testimonial-role { opacity: 0.7; }
 
 /* CTA Box */
-.fvcms-cta-box {
+.oscar-cta-box {
   padding: 24px 20px;
   margin: 16px 0;
   background: rgba(45, 79, 45, 0.4);
   border-radius: 10px;
 }
-.fvcms-cta-box-inner {
+.oscar-cta-box-inner {
   display: flex; flex-direction: column; gap: 10px;
   align-items: flex-start;
 }
-.fvcms-cta-box-centered { text-align: center; align-items: center; }
-.fvcms-cta-box-side-by-side {
+.oscar-cta-box-centered { text-align: center; align-items: center; }
+.oscar-cta-box-side-by-side {
   flex-direction: row; justify-content: space-between; align-items: center;
 }
-.fvcms-cta-box-title { font-size: 20px; margin: 0; }
-.fvcms-cta-box-body { font-size: 13px; opacity: 0.85; margin: 0; }
+.oscar-cta-box-title { font-size: 20px; margin: 0; }
+.oscar-cta-box-body { font-size: 13px; opacity: 0.85; margin: 0; }
+/* 'All widgets' toggle — every Elementor widget on the page gets
+   a tag. Bright blue so it visually distinguishes from the
+   curated region tags (yellow) and module sub-tags (green). */
+.oscar-allwidget-tag {
+  position: fixed;
+  z-index: 2147483644;
+  background: rgba(60, 90, 140, 0.95);
+  color: #d0e4f5;
+  border: 1px solid rgba(140, 180, 220, 0.7);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font: 10px ui-monospace, monospace;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  user-select: none;
+  pointer-events: auto;
+  max-width: 280px;
+}
+.oscar-allwidget-tag:hover {
+  background: rgba(140, 180, 220, 0.3);
+  border-color: #c0d8e8;
+}
+.oscar-allwidget-tag .oaw-type {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+}
+.oscar-allwidget-tag .oaw-label {
+  color: #d0e4f5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}
+
+
+/* ---- Stage F: visual feedback when an element gets re-rendered ----
+   Briefly highlights the updated element with a yellow glow that
+   fades out. Helps the operator see exactly which DOM node changed
+   in response to their Inspector edit. */
+.oscar-just-updated {
+  outline: 3px solid #ffd84d !important;
+  outline-offset: 2px !important;
+  animation: oscar-flash 0.8s ease-out forwards;
+  position: relative;
+  z-index: 1;
+}
+@keyframes oscar-flash {
+  0%   { background-color: rgba(255, 216, 77, 0.30); outline-color: #ffd84d; }
+  50%  { background-color: rgba(255, 216, 77, 0.15); outline-color: #ffd84d; }
+  100% { background-color: transparent; outline-color: rgba(255, 216, 77, 0); }
+}
