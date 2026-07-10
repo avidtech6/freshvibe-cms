@@ -947,3 +947,49 @@ h1, h2, h3, h4, h5, h6 {
 .fvcms-editor-raw-textarea.fvcms-editor-raw-invalid {
   border-color: rgba(255, 80, 80, 0.7);
 }
+
+/* ============================================================================
+   editor-context-menu feature — right-click menu
+   (Per app-fragments/editor-context-menu/fragment.md)
+   ============================================================================ */
+
+.fvcms-context-menu {
+  position: fixed;
+  z-index: 2147483647;
+  background: rgba(20, 28, 20, 0.98);
+  border: 1px solid rgba(255, 220, 100, 0.5);
+  border-radius: 6px;
+  padding: 4px 0;
+  min-width: 180px;
+  font: 11px ui-monospace, Menlo, monospace;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.fvcms-context-menu-item {
+  display: block;
+  width: 100%;
+  background: transparent;
+  color: #d0e8d0;
+  border: none;
+  padding: 6px 14px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.fvcms-context-menu-item:hover {
+  background: rgba(255, 220, 100, 0.15);
+  color: #ffdc64;
+}
+.fvcms-context-menu-divider {
+  height: 1px;
+  background: rgba(120, 160, 120, 0.2);
+  margin: 4px 0;
+}
+.fvcms-context-menu-danger {
+  color: #ff8866;
+}
+.fvcms-context-menu-danger:hover {
+  background: rgba(255, 80, 80, 0.15);
+  color: #ff6644;
+}
