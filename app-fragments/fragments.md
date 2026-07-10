@@ -27,6 +27,7 @@ The click-to-edit experience. This is the area we're building right now. Removin
 | `outline-system` | partial | The yellow outline + region tag visible when dev mode is on. | `panel-bridge.css` + `runtime/visualizer.js` |
 | `editor-outline` | active | Floating yellow tags on each region and module. Click to focus. Selection highlight with purple accent. Contract: `app-fragments/editor-outline/fragment.md`. 10/10 smoke tests pass. | `runtime/outline.js` |
 | `editor-navigator` | active | Structure tree walker. Mirrors live DOM (Elementor, Gutenberg, Webflow tokens). Click selects, drag reorders. Contract: `app-fragments/editor-navigator/fragment.md`. 23/23 smoke tests pass. | `runtime/navigator.js` |
+| `editor-inspector` | active | The panel that edits one module instance — Fields / Variants / Raw JSON tabs. Auto-opens on module selection. Contract: `app-fragments/editor-inspector/fragment.md`. 24/24 smoke tests pass. | `runtime/editor-shell.js` |
 | `selection` | active | The shared selection state — which module or region is currently focused. Read by outline, inspector, navigator, breadcrumb, context-menu. Singleton at `window.FreshVibeCmsSelection`. Contract: `app-fragments/editor-selection/fragment.md`. 27/27 smoke tests pass. | `runtime/selection.js` |
 | `structure-tree` | partial | The Navigator tab inside the CMS panel. Walks live DOM, supports click-to-jump. | `runtime/cms-panel.js` (structure-tab branch) |
 | `cms-panel` | partial | The dock panel with Overview / Structure / Inspector tabs. | `runtime/cms-panel.js` |
