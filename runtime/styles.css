@@ -764,3 +764,71 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(180, 100, 220, 0.4);
   color: #ffe4a0;
 }
+
+/* ============================================================================
+   editor-navigator feature — structure tree of the page
+   (Per app-fragments/editor-navigator/fragment.md)
+   ============================================================================ */
+
+.fvcms-navigator-tree {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 11px;
+  color: #c8e0c8;
+  padding: 6px 0;
+}
+.fvcms-navigator-empty {
+  color: #7a8a7a;
+  font-style: italic;
+  padding: 8px 12px;
+}
+.fvcms-tree-node .row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  cursor: pointer;
+  border-radius: 3px;
+  user-select: none;
+}
+.fvcms-tree-node .row:hover {
+  background: rgba(255, 220, 100, 0.10);
+}
+.fvcms-tree-node .row.is-current {
+  background: rgba(255, 220, 100, 0.20);
+}
+.fvcms-tree-node .chev {
+  color: #a0c0a0;
+  width: 10px;
+  display: inline-block;
+  font-size: 10px;
+}
+.fvcms-tree-node .icon {
+  color: #c0d8e0;
+  font-size: 11px;
+  width: 14px;
+  text-align: center;
+}
+.fvcms-tree-node .pill {
+  background: rgba(60, 90, 140, 0.4);
+  color: #d0e4f5;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fvcms-tree-node .label {
+  flex: 1;
+  color: #d0e8d0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fvcms-tree-children {
+  /* child container — display:none when collapsed */
+}

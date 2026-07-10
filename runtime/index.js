@@ -25,6 +25,7 @@ export {
   showRegionOverlays, hideRegionOverlays, isOverlaysActive, startOverlayTracking
 } from './visualizer.js';
 export { startOutlines, stopOutlines, isOutlinesActive, refreshOutlines } from './outline.js';
+export { buildNavigator, mountNavigator, refreshNavigator } from './navigator.js';
 export { renderGroupToggleUI, toggleGroupToModule } from './group-toggle.js';
 export { openEditorShell } from './editor-shell.js';
 export { renderRegion, renderAllRegions, applyRegionToStore, updateRegionConfig, subscribeRegionRenderer } from './region-renderer.js';
