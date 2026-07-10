@@ -1,62 +1,59 @@
 id: fragment.editor-selection.001
 freshvibe_way_version: v8
 date: 2026-07-09
+last_rewritten: 2026-07-10 (plain-language pass per operator)
 
 # editor-selection — central selection state
 
-## Purpose
+## What it does
 
-Single source of truth for "what is currently selected" in the frontend
-editor. Tracks whether the user is focused on a region, a module, or
-nothing, plus the ID of the focused item. Other fragments (outline,
-inspector, navigator, breadcrumb, context-menu) read from and write to
-this state.
+The single source of truth for "what is currently selected" in the frontend editor. It tracks whether the user is focused on a region, a module, or nothing — plus the ID of the focused item.
 
-## Why this is a fragment, not a chip
+Other features (outline, inspector, navigator, breadcrumb, context-menu) read from and write to this state. Without it, each feature would have to track selection on its own and they'd drift out of sync.
 
-Selection is a **behaviour cluster** per V8 §10.1. It contains:
+## Why this is its own feature
 
-1. **Get current selection** — fast read for outline + breadcrumb to highlight
+Selection isn't a single action — it's a cluster of related capabilities:
+
+1. **Get current selection** — fast read for outline and breadcrumb to highlight
 2. **Set selection** — from outline click, navigator click, breadcrumb click
 3. **Subscribe to changes** — outline highlights, inspector reloads, breadcrumb redraws
 4. **History (undo selection)** — back-button through recent selections
 5. **Multi-kind selection** — region, module, page (future: group)
 
-Removing any one of these would break the editor's value. Cluster rule
-holds: selection is a fragment, not a chip.
+Removing any one of these would break the editor's value. That's why selection is one feature, not five.
 
 ## Inputs
 
-- `select({ kind, id })` — `kind` ∈ `{'region', 'module', 'page', null}`, `id` ∈ string
+- `select({ kind, id })` — `kind` is `'region'`, `'module'`, `'page'`, or `null`. `id` is the focused item's ID.
 - `get()` — no inputs
-- `onChange(fn)` — `fn` ∈ `(state, prevState) => void`
-- `withSelection(fn)` — `fn` ∈ `(state) => T`, returns `T`
-- `undo()` — no inputs; pops history
-- `clear()` — no inputs; sets current to `{ kind: null, id: null }`
+- `onChange(fn)` — `fn` is a callback that receives `(current, previous)`
+- `withSelection(fn)` — `fn` runs once with the current selection
+- `undo()` — no inputs; pops the history
+- `clear()` — no inputs; sets current to `null`
 
 ## Outputs
 
 - `window.FreshVibeCmsSelection` — the singleton
-- DOM event `fvcms:selection-change` (bubbles, detail = `{ current, previous }`)
-- Side-effect: `data-fvcms-selected-kind` + `data-fvcms-selected-id` on `<body>` for CSS hooks
+- DOM event `fvcms:selection-change` (bubbles, detail includes `current` and `previous`)
+- Side-effect: `data-fvcms-selected-kind` and `data-fvcms-selected-id` attributes on `<body>`, for CSS hooks
 
-## Dependencies
+## What depends on it
 
-- **Reads:** none (no upstream)
-- **Written by:** `runtime/editor-shell.js` (when user opens a module editor), `runtime/visualizer.js` (when user clicks a region tag), `runtime/cms-panel.js` (navigator click), future `runtime/breadcrumb.js` (path click), future `runtime/context-menu.js` (action target)
-- **Read by:** `runtime/cms-panel.js` (Inspector tab), `runtime/visualizer.js` (outline highlight), future `runtime/breadcrumb.js`, future `runtime/context-menu.js`
+- **Writes to it:** `runtime/editor-shell.js` (when user opens a module editor), `runtime/visualizer.js` (when user clicks a region tag), `runtime/cms-panel.js` (navigator click), future `runtime/breadcrumb.js` (path click), future `runtime/context-menu.js` (action target)
+- **Reads from it:** `runtime/cms-panel.js` (Inspector tab), `runtime/visualizer.js` (outline highlight), future `runtime/breadcrumb.js`, future `runtime/context-menu.js`
 
-## Invariants
+## The rules (invariants)
 
-1. **`current` is always either `null` or `{ kind, id }` where `kind` is non-null and `id` is a string.** Never a half-state.
+1. **`current` is always either `null` or `{ kind, id }`** where `kind` is non-null and `id` is a string. Never a half-state.
 2. **Listeners fire synchronously** — by the time `select()` returns, all `onChange` callbacks have run. No async.
 3. **DOM hook mirrors state** — `document.body.dataset.fvcmsSelectedKind` and `dataset.fvcmsSelectedId` are always in sync with `current`.
-4. **History is capped at 20** (matches `fragment.undo-stack` capacity).
+4. **History is capped at 20** (matches the undo-stack capacity).
 5. **Setting the same value twice is a no-op** — listeners don't fire, history doesn't grow. Prevents feedback loops.
 6. **No framework names** — selection is framework-agnostic. It just tracks IDs.
-7. **`undo()` does not cross kinds** — popping a `module` selection from history returns to whatever was selected before the module (could be `region` or `null`).
+7. **`undo()` doesn't cross kinds** — popping a `module` selection from history returns to whatever was selected before (could be `region` or `null`).
 
-## Public API (window.FreshVibeCmsSelection)
+## Public API
 
 ```
 FreshVibeCmsSelection.get()                     → { kind, id } | null
@@ -68,37 +65,35 @@ FreshVibeCmsSelection.withSelection(fn)         → T
 FreshVibeCmsSelection.state                     → { current, history, listeners }
 ```
 
-## DOM hooks (CSS selectors)
+## CSS hooks
 
-- `[data-fvcms-selected-kind="region"]` — body when region selected
-- `[data-fvcms-selected-kind="module"]` — body when module selected
-- `[data-fvcms-selected-kind="page"]` — body when page selected
-- `[data-fvcms-selected-kind=""]` — body when nothing selected
+These data attributes on `<body>` let CSS style the outline, breadcrumb, and navigator entries without needing JavaScript for visual state:
 
-These let CSS style the outline / breadcrumb / navigator entries without
-needing JS for visual state.
+- `[data-fvcms-selected-kind="region"]` — region selected
+- `[data-fvcms-selected-kind="module"]` — module selected
+- `[data-fvcms-selected-kind="page"]` — page selected
+- `[data-fvcms-selected-kind=""]` (or absent) — nothing selected
 
 ## Migration path
 
 Today, selection is implicit:
 
 - `oscar-cms-panel.js` tracks `selectedModuleId` locally
-- `PanelManager` tracks active panel
-- `visualizer.js` highlights region by panel focus
+- `PanelManager` tracks the active panel
+- `visualizer.js` highlights a region by panel focus
 
-After this fragment lands, consumers migrate to `FreshVibeCmsSelection`
-in their own commits:
+After this feature ships, consumers migrate to `FreshVibeCmsSelection` in their own commits:
 
 - `oscar-cms-panel.js` reads selection from the singleton instead of local state
 - `visualizer.js` reads selection to highlight region outlines
-- future `breadcrumb.js` reflects selection
-- future `context-menu.js` acts on selection
+- Future `breadcrumb.js` reflects the selection path
+- Future `context-menu.js` acts on the selection
 
-Migration is per-consumer, not required for this fragment to land.
+Migration is per-consumer, not required for this feature to land.
 
-## Cross-references
+## Where to look
 
-- `app-pact/app-pact.md §3.4` — runtime never touches DOM outside overlays (selection respects this — DOM hooks are minimal)
-- `app-pact/app-pact.md §3.6` — Panel manager owns all overlays (selection doesn't replace PanelManager, it lives alongside)
-- `app-fragments/fragments.md §Module 1` — fragment index entry
-- `invariants.md I-009` — consumer app owns host-specific glue (selection is host-agnostic)
+- `app-pact.md §3.4` — runtime doesn't touch host DOM (selection respects this — DOM hooks are minimal)
+- `app-pact.md §3.6` — Panel manager owns all overlays (selection doesn't replace PanelManager, it lives alongside)
+- `app-fragments/fragments.md §Area 1` — feature index entry
+- `invariants.md I-009` — consumer owns host-specific glue (selection is host-agnostic)
