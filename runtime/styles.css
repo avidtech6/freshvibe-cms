@@ -665,3 +665,102 @@ h1, h2, h3, h4, h5, h6 {
   50%  { background-color: rgba(255, 216, 77, 0.15); outline-color: #ffd84d; }
   100% { background-color: transparent; outline-color: rgba(255, 216, 77, 0); }
 }
+
+/* ============================================================================
+   editor-outline feature — yellow tag overlays on the page
+   (Per app-fragments/editor-outline/fragment.md)
+   ============================================================================ */
+
+.fvcms-region-tag {
+  position: fixed;
+  z-index: 2147483645;
+  background: rgba(40, 50, 25, 0.96);
+  color: #ffdc64;
+  border: 1px solid rgba(255, 220, 100, 0.7);
+  border-radius: 4px;
+  padding: 5px 10px;
+  font: 600 11px ui-monospace, Menlo, monospace;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  pointer-events: auto;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.fvcms-region-tag:hover {
+  background: rgba(60, 80, 35, 0.98);
+  border-color: rgba(255, 220, 100, 1);
+}
+.fvcms-region-tag .fvcms-tag-prefix {
+  color: #ffdc64;
+  font-size: 10px;
+}
+.fvcms-region-tag.is-selected {
+  /* Purple + glow accent per operator plan v4 "yellow + purple accent" */
+  background: rgba(40, 20, 60, 0.97);
+  border-color: rgba(180, 100, 220, 0.95);
+  color: #ffe4a0;
+  box-shadow: 0 0 12px 1px rgba(180, 100, 220, 0.55), 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+.fvcms-region-tag.is-selected .fvcms-tag-prefix {
+  color: #d8a8ff;
+}
+
+/* Module tags (inside the selected region only) — smaller, distinct colour */
+.fvcms-module-tag {
+  position: fixed;
+  z-index: 2147483646;
+  background: rgba(20, 28, 20, 0.95);
+  color: #d0e8d0;
+  border: 1px solid rgba(180, 220, 140, 0.6);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font: 10px ui-monospace, Menlo, monospace;
+  pointer-events: auto;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 240px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fvcms-module-tag:hover {
+  background: rgba(255, 220, 100, 0.2);
+  color: #ffdc64;
+  border-color: rgba(255, 220, 100, 0.9);
+}
+.fvcms-module-tag .fvcms-tag-type {
+  background: rgba(255, 220, 100, 0.25);
+  color: #ffdc64;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+}
+.fvcms-module-tag .fvcms-tag-label {
+  color: #d0e8d0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+.fvcms-module-tag.is-selected {
+  background: rgba(40, 20, 60, 0.97);
+  border-color: rgba(180, 100, 220, 0.95);
+  color: #ffe4a0;
+  box-shadow: 0 0 10px 1px rgba(180, 100, 220, 0.5);
+}
+.fvcms-module-tag.is-selected .fvcms-tag-type {
+  background: rgba(180, 100, 220, 0.4);
+  color: #ffe4a0;
+}

@@ -25,6 +25,7 @@ The click-to-edit experience. This is the area we're building right now. Removin
 | `region-editor` | active | Edits a region's settings (background, padding, max-width, text colour). The body of the region panel. | `runtime/region-editor.js` |
 | `region-overlay` | active | Shows one panel per region with a yellow tag overlay. | `runtime/visualizer.js` |
 | `outline-system` | partial | The yellow outline + region tag visible when dev mode is on. | `panel-bridge.css` + `runtime/visualizer.js` |
+| `editor-outline` | active | Floating yellow tags on each region and module. Click to focus. Selection highlight with purple accent. Contract: `app-fragments/editor-outline/fragment.md`. 10/10 smoke tests pass. | `runtime/outline.js` |
 | `selection` | active | The shared selection state — which module or region is currently focused. Read by outline, inspector, navigator, breadcrumb, context-menu. Singleton at `window.FreshVibeCmsSelection`. Contract: `app-fragments/editor-selection/fragment.md`. 27/27 smoke tests pass. | `runtime/selection.js` |
 | `structure-tree` | partial | The Navigator tab inside the CMS panel. Walks live DOM, supports click-to-jump. | `runtime/cms-panel.js` (structure-tab branch) |
 | `cms-panel` | partial | The dock panel with Overview / Structure / Inspector tabs. | `runtime/cms-panel.js` |
