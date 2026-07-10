@@ -187,6 +187,33 @@ freshvibe-cms/
 - [ ] **v1.0** — tests + docs + AI integration spec
 - [ ] **v2.0 (Thread B — Oscar platform)** — auth + gating + progress + quiz module
 
+## Future wiring: how this repo joins the Windows app
+
+This package ships as a runtime that any HTML page can `import`. Today it lives in its own repo (`avidtech6/freshvibe-cms`) and is consumed by Oscar-web. When the FreshVibe Studio Windows app ships, this package needs to be wired into the build.
+
+**The decision (locked 2026-07-10, operator directive):** the three repos stay separate for now. The Windows app build script pulls from each.
+
+**The recommended wiring when ready (git submodules):**
+
+1. Add this repo as a submodule inside FreshVibe Studio, probably at `packages/freshvibe-cms/`.
+2. Pin to a specific commit hash, not a branch, so the build is reproducible.
+3. When bumping, the FreshVibe Studio repo updates the pointer commit.
+
+**Why submodules:**
+- Pin to exact versions so the Windows build is reproducible byte-for-byte.
+- Each repo keeps its own history and its own release cadence.
+- No risk of "FvRE changed last week and broke the build" surprises.
+
+**Why not vendor:** freshvibe-cms is moving fast (the FES work is in progress). Vendoring means manually re-syncing every time we want upstream changes. Submodules make that a one-line `git submodule update` + a commit in Studio.
+
+**Why not merge the repo into Studio:** Studio is the consumer shell. Consumers shouldn't pull in the entire FVS monorepo to use a runtime library. Each consumer (Oscar-web, future Shopify, future Webflow) needs freshvibe-cms to be importable on its own.
+
+**The cross-repo contract:** Studio's build script (the one that produces `MyApp.exe`) is responsible for pulling this repo, copying it into the build dir, and bundling its `runtime/` + `modules/` + `app-fragments/` + `bootstrap.js` into the final app. This package exposes a stable ES module API in `runtime/index.js` — that's the only surface Studio depends on.
+
+**Tracking:** when Studio wiring starts, the work lives in `avidtech6/freshvibestudio` under `build/` or `windows-app/`. Mirror this README's "Future wiring" section in the corresponding Studio docs so the cross-repo decision is visible from both sides.
+
+**Same wording lives in three repos:** `avidtech6/freshvibe-cms` (this file), `avidtech6/freshvibe-reconstruction-engine`, and `avidtech6/freshvibestudio` (top-level). If one gets updated, all three should.
+
 ## License
 
 Operator-internal.

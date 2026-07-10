@@ -24,14 +24,19 @@ export {
 export {
   showRegionOverlays, hideRegionOverlays, isOverlaysActive, startOverlayTracking
 } from './visualizer.js';
+export { startOutlines, stopOutlines, isOutlinesActive, refreshOutlines } from './outline.js';
+export { buildNavigator, mountNavigator, refreshNavigator } from './navigator.js';
 export { renderGroupToggleUI, toggleGroupToModule } from './group-toggle.js';
 export { openEditorShell } from './editor-shell.js';
+export { openContextMenu, closeContextMenu, isContextMenuOpen } from './context-menu.js';
+export { mountBreadcrumb, unmountBreadcrumb, isBreadcrumbMounted } from './breadcrumb.js';
 export { renderRegion, renderAllRegions, applyRegionToStore, updateRegionConfig, subscribeRegionRenderer } from './region-renderer.js';
 export { renderRegionEditor } from './region-editor.js';
 export {
   registerConfigAdapter, populateConfigFromDOM, populateAll
 } from './config-from-dom.js';
 export { ensureDefaultAdapters } from './default-config-adapters.js';
+export { getSelection } from './selection.js';
 
 import { getStore } from './store.js';
 import { CANONICAL_MODULES } from '../modules/index.js';
