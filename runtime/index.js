@@ -29,6 +29,7 @@ export { buildNavigator, mountNavigator, refreshNavigator } from './navigator.js
 export { renderGroupToggleUI, toggleGroupToModule } from './group-toggle.js';
 export { openEditorShell } from './editor-shell.js';
 export { openContextMenu, closeContextMenu, isContextMenuOpen } from './context-menu.js';
+export { mountBreadcrumb, unmountBreadcrumb, isBreadcrumbMounted } from './breadcrumb.js';
 export { renderRegion, renderAllRegions, applyRegionToStore, updateRegionConfig, subscribeRegionRenderer } from './region-renderer.js';
 export { renderRegionEditor } from './region-editor.js';
 export {

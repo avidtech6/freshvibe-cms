@@ -993,3 +993,52 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(255, 80, 80, 0.15);
   color: #ff6644;
 }
+
+/* ============================================================================
+   editor-breadcrumb feature — bottom-bar path
+   (Per app-fragments/editor-breadcrumb/fragment.md)
+   ============================================================================ */
+
+.fvcms-breadcrumb {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2147483644;
+  background: rgba(20, 28, 20, 0.95);
+  border-top: 1px solid rgba(255, 220, 100, 0.3);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font: 11px ui-monospace, Menlo, monospace;
+  color: #c8e0c8;
+}
+.fvcms-breadcrumb-segment {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #b0c0b0;
+  padding: 3px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font: inherit;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fvcms-breadcrumb-segment:hover {
+  background: rgba(255, 220, 100, 0.15);
+  color: #ffdc64;
+  border-color: rgba(255, 220, 100, 0.4);
+}
+.fvcms-breadcrumb-segment.is-current {
+  background: rgba(255, 220, 100, 0.25);
+  color: #ffdc64;
+  border-color: rgba(255, 220, 100, 0.7);
+}
+.fvcms-breadcrumb-separator {
+  color: #6a8a6a;
+  font-size: 12px;
+  user-select: none;
+}
