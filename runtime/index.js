@@ -32,6 +32,7 @@ export {
   registerConfigAdapter, populateConfigFromDOM, populateAll
 } from './config-from-dom.js';
 export { ensureDefaultAdapters } from './default-config-adapters.js';
+export { getSelection } from './selection.js';
 
 import { getStore } from './store.js';
 import { CANONICAL_MODULES } from '../modules/index.js';

@@ -24,7 +24,7 @@ The editor is a **cluster of features** per V8 §10.1. Removing the inspector wo
 | `fragment.region-editor` | active | Edit a region's config (background, padding, max-width, text colour). Body of the region panel. | `runtime/region-editor.js` |
 | `fragment.region-overlay` | active | Show one PanelManager panel per region. Yellow region tag overlay on dev mode. | `runtime/visualizer.js` |
 | `fragment.outline-system` | partial | Yellow outline + region tag visible on dev mode. Lives in `panel-bridge.css` + `visualizer.js`. | `panel-bridge.css` + `runtime/visualizer.js` |
-| `fragment.selection` | partial | The shared selection state. Tracks which module/region is currently selected. Read by outline-system (highlights), inspector (reads), navigator (sets on click), breadcrumb (reflects), context-menu (acts on). Lives today as `selectedModuleId` in `runtime/cms-panel.js` and as PanelManager-active-panel tracking. | `runtime/cms-panel.js` + PanelManager singleton |
+| `fragment.selection` | active | The shared selection state. Tracks which module/region is currently selected. Read by outline-system (highlights), inspector (reads), navigator (sets on click), breadcrumb (reflects), context-menu (acts on). Singleton at `window.FreshVibeCmsSelection`. Contract: `app-fragments/editor-selection/fragment.md`. 27/27 smoke tests pass. | `runtime/selection.js` |
 | `fragment.structure-tree` | partial | The Navigator tab inside the CMS panel. Walks live DOM, supports click-to-jump. | `runtime/cms-panel.js` (structure-tab branch) |
 | `fragment.cms-panel` | partial | The dock panel with Overview / Structure / Inspector tabs. | `runtime/cms-panel.js` |
 | `fragment.breadcrumb` | planned | Bottom-bar path: page > region > section > module. | (no entry point yet) |
