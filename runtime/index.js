@@ -37,6 +37,14 @@ export {
 } from './config-from-dom.js';
 export { ensureDefaultAdapters } from './default-config-adapters.js';
 export { getSelection } from './selection.js';
+export {
+  installEditor,
+  uninstallEditor,
+  openModulePanel,
+  openRegionPanel,
+  setDevMode,
+  isDevMode,
+} from './install-editor.js';
 
 import { getStore } from './store.js';
 import { CANONICAL_MODULES } from '../modules/index.js';
