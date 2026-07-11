@@ -98,6 +98,50 @@ All overlays (region outlines, CMS panel, inspector panels, future breadcrumb) u
 
 ---
 
+### 3.7 Panels are FES-managed or website-managed, never both
+
+A panel has exactly one owner. Either the FES owns it, or the website owns it. The two never share an implementation.
+
+- **FES-owned panels** ship with the package: Module widget (per §3.10), Navigator (per `app-fragments/editor-navigator/fragment.md`), Outline, Context menu, Breadcrumb, Renderer, Store, Panel Manager, canonical M-* modules.
+- **Website-owned panels** ship with the website: Dev panel, CMS panel, Region panel, anything with site-specific UI.
+
+A panel is created by exactly one place. A change to a panel's body is the responsibility of that panel's owner. The FES does not patch into a website's panel. The website does not patch into an FES-owned panel. A website that wants to override an FES-owned panel does so by NOT installing the FES panel and providing its own.
+
+### 3.8 Chip-click opens or focuses the panel for that thing. Tabs inside a panel are a separate, host-app concern.
+
+Click a region chip on the page → a region panel for that region opens in the dock (or focuses if already open). Click a module chip → a module panel for that module opens. Multiple module panels can be open simultaneously (one per selected module).
+
+Selection is the only routing signal for which panel to open. The FES does not swap content inside an existing panel when a chip is clicked.
+
+**Tabs inside any panel are an independent, host-app affordance.** The Dev panel may have tabs, the CMS panel has tabs, the Region panel may have tabs, the Module panel has tabs (Fields / Variants / Raw JSON per the FES editor-shell design). The pact does not define tab content. The pact only defines: chip click opens a separate panel, never swaps content inside an existing one.
+
+### 3.9 Each area is a module. Hooks between modules are named and minimal.
+
+Per FreshVibe Way V8 §10 ("Modules as Clusters"), the CMS is split into modules — clusters of features. Each module lives in its own folder under `app-fragments/`. Modules **only** talk to each other through **named, minimal hooks** declared in the module's `fragment.md`.
+
+**The public hook surface for each module is its `index.js`**. The private implementation lives in `runtime.js`, css files, and test files. No module imports from another module's `runtime.js`. Cross-module imports go through the other module's `index.js`. Implementation details stay private.
+
+If you want to swap the Navigator for a different one, you only change the Navigator folder. The other modules don't know the Navigator exists — they only know "there is a thing that gives me a tree, and clicking a row gives me a selection." That's the entire Navigator contract.
+
+**If swapping one module for a different one requires changes in another module, the boundaries are wrong.** This is the modularity test.
+
+### 3.10 A "widget" is the control surface of a module.
+
+In Elementor, a widget is the editing panel that appears when you click a module on the page. In this CMS, the same word: the **widget** for `M-heading` is the form with text/level/color/align/font fields. The widget is the module's chips + behaviours rendered as the panel body.
+
+- The **module** owns the data (canonical config) and the renderer.
+- The **widget** owns the editing UI (chips + behaviours that show up in the panel).
+- When you change a field in the widget, the module's renderer patches the live DOM in place (per §3.2).
+
+**Tag colors** (operator-locked 2026-07-11):
+- **Yellow** (`#ffdc64`) = CMS-level pills in the dock (Dev, CMS, any tool not tied to a thing on the page).
+- **Brown** (`#a06a3a`) = Region tags on the page. Region tags float at the top-left of each region.
+- **Purple** (`#a878e8`) = Widget sub-tags inside a region. Visible only when the region is selected.
+
+Tags are visually independent. Tags of one type NEVER hide tags of another type. Every tag stays clickable regardless of what other tags are nearby. (No z-index war — each tag is in its own visual layer and clicks pass through correctly.)
+
+**Drill-down navigation** (operator-locked 2026-07-11): in dev mode, top-level region tags are always visible. Click a region tag → its area on the page gets a brown highlight outline AND the widget sub-tags inside that region become visible. Other regions' widget sub-tags stay hidden. Click a widget sub-tag → open the widget panel for that widget. The operator navigates down a page by region, drills down to widgets.
+
 ## 4. What not to do
 
 - Don't add features "for the operator's convenience" during a refactor. Refactor what exists; new features get their own commit with sign-off.
