@@ -179,27 +179,21 @@
 
   // Mark a single panel as the operator's current focus. Other
   // in-play panels remain in-play but lose the focus badge.
-  // Mark a panel as the operator's current focus AND collapse any
-  // other docked-active panel on the same edge. The previously
-  // focused panel becomes docked-collapsed (slim pill) — so on
-  // each edge, only one panel is "shown" at a time. Panels on
-  // different edges are not affected.
+  // Mark a panel as the operator's current focus. Other
+  // in-play panels stay docked-active — only the focus badge moves.
+  // Per fragment.oscar.panel-manager.001: multi-panel per edge
+  // is supported, with only one focused at a time. The previously
+  // focused panel does NOT collapse. Closing happens explicitly
+  // via the × button or by clicking the focused header (collapse()).
   DockManager.prototype._setFocus = function (panel) {
     Object.keys(this.panels).forEach(function (pid) {
       const p = this.panels[pid];
       if (!p) return;
       const wasFocused = p.isFocused;
       p.isFocused = (p === panel);
-      if (!p.isFocused && wasFocused) {
-        // Lost focus. Re-render the element so its data-focused
-        // attribute updates (mobile CSS hides non-focused panels).
-        this._renderPanelState(p);
-      }
-      // If we're focusing a different panel on the same edge and the
-      // previously focused panel was docked-active, collapse it.
-      if (!p.isFocused && wasFocused && p.dockEdge && p.dockEdge === panel.dockEdge
-          && p.state === 'docked-active') {
-        p.state = 'docked-collapsed';
+      if (p.isFocused !== wasFocused) {
+        // Focus state changed. Re-render so the data-focused
+        // attribute updates (CSS uses it for the focus ring).
         this._renderPanelState(p);
       }
     }.bind(this));
@@ -291,6 +285,15 @@
     // Add to new dock
     panel.dockEdge = edge;
     panel.state = 'docked-active';  // docking defaults to active
+    // Assign a stable dock order if not set. Used by the same-edge
+    // stack layout to keep panels in deterministic order across
+    // re-renders.
+    if (panel.dockOrder === undefined || panel.dockOrder === null) {
+      const maxOrder = Object.values(this.panels).reduce(function (m, p) {
+        return Math.max(m, p.dockOrder || 0);
+      }, 0);
+      panel.dockOrder = maxOrder + 1;
+    }
     this._setFocus(panel);
     this._addPillToDock(edge, id);
     // NOTE: the previous 'collapse others on this dock' rule is
@@ -302,10 +305,13 @@
       this._updateDockPills(dock);
     }
     this._renderPanelState(panel);
-    // Re-render ALL other active panels on perpendicular edges so they
-    // pick up this new dock's offset.
+    // Re-render ALL other active panels (same edge AND perpendicular
+    // edges) so each panel picks up the new sameEdgeOffset. The
+    // reason: when you add a panel to a dock, every other panel on
+    // the SAME edge needs its position recomputed (its left is
+    // based on the count of panels before it on the edge).
     Object.values(this.panels).forEach(function (p) {
-      if (p.id !== id && p.state === 'docked-active' && p.dockEdge !== edge) {
+      if (p.id !== id && p.state === 'docked-active') {
         this._renderPanelState(p);
       }
     }.bind(this));
@@ -469,13 +475,26 @@
       const w = Math.min(requestedW, maxW);
       const overlay = el.dataset.overlayMode !== '1';  // default = overlay
 
-      // Calculate offsets from ACTIVE panels on perpendicular edges so
-      // panels on different edges don't overlap each other.
+      // Calculate offsets so multiple panels on the same edge stack
+      // side-by-side, and panels on different edges don't overlap.
+      // Per fragment.oscar.panel-manager.001: "Multi-panel per edge
+      // supported (one focused at a time)". Panels on the same edge
+      // are ordered by dockOrder (counter assigned at first dock).
+      // Sort by dockOrder so the stack is deterministic.
       const allPanels = Object.values(this.panels);
-      const leftActive = allPanels.find(function (p) { return p.id !== panel.id && p.state === 'docked-active' && p.dockEdge === 'left'; });
-      const rightActive = allPanels.find(function (p) { return p.id !== panel.id && p.state === 'docked-active' && p.dockEdge === 'right'; });
-      const topActive = allPanels.find(function (p) { return p.id !== panel.id && p.state === 'docked-active' && p.dockEdge === 'top'; });
-      const bottomActive = allPanels.find(function (p) { return p.id !== panel.id && p.state === 'docked-active' && p.dockEdge === 'bottom'; });
+      const sameEdgeOrdered = allPanels
+        .filter(function (p) { return p.state === 'docked-active' && p.dockEdge === panel.dockEdge; })
+        .sort(function (a, b) { return (a.dockOrder || 0) - (b.dockOrder || 0); });
+      const myIndex = sameEdgeOrdered.findIndex(function (p) { return p.id === panel.id; });
+      let sameEdgeOffset = 0;
+      for (let i = 0; i < myIndex; i++) {
+        sameEdgeOffset += (sameEdgeOrdered[i].position.w || 340) + DOCK_WIDTH;
+      }
+      // Perpendicular-edge offsets (single panel each).
+      const leftActive = allPanels.find(function (p) { return p.state === 'docked-active' && p.dockEdge === 'left'; });
+      const rightActive = allPanels.find(function (p) { return p.state === 'docked-active' && p.dockEdge === 'right'; });
+      const topActive = allPanels.find(function (p) { return p.state === 'docked-active' && p.dockEdge === 'top'; });
+      const bottomActive = allPanels.find(function (p) { return p.state === 'docked-active' && p.dockEdge === 'bottom'; });
       const leftW = leftActive ? (leftActive.position.w || 340) + DOCK_WIDTH : 0;
       const rightW = rightActive ? (rightActive.position.w || 340) + DOCK_WIDTH : 0;
       const topH = topActive ? (topActive.position.h || 420) + DOCK_HEIGHT : 0;
@@ -485,8 +504,10 @@
         // Flush with the left edge. The pill overlays the panel body
         // (not the header) at x=0..DOCK_WIDTH. The body has padding-
         // left so text content doesn't sit behind the pill. The header
-        // extends edge-to-edge (no padding).
-        el.style.left = '0px';
+        // extends edge-to-edge (no padding). For multiple panels on
+        // the same edge, each subsequent panel sits to the RIGHT of
+        // the previous (sameEdgeOffset).
+        el.style.left = sameEdgeOffset + 'px';
         el.style.top = topH + 'px';
         el.style.right = 'auto';
         el.style.width = w + 'px';
@@ -508,7 +529,10 @@
           document.documentElement.style.setProperty('--fvcms-pm-pinned-w', w + 'px');
         }
       } else if (panel.dockEdge === 'right') {
-        el.style.right = '0px';
+        // For multiple panels on the same edge, each subsequent
+        // panel sits to the LEFT of the previous (sameEdgeOffset
+        // pushes us in from the right edge).
+        el.style.right = sameEdgeOffset + 'px';
         el.style.top = topH + 'px';
         el.style.left = 'auto';
         el.style.width = w + 'px';
