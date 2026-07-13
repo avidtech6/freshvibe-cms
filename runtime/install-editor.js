@@ -80,9 +80,9 @@ export function installEditor(opts = {}) {
       // Auto-open the panel for the new selection (if dev mode)
       if (current && current.kind && current.id && isDevMode()) {
         if (current.kind === 'module' && callbacks.createModulePanel) {
-          try { callbacks.createModulePanel(current.id); } catch (e) { /* host error, ignore */ }
+          try { callbacks.createModulePanel(current.id); } catch (e) { console.error('[FES] createModulePanel:', e?.message || e); }
         } else if (current.kind === 'region' && callbacks.createRegionPanel) {
-          try { callbacks.createRegionPanel(current.id); } catch (e) { /* host error, ignore */ }
+          try { callbacks.createRegionPanel(current.id); } catch (e) { console.error('[FES] createRegionPanel:', e?.message || e); }
         }
       }
     });
