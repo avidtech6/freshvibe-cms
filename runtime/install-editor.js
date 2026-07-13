@@ -23,6 +23,7 @@
 import { getSelection } from './selection.js';
 import { startOutlines, stopOutlines, refreshOutlines } from './outline.js';
 import { mountBreadcrumb, unmountBreadcrumb } from './breadcrumb.js';
+import { autoDetectEverything } from './region-scanner.js';
 
 let _installed = false;
 let _opts = null;
@@ -98,6 +99,20 @@ export function installEditor(opts = {}) {
   // Initial dev mode state
   if (opts.devMode) {
     setDevMode(true);
+  }
+
+  // Runtime region/module detection. FvRE does an offline pass, but
+  // its detector misses things. We walk the live DOM and add any
+  // regions FvRE didn't find. Idempotent: re-runs are no-ops.
+  if (typeof document !== 'undefined' && opts.runtimeScan !== false) {
+    try {
+      const result = autoDetectEverything();
+      if (result.regionsAdded > 0 || result.modulesAdded > 0) {
+        console.info('[FES] runtime scan: +' + result.regionsAdded + ' regions, +' + result.modulesAdded + ' modules');
+      }
+    } catch (e) {
+      console.warn('[FES] runtime scan failed:', e?.message || e);
+    }
   }
 
   console.info('[FES] installed. Use setDevMode(true) to enter dev mode.');
