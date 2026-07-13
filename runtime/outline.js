@@ -105,9 +105,26 @@ function shortTypeLabel(moduleId) {
 function startReposition(tagEl, target) {
   function position() {
     const r = target.getBoundingClientRect();
-    const top = Math.max(8, r.top);
-    tagEl.style.left = Math.max(8, r.left) + 'px';
-    tagEl.style.top = (top + 4) + 'px';
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
+    // Region is in viewport: position tag at top-left of region.
+    // Region is above viewport (scrolled past): pin tag to top.
+    // Region is below viewport (not yet scrolled to): pin tag to
+    // bottom of viewport so the operator can see it.
+    let top;
+    if (r.top < 0) {
+      // scrolled past — pin to top
+      top = 8;
+    } else if (r.top > vh) {
+      // not yet visible — pin to bottom
+      top = vh - (tagEl.offsetHeight || 24) - 8;
+    } else {
+      // in viewport
+      top = r.top + 4;
+    }
+    const left = Math.max(8, Math.min(vw - 240, r.left));
+    tagEl.style.left = left + 'px';
+    tagEl.style.top = top + 'px';
   }
   position();
   function tick() {
