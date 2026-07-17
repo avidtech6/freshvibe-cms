@@ -1,21 +1,36 @@
 # FES spec contract — for any AI generating or consuming FES modules
 
-**Date:** 2026-07-17
-**Owner:** Mavis (FES worker maintainer)
-**Audience:** Any AI that generates, validates, renders, or audits FreshVibe
-Extracted Spec (FES) modules. Especially the GLM worker that produces them.
+**Date written:** 2026-07-17 (locked after the broken `theme-post-content`
+spec was discovered in production)
+**Audience:** Any AI (current model, future model, fine-tune, human
+auditor) that generates, validates, renders, or audits FreshVibe
+Extracted Spec (FES) modules. Especially the GLM worker that produces
+them and the FES inspector dispatcher that renders them.
 
-This document exists because **GLM-4.7-flash drifts when modules get large.**
-On small modules (heading, button — 3-5 controls) it follows the convention.
-On big modules (post-content — 30 controls) it shortcuts: bare type-name
-strings for `fieldSchema`, raw primitive names like `HEADING_FONT_FAMILY`
-in `inspector.Style`, and inconsistent id vs `name` fields. This drift
-breaks the dispatcher, which then shows the operator "HEADING_FONT_FAMILY"
-as a label inside a text input. The contract below is the strict shape
-the FES worker MUST produce and the dispatcher MUST tolerate.
+This document exists because **GLM-4.7-flash drifts when modules get
+large.** On small modules (heading, button — 3-5 controls) it follows
+the convention. On big modules (post-content — 30 controls) it
+shortcuts: bare type-name strings for `fieldSchema`, raw primitive
+names like `HEADING_FONT_FAMILY` in `inspector.Style`, and
+inconsistent id vs `name` fields. This drift breaks the dispatcher,
+which then shows the operator "HEADING_FONT_FAMILY" as a label inside
+a text input. The contract below is the strict shape the FES worker
+MUST produce and the dispatcher MUST tolerate.
 
-If you are an AI modifying either the worker or the dispatcher, read this
-first and follow the rules exactly.
+If you are an AI modifying either the worker or the dispatcher, read
+this first and follow the rules exactly.
+
+## What is FES?
+
+FreshVibe Extracted Spec (FES) is the canonical recipe format produced
+by the FES worker from raw page-builder widgets (Elementor, EAEL, etc.)
+and consumed by the FES inspector dispatcher. A FES spec describes one
+module type (e.g. "heading", "button", "post-content") with a schema,
+default config, and the inspector form the operator sees in the FreshVibe
+chrome.
+
+The FES worker is the only producer. The FES inspector dispatcher is
+the only consumer. Both are linked from this doc in §6 and §7.
 
 ---
 
@@ -435,3 +450,34 @@ pre-regen outputs are preserved at
 
 **Never ship a dispatcher that breaks for shapes the LLM produces.**
 The LLM is a moving target; the renderer is the contract.
+
+## 11. Note to a different model
+
+If you are not GLM-4.7-flash — if you are a future GLM, a different
+LLM entirely, or a fine-tune of any of them — the specific drift
+patterns described in this doc (bare type-name strings, raw primitive
+names in `inspector.Style`, mixed `id`/`name` field conventions) may
+not be the exact ways you drift. You will drift, but in different
+ways.
+
+The contract rules in §1–§3 are model-agnostic. They are the shape
+that the renderer requires, full stop. Whatever shape you produce,
+the renderer will tolerate as much as it can (see §7 for the current
+tolerance list) and will reject the rest.
+
+If you are a new model and you produce shapes the renderer doesn't
+yet tolerate, the operator will see broken output. The right response
+is:
+
+1. Add the new shape to `normalizeCtrl()` in the dispatcher and
+   document the tolerance in §7.
+2. Add a forbidden-shape example to §5 so future models learn not
+   to do it.
+3. Tighten the worker prompt in §6 to actively instruct against the
+   new shape.
+4. Add a check to `validate_fes_shape()` so the worker rejects
+   malformed output before saving.
+
+The two-layer model is the invariant: the renderer is the contract,
+the prompt is the teaching, the validator is the gate, the doc is the
+reference. Keep all four in sync.
