@@ -1,0 +1,5 @@
+{
+  "html_components": ["div", "input", "button"],
+  "css_tokens": ["--bg", "--border", "--text", "--panel-2", "--accent"],
+  "js_native_api": ["Math.floor", "Math.max", "Math.min"]
+}

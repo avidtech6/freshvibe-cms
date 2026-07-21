@@ -1,0 +1,56 @@
+:root {
+  --bg: #0b0d11; --panel: #14181f; --panel-2: #1a1f27;
+  --border: #2a3038; --text: #e6e9ef; --text-mid: #b8bfca;
+  --text-dim: #7a8290; --accent: #7cf0a0; --accent-2: #5fa8ff;
+  --r-sm: 4px;
+}
+
+.fes-control-number {
+  display: flex;
+  width: 100%;
+  max-width: 300px;
+  height: 40px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+
+.fes-number-input {
+  flex-grow: 1;
+  height: 100%;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  text-align: center;
+  padding: 0 10px;
+  outline: none;
+}
+
+.fes-number-btn {
+  width: 32px;
+  height: 100%;
+  background: var(--panel-2);
+  color: var(--text-dim);
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  transition: background 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fes-number-btn:hover {
+  background: var(--border);
+  color: var(--text-mid);
+}
+
+.fes-number-btn:active {
+  background: var(--accent-2);
+  color: var(--bg);
+}

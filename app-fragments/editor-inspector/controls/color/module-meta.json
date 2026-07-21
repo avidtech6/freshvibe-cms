@@ -1,0 +1,7 @@
+{
+  "control_type": "input-color",
+  "fvw_version": "8.0.0",
+  "exports": ["render"],
+  "dependencies": [],
+  "version": "1.0.0"
+}

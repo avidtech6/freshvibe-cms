@@ -1,0 +1,5 @@
+{
+  "core": ["input", "label"],
+  "ui": ["chip-group", "image-grid"],
+  "icons": ["search"]
+}

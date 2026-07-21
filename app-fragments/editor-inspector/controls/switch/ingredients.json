@@ -1,0 +1,5 @@
+{
+  "html_components": ["div", "span"],
+  "css_tokens": ["--bg", "--panel", "--text", "--accent", "--accent-2", "--panel-2"],
+  "js_native_api": ["EventTarget"]
+}

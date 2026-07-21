@@ -1,0 +1,5 @@
+{
+  "html_components": ["div", "textarea"],
+  "css_tokens": ["--bg", "--border", "--text", "--accent-2"],
+  "js_native_api": ["window.Element"]
+}

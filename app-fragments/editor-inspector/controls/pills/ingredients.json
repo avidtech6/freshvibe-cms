@@ -1,0 +1,8 @@
+{
+  "icons": {
+    "none": "svg://icons/check"
+  },
+  "defaults": {
+    "value": null
+  }
+}

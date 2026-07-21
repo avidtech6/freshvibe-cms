@@ -1,0 +1,83 @@
+:root {
+  --bg: #0b0d11; --panel: #14181f; --panel-2: #1a1f27;
+  --border: #2a3038; --text: #e6e9ef; --text-mid: #b8bfca;
+  --text-dim: #7a8290; --accent: #7cf0a0; --accent-2: #5fa8ff;
+  --r-sm: 4px; --r-md: 6px;
+}
+
+.fes-control-dropdown {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+}
+
+.fes-dropdown-trigger {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.fes-dropdown-trigger:hover {
+  border-color: var(--text-dim);
+}
+
+.fes-dropdown-trigger:focus {
+  outline: none;
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 2px rgba(95, 168, 255, 0.2);
+}
+
+.fes-dropdown-search {
+  width: 100%;
+  height: 32px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  padding: 0 8px;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.fes-dropdown-options {
+  list-style: none;
+  padding: 4px 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.fes-dropdown-option {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.fes-dropdown-option:hover {
+  background: var(--panel-2);
+  color: var(--text-mid);
+}
+
+.fes-dropdown-option-selected {
+  color: var(--accent);
+  font-weight: 600;
+}

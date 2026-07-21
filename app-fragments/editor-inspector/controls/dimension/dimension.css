@@ -1,0 +1,36 @@
+.fes-control-dimension {
+  height: 36px;
+  margin-bottom: 12px;
+}
+
+.fes-dim-inputs {
+  flex: 1;
+  display: flex;
+  gap: 2px;
+}
+
+.fes-dim-input {
+  transition: all 0.2s;
+}
+
+.fes-dim-input:focus {
+  background-color: var(--panel);
+  border-color: var(--accent-2);
+  color: var(--text);
+}
+
+.fes-dim-link {
+  color: var(--text-dim);
+  transition: all 0.2s;
+}
+
+.fes-dim-link:hover {
+  border-color: var(--text-mid);
+  background-color: var(--panel-2);
+}
+
+.fes-dim-link.active {
+  background-color: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}

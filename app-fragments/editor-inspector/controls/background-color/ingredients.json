@@ -1,0 +1,5 @@
+{
+  "core": ["input", "label", "spacer"],
+  "ui": ["swatch", "slider"],
+  "icons": ["eye"]
+}

@@ -1,0 +1,12 @@
+{
+  "defaults": {
+    "value": "none"
+  },
+  "options": [
+    { "value": "none", "label": "None", "icon": "▢" },
+    { "value": "color", "label": "Color", "icon": "●" },
+    { "value": "gradient", "label": "Gradient", "icon": "▦" },
+    { "value": "image", "label": "Image", "icon": "▢" },
+    { "value": "video", "label": "Video", "icon": "▶" }
+  ]
+}

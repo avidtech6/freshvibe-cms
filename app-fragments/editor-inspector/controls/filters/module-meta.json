@@ -1,0 +1,6 @@
+{
+  "control_type": "component",
+  "fvw_version": "8.0.0",
+  "exports": ["render"],
+  "notes": "5-axis CSS filter tool."
+}

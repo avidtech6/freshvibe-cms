@@ -1,0 +1,5 @@
+{
+  "core": ["button", "input", "label"],
+  "ui": ["tabs", "slider", "preview-bar"],
+  "icons": ["plus", "minus"]
+}

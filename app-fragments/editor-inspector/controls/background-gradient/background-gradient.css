@@ -1,0 +1,140 @@
+/* === background-gradient.css === */
+.fes-control-bg-gradient {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fes-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.fes-tab {
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 11px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-right: 4px;
+}
+
+.fes-tab.active {
+  color: var(--text);
+  border-bottom-color: var(--accent-2);
+}
+
+.fes-angle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fes-angle-wrap label {
+  font-size: 11px;
+  color: var(--text-mid);
+}
+
+.fes-stops-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fes-stop-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fes-stop-color {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.fes-stop-slider {
+  flex: 1;
+  height: 4px;
+  background: var(--panel-2);
+  border-radius: 2px;
+  appearance: none;
+}
+
+.fes-stop-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--text);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.fes-stop-pos-val {
+  font-size: 11px;
+  color: var(--text-dim);
+  width: 25px;
+}
+
+.fes-stop-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.fes-btn-icon {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 14px;
+  padding: 0 4px;
+  cursor: pointer;
+}
+
+.fes-btn-add {
+  background: none;
+  border: 1px dashed var(--border);
+  color: var(--text-mid);
+  padding: 8px;
+  width: 100%;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.fes-btn-add:hover {
+  border-color: var(--text-mid);
+  color: var(--text);
+}
+
+.fes-gradient-preview {
+  position: relative;
+  height: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: var(--panel-2);
+  margin-top: 8px;
+}
+
+.fes-preview-bar {
+  width: 100%;
+  height: 100%;
+}
+
+.fes-preview-handle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 16px;
+  background: var(--panel);
+  border: 1px solid var(--text-dim);
+  border-radius: 2px;
+  cursor: ew-resize;
+  z-index: 2;
+}

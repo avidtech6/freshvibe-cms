@@ -1,0 +1,19 @@
+.fes-control-responsive {
+  padding: 8px 0;
+}
+
+.fes-resp-row {
+  height: 32px;
+  align-items: center;
+}
+
+.fes-resp-input {
+  transition: all 0.2s;
+}
+
+.fes-resp-input:disabled {
+  background-color: var(--panel);
+  color: var(--text-dim);
+  cursor: not-allowed;
+  border-color: var(--border);
+}

@@ -1,0 +1,15 @@
+.fes-control-radius {
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+
+.fes-radius-input {
+  transition: border-color 0.2s;
+}
+
+.fes-radius-input:focus {
+  background-color: var(--panel);
+  border-color: var(--accent-2);
+}

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FES Inspector v2</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-panel: #1e293b;
+            --bg-header: #020617;
+            --bg-input: #334155;
+            --border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --danger: #ef4444;
+            --success: #10b981;
+            --rail-width: 268px;
+            --panels-width: 360px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Shell Layout --- */
+        #fes-shell-root {
+            display: grid;
+            grid-template-rows: 50px 1fr 30px;
+            height: 100%;
+            width: 100%;
+        }
+
+        .fes-header {
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 13px;
+        }
+
+        .fes-title { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .fes-breadcrumb { color: var(--text-muted); }
+        .fes-breadcrumb span { color: var(--text-main); }
+
+        .fes-body {
+            display: grid;
+            grid-template-columns: var(--rail-width) 1fr var(--panels-width);
+            overflow: hidden;
+        }
+
+        /* --- Rail (Left) --- */
+        .fes-rail {
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fes-rail-search {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .fes-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid transparent;
+            color: var(--text-main);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .fes-input:focus { border-color: var(--accent); outline: none; }
+
+        .fes-tabs { display: flex; border-bottom: 1px solid var(--border); }
+        .fes-tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
+        }
+        .fes-tab:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+        .fes-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+        .fes-rail-list {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .fes-section-item {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.1s;
+        }
+        .fes-section-item:hover { background: rgba(255,255,255,0.05); }
+        .fes-section-item.active { background: rgba(59, 130, 246, 0.1); border-left: 3px solid var(--accent); }
+        .fes-icon { color: var(--text-muted); }
+
+        /* --- Preview (Center) --- */
+        .fes-preview {
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .fes-preview-toolbar {
+            height: 32px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            font-size: 12px;
+        }
+        .fes-toolbar-group { display: flex; gap: 4px; }
+        .fes-btn {
+            background: var(--bg-input);
+            border: none;
+            color: var(--text-muted);
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .fes-btn:hover { color: var(--text-main); background: var(--border); }
+        .fes-btn.active { background: var(--accent); color: white; }
+        .fes-device-btn { font-weight: bold; }
+
+        .fes-preview-canvas-container {
+            flex: 1;
+            overflow: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .fes-device-frame {
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+            position: relative;
+        }
+
+        /* --- Panels (Right) --- */
+        .fes-panels {
+            background: var(--bg-panel);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fes-panels-tabs { display: flex; border-bottom: 1px solid var(--border); }
+        .fes-panel-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .fes-panel-tab:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+        .fes-panel-tab.active { color: var(--accent); font-weight: 600; }
+
+        .fes-panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        .fes-field-group { margin-bottom: 20px; }
+        .fes-field-group-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border);
+        }
+        .fes-field-row {
+            margin-bottom: 12px;
+        }
+        .fes-field-label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+        .fes-field-hint {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .fes-panel-footer {
+            padding: 12px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            background: var(--bg-header);
+        }
+
+        /* --- Status Bar --- */
+        .fes-status-bar {
+            background: var(--bg-panel);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .fes-status-item { margin-right: 16px; display: flex; align-items: center; gap: 6px; }
+        .fes-status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+        .fes-status-dot.saved { background: var(--success); }
+        .fes-status-dot.dirty { background: var(--danger); }
+
+        /* --- Utilities --- */
+        .fes-hidden { display: none !important; }
+        .cmd-k-hint {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        /* --- Mobile Responsive --- */
+        @media (max-width: 900px) {
+            .fes-body {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+            .fes-rail {
+                display: none; /* In a real app, toggle visibility */
+            }
+            .fes-panels {
+                position: fixed;
+                top: 50px;
+                right: 0;
+                bottom: 30px;
+                width: 80%;
+                z-index: 100;
+                box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+            }
+            .fes-preview { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="fes-shell-root">
+        <!-- Header -->
+        <header class="fes-header">
+            <div class="fes-title">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                FES Inspector
+            </div>
+            <div class="fes-breadcrumb">
+                <span class="fes-label">Page</span> / <span class="fes-name">Homepage</span>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <span class="cmd-k-hint">⌘K</span>
+                <div class="fes-status-dot saved" id="fes-save-status"></div>
+            </div>
+        </header>
+
+        <!-- Main Body -->
+        <main class="fes-body">
+            <!-- Rail -->
+            <aside class="fes-rail">
+                <div class="fes-rail-search">
+                    <input type="text" class="fes-input" placeholder="Filter sections...">
+                </div>
+                <div class="fes-tabs">
+                    <div class="fes-tab active" data-tab="structure">Structure</div>
+                    <div class="fes-tab" data-tab="pages">Pages</div>
+                    <div class="fes-tab" data-tab="assets">Assets</div>
+                    <div class="fes-tab" data-tab="tokens">Tokens</div>
+                </div>
+                <div class="fes-rail-list" id="fes-rail-list">
+                    <!-- Sections rendered here -->
+                </div>
+            </aside>
+
+            <!-- Preview -->
+            <section class="fes-preview">
+                <div class="fes-preview-toolbar">
+                    <div class="fes-toolbar-group">
+                        <button class="fes-btn active" title="Show Outlines">⬡</button>
+                        <button class="fes-btn" title="Show Rulers">R</button>
+                        <button class="fes-btn" title="Show Grid">G</button>
+                    </div>
+                    <div class="fes-toolbar-group">
+                        <button class="fes-btn device-btn" data-device="desktop">💻</button>
+                        <button class="fes-btn device-btn" data-device="tablet">📱</button>
+                        <button class="fes-btn device-btn" data-device="mobile">📱</button>
+                        <button class="fes-btn" id="fes-zoom-out">-</button>
+                        <span class="fes-btn" id="fes-zoom-level" style="cursor: default;">100%</span>
+                        <button class="fes-btn" id="fes-zoom-in">+</button>
+                    </div>
+                </div>
+                <div class="fes-preview-canvas-container">
+                    <div id="fes-preview-frame" class="fes-device-frame" style="width: 1200px; height: 800px; background: white;">
+                        <iframe id="fes-target-frame" style="width: 100%; height: 100%; border: none; background: white;"></iframe>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panels -->
+            <aside class="fes-panels">
+                <div class="fes-panels-tabs">
+                    <div class="fes-panel-tab active" data-tab="settings">Settings</div>
+                    <div class="fes-panel-tab" data-tab="style">Style</div>
+                    <div class="fes-panel-tab" data-tab="advanced">Advanced</div>
+                </div>
+                <div class="fes-panel-content" id="fes-panel-content">
+                    <div style="text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 13px;">
+                        Select a section to edit properties
+                    </div>
+                </div>
+                <div class="fes-panel-footer">
+                    <button class="fes-btn" style="background: var(--bg-input);" id="fes-revert-btn">Revert</button>
+                    <button class="fes-btn" style="background: var(--accent);" id="fes-apply-btn">Apply Changes</button>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Status Bar -->
+        <footer class="fes-status-bar">
+            <div style="display: flex;">
+                <div class="fes-status-item">
+                    <span class="fes-status-dot" style="background: var(--success)"></span>
+                    CSS Score: 100
+                </div>
+                <div class="fes-status-item">
+                    <span class="fes-status-dot" style="background: var(--success)"></span>
+                    A11y Score: 98
+                </div>
+            </div>
+            <div>FES Inspector v2.0.0</div>
+        </footer>
+    </div>
+
+<script>
+// --- FES SHELL V2 NAMESPACE ---
+
+window.FES_SHELL_V2 = {
+    _state: null,
+
+    open: function(targetEl, fesSpec, adapter, options) {
+        // 1. Initialize State
+        this._state = {
+            targetEl: targetEl,
+            fesSpec: fesSpec,
+            adapter: adapter,
+            options: options || {},
+            activeSectionId: null,
+            activePanelTab: 'settings', // settings, style, advanced
+            activeRailTab: 'structure',  // structure, pages, assets, tokens
+            previewDevice: 'desktop',
+            previewZoom: 100,
+            showOutlines: true,
+            showRulers: false,
+            isDirty: false
+        };
+
+        // 2. Render Shell (Header, Tabs, Buttons)
+        this._renderShell();
+        this._renderRail();
+        this._renderPreview();
+        this._renderPanels();
+
+        // 3. Auto-select first section
+        if (fesSpec.structure?.sections?.length > 0) {
+            this._selectSection(fesSpec.structure.sections[0].id);
+        }
+
+        // 4. Attach Listeners (once, per shell instance)
+        this._attachGlobalListeners();
+    },
+
+    _renderShell: function() {
+        // Updates classes/icons based on state
+        const statusDot = document.getElementById('fes-save-status');
+        if (this._state.isDirty) {
+            statusDot.classList.remove('saved');
+            statusDot.classList.add('dirty');
+        } else {
+            statusDot.classList.remove('dirty');
+            statusDot.classList.add('saved');
+        }
+    },
+
+    _renderRail: function() {
+        const list = document.getElementById('fes-rail-list');
+        list.innerHTML = '';
+        
+        const sections = this._state.fesSpec.structure.sections;
+        
+        // Simple list renderer (could be optimized with virtual DOM in real app, but fine here)
+        sections.forEach(section => {
+            const el = document.createElement('div');
+            el.className = 'fes-section-item';
+            el.dataset.id = section.id;
+            el.innerHTML = `
+                <span class="fes-icon">📄</span>
+                <span>${section.name || section.id}</span>
+            `;
+            el.onclick = () => this._selectSection(section.id);
+            list.appendChild(el);
+        });
+    },
+
+    _renderPreview: function() {
+        // Set device frame dimensions
+        const frame = document.getElementById('fes-preview-frame');
+        const device = this._state.previewDevice;
+        
+        let width = 1200;
+        let height = 800;
+        if (device === 'tablet') { width = 768; height = 1024; }
+        if (device === 'mobile') { width = 375; height = 667; }
+
+        frame.style.width = width + 'px';
+        frame.style.height = height + 'px';
+        
+        // Apply zoom
+        frame.style.transform = `scale(${this._state.previewZoom / 100})`;
+        frame.style.transformOrigin = 'center center';
+
+        // Update toolbar buttons
+        document.querySelectorAll('.fes-btn.device-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.device === device);
+        });
+
+        document.getElementById('fes-zoom-level').innerText = this._state.previewZoom + '%';
+    },
+
+    _renderPanels: function() {
+        const content = document.getElementById('fes-panel-content');
+        const railTabs = document.querySelectorAll('.fes-tab[data-tab]');
+        const panelTabs = document.querySelectorAll('.fes-panel-tab[data-tab]');
+
+        // Update Rail Tabs
+        railTabs.forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.tab === this._state.activeRailTab);
+        });
+
+        // Update Panel Tabs
+        panelTabs.forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.tab === this._state.activePanelTab);
+        });
+
+        // Render content
+        if (!this._state.activeSectionId) {
+            content.innerHTML = `<div style="text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 13px;">
+                Select a section to edit properties
+            </div>`;
+            return;
+        }
+
+        content.innerHTML = ''; // Clear current
+
+        const section = this._state.fesSpec.structure.sections.find(s => s.id === this._state.activeSectionId);
+        if (!section) return;
+
+        const groups = this._getGroupsForTab(section, this._state.activePanelTab);
+        
+        // Render Groups
+        groups.forEach(group => {
+            const groupEl = document.createElement('div');
+            groupEl.className = 'fes-field-group';
+            groupEl.innerHTML = `<div class="fes-field-group-title">${group.name}</div>`;
+            
+            group.fields.forEach(field => {
+                // Read value via adapter (FvW v8 path-based reads)
+                const fieldValue = this._state.adapter && this._state.adapter.readValue 
+                  ? this._state.adapter.readValue(field.path || field.id)
+                  : (section.data && section.data[field.id]);
+                groupEl.appendChild(this._renderField(field, fieldValue));
+            });
+            
+            content.appendChild(groupEl);
+        });
+    },
+
+    _getGroupsForTab: function(section, tabName) {
+        // Mock data structure logic
+        const inspector = this._state.fesSpec.inspector || {};
+        const tabData = inspector[tabName];
+        
+        if (!tabData) return [];
+        if (!tabData.groups) return [];
+        
+        return tabData.groups;
+    },
+
+    _renderField: function(field, value) {
+        const row = document.createElement('div');
+        row.className = 'fes-field-row';
+        
+        const label = document.createElement('label');
+        label.className = 'fes-field-label';
+        label.innerText = field.label || field.id;
+        
+        const hint = document.createElement('span');
+        hint.className = 'fes-field-hint';
+        hint.innerText = field.hint || '';
+        
+        const wrapper = document.createElement('div');
+        
+        // Use FES_CONTROLS_V2 if available
+        if (typeof window.FES_CONTROLS_V2 !== 'undefined' && window.FES_CONTROLS_V2.render) {
+            wrapper.appendChild(window.FES_CONTROLS_V2.render(
+                field.type, 
+                field, 
+                value, 
+                (newValue) => this._onFieldChange(field.path || field.id, newValue), 
+                this._state.adapter
+            ));
+        } else {
+            // Fallback for testing
+            const input = document.createElement('input');
+            input.className = 'fes-input';
+            input.value = value || '';
+            input.onchange = (e) => this._onFieldChange(field.id, e.target.value);
+            wrapper.appendChild(input);
+        }
+
+        row.appendChild(label);
+        row.appendChild(hint);
+        row.appendChild(wrapper);
+        return row;
+    },
+
+    _onFieldChange: function(fieldId, value) {
+        this._state.isDirty = true;
+        this._renderShell(); // Update dot
+
+        // Update local data state
+        if (!this._state.sectionData) {
+            this._state.sectionData = {}; // Init data holder
+        }
+        this._state.sectionData[fieldId] = value;
+
+        // Trigger adapter write (mocked)
+        if (typeof this._state.adapter.writeValue === 'function') {
+            this._state.adapter.writeValue(this._state.activeSectionId, this._state.sectionData);
+        }
+    },
+
+    _selectSection: function(id) {
+        this._state.activeSectionId = id;
+        
+        // UI updates
+        document.querySelectorAll('.fes-section-item').forEach(el => {
+            el.classList.toggle('active', el.dataset.id === id);
+        });
+
+        this._renderPanels();
+    },
+
+    _switchTab: function(tabName) {
+        this._state.activeRailTab = tabName;
+        this._renderRail();
+    },
+
+    _switchPanelTab: function(tabName) {
+        this._state.activePanelTab = tabName;
+        this._renderPanels();
+    },
+
+    close: function() {
+        const root = document.getElementById('fes-shell-root');
+        root.style.opacity = '0';
+        setTimeout(() => root.remove(), 200);
+    },
+
+    _attachGlobalListeners: function() {
+        const self = this;
+
+        // Rail Tabs
+        document.querySelectorAll('.fes-tab[data-tab]').forEach(el => {
+            el.onclick = () => this._switchTab(el.dataset.tab);
+        });
+
+        // Panel Tabs
+        document.querySelectorAll('.fes-panel-tab[data-tab]').forEach(el => {
+            el.onclick = () => this._switchPanelTab(el.dataset.tab);
+        });
+
+        // Device Toggles
+        document.querySelectorAll('.fes-btn.device-btn').forEach(btn => {
+            btn.onclick = () => {
+                this._state.previewDevice = btn.dataset.device;
+                this._renderPreview();
+            };
+        });
+
+        // Zoom
+        const handleZoom = (delta) => {
+            let newZoom = this._state.previewZoom + delta;
+            if (newZoom < 50) newZoom = 50;
+            if (newZoom > 200) newZoom = 200;
+            this._state.previewZoom = newZoom;
+            this._renderPreview();
+        };
+        document.getElementById('fes-zoom-in').onclick = () => handleZoom(10);
+        document.getElementById('fes-zoom-out').onclick = () => handleZoom(-10);
+
+        // Revert
+        document.getElementById('fes-revert-btn').onclick = () => {
+            this._state.isDirty = false;
+            this._renderShell();
+        };
+        
+        // Apply
+        document.getElementById('fes-apply-btn').onclick = () => {
+            this._state.isDirty = false;
+            this._renderShell();
+            alert('Changes applied successfully!');
+        };
+    }
+};
+</script>
+</body>
+</html>

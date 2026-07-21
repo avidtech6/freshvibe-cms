@@ -1,0 +1,53 @@
+.fes-control-slider {
+  height: 34px;
+  margin-bottom: 8px;
+}
+
+.fes-slider-track-wrap {
+  position: relative;
+  height: 100%;
+}
+
+.fes-slider-track {
+  position: relative;
+  z-index: 1;
+}
+
+.fes-slider-progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+}
+
+.fes-slider-handle {
+  z-index: 3;
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.1s;
+}
+
+.fes-slider-handle:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 0 0 6px var(--bg);
+}
+
+.fes-slider-input {
+  width: 56px;
+  height: 26px;
+  padding: 0 8px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 12px;
+  text-align: right;
+  color: var(--text);
+  background-color: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.fes-slider-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}

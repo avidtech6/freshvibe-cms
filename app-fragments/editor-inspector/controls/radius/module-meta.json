@@ -1,0 +1,6 @@
+{
+  "control_type": "radius",
+  "fvw_version": "8.0.0",
+  "exports": ["render"],
+  "dependencies": []
+}

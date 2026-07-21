@@ -1,0 +1,78 @@
+/* === background-image.css === */
+.fes-control-bg-image {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fes-upload-zone {
+  width: 100%;
+  height: 120px;
+  border: 2px dashed var(--border);
+  border-radius: var(--r-md);
+  background: var(--panel-2);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.fes-upload-zone:hover {
+  border-color: var(--accent-2);
+}
+
+.fes-image-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.fes-prop-row-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fes-prop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fes-label {
+  font-size: 11px;
+  color: var(--text-mid);
+  white-space: nowrap;
+}
+
+.fes-select {
+  flex: 1;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  outline: none;
+}
+
+.fes-select:focus {
+  border-color: var(--accent-2);
+}
+
+.fes-live-preview-wrap {
+  height: 80px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: #fff;
+  overflow: hidden;
+}
+
+.fes-live-preview-box {
+  width: 100%;
+  height: 100%;
+  border: none;
+}

@@ -1,0 +1,5 @@
+{
+  "html_components": ["button", "div", "input", "ul", "li"],
+  "css_tokens": ["--bg", "--panel", "--border", "--text", "--text-mid", "--accent", "--accent-2", "--r-sm"],
+  "js_native_api": ["EventTarget", "EventListener"]
+}

@@ -1,0 +1,5 @@
+{
+  "core": ["input", "select", "label"],
+  "ui": ["upload-zone", "preview", "spacer"],
+  "icons": ["upload", "trash"]
+}

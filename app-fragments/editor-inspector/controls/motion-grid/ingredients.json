@@ -1,0 +1,14 @@
+{
+  "defaults": {
+    "value": "none",
+    "columns": 3
+  },
+  "defaults_options": [
+    { "value": "fade-up", "label": "Fade Up", "icon": "▶" },
+    { "value": "slide", "label": "Slide", "icon": "←→" },
+    { "value": "scale", "label": "Scale", "icon": "↔" },
+    { "value": "rotate", "label": "Rotate", "icon": "↻" },
+    { "value": "reveal", "label": "Reveal", "icon": "⟳" },
+    { "value": "none", "label": "None", "icon": "—" }
+  ]
+}

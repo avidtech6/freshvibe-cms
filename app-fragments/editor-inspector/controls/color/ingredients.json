@@ -1,0 +1,9 @@
+{
+  "icons": {
+    "picker": "svg://icons/eye-dropper"
+  },
+  "defaults": {
+    "value": "#3b82f6",
+    "showAlpha": false
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "layer_template": {
+    "x": 2,
+    "y": 4,
+    "blur": 10,
+    "spread": 2,
+    "color": "rgba(0, 0, 0, 0.3)",
+    "inset": false
+  },
+  "preview_size": "60px",
+  "preview_bg": "#fff"
+}

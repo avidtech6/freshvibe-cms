@@ -1,0 +1,7 @@
+{
+  "control_type": "component",
+  "fvw_version": "8.0.0",
+  "exports": ["render"],
+  "dependencies": [],
+  "notes": "Multi-layer box-shadow construction tool."
+}

@@ -1,0 +1,46 @@
+:root {
+  --bg: #0b0d11; --panel: #14181f; --panel-2: #1a1f27;
+  --border: #2a3038; --text: #e6e9ef; --text-mid: #b8bfca;
+  --text-dim: #7a8290; --accent: #7cf0a0; --accent-2: #5fa8ff;
+  --r-sm: 4px;
+}
+
+.fes-control-textarea {
+  width: 100%;
+  max-width: 300px;
+}
+
+.fes-control-textarea textarea {
+  width: 100%;
+  height: auto; /* controlled by JS */
+  min-height: 60px;
+  max-height: 150px;
+  padding: 8px 0;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  outline: none;
+  resize: none;
+  overflow-y: hidden; /* hidden until max height */
+  box-sizing: border-box;
+}
+
+.fes-control-textarea textarea:focus {
+  border-bottom-color: var(--accent-2);
+}
+
+/* Scrollbar styling for max-height case */
+.fes-control-textarea textarea::-webkit-scrollbar {
+  width: 6px;
+}
+.fes-control-textarea textarea::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+.fes-control-textarea textarea::-webkit-scrollbar-track {
+  background: transparent;
+}

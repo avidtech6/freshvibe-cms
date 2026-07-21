@@ -1,0 +1,9 @@
+{
+  "icons": {
+    "close": "svg://icons/x-mark"
+  },
+  "defaults": {
+    "value": [],
+    "placeholder": "Add a tag..."
+  }
+}

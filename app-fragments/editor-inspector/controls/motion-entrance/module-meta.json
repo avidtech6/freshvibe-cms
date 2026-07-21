@@ -1,0 +1,6 @@
+{
+  "control_type": "component",
+  "fvw_version": "8.0.0",
+  "exports": ["render"],
+  "notes": "6-entrance animation presets."
+}

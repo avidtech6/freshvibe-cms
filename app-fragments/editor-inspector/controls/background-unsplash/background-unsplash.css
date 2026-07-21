@@ -1,0 +1,114 @@
+/* === background-unsplash.css === */
+.fes-control-bg-unsplash {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 500px;
+}
+
+.fes-unsplash-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fes-search-input {
+  width: 100%;
+  padding: 6px 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  outline: none;
+  font-size: 12px;
+}
+
+.fes-chips-group {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.fes-chip {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text-mid);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fes-chip:hover {
+  border-color: var(--text-dim);
+}
+
+.fes-chip.active {
+  background: var(--accent-2);
+  color: var(--bg);
+  border-color: var(--accent-2);
+}
+
+.fes-unsplash-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  height: 350px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Scrollbar */
+.fes-unsplash-grid::-webkit-scrollbar {
+  width: 6px;
+}
+.fes-unsplash-grid::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.fes-grid-item {
+  height: 100px;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.fes-grid-item:hover {
+  border-color: var(--accent);
+}
+
+.fes-grid-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.fes-grid-item:hover .fes-grid-overlay {
+  opacity: 1;
+}
+
+.fes-grid-author {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  color: #fff;
+  font-size: 10px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all 0.2s;
+}
+
+.fes-grid-item:hover .fes-grid-author {
+  opacity: 1;
+  transform: translateY(0);
+}
