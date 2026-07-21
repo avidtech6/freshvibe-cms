@@ -10,8 +10,8 @@
 //
 // Per app-pact §3.9: this is the public entry point.
 
-import { getStore } from '../../oscar-cms-panel/runtime/store.js';
-import { getModuleDef } from '../../oscar-cms-panel/runtime/index.js';
+import { getStore } from '../oscar-cms-panel/runtime/store.js';
+import { getModuleDef } from '../oscar-cms-panel/runtime/index.js';
 
 const SHELL_URL = new URL('./shell-v2.html', import.meta.url).href;
 const FES_BASE = '/app-fragments/fes-modules';
@@ -176,14 +176,35 @@ async function ensureShell() {
     const html = await (await fetch(SHELL_URL)).text();
     const wrap = document.createElement('div');
     wrap.id = 'fes-v2-shell-root';
-    wrap.innerHTML = html;
+    // Extract <style> tags and <script> separately
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
     // Move <style> tags to head
-    wrap.querySelectorAll('style').forEach(s => {
-      if (!document.getElementById(s.id || '')) document.head.appendChild(s);
+    doc.querySelectorAll('style').forEach(s => {
+      const clone = document.createElement('style');
+      for (const a of s.attributes) clone.setAttribute(a.name, a.value);
+      clone.textContent = s.textContent;
+      if (!document.getElementById(s.id || '')) document.head.appendChild(clone);
     });
-    // Move root element to body
-    const root = wrap.querySelector('[data-fvcms-v2-root]') || wrap.firstElementChild;
-    if (root) document.body.appendChild(root);
+    // Move root HTML element (everything not script/style) to body
+    const root = doc.querySelector('[data-fvcms-v2-root]') || doc.body.firstElementChild;
+    if (root) {
+      // Re-create the root in our document so scripts can be properly attached
+      const newRoot = document.createElement('div');
+      newRoot.id = root.id || 'fes-v2-drawer';
+      newRoot.className = root.className;
+      newRoot.innerHTML = root.innerHTML;
+      document.body.appendChild(newRoot);
+    }
+    // Execute the <script> from shell.html — must be done as a real script
+    const scriptEl = doc.querySelector('script');
+    if (scriptEl) {
+      const s = document.createElement('script');
+      s.textContent = scriptEl.textContent;
+      document.head.appendChild(s);
+      // Remove the script from head after execution
+      setTimeout(() => s.remove(), 0);
+    }
 
     // Build FES_V2_CONTROLS map and preload all 24 controls
     const controlNames = [
@@ -285,12 +306,14 @@ export async function v2Inspect({ moduleInstance, moduleDef, onSave, store }) {
     if (onSave) onSave(moduleInstance.config);
   };
 
-  const open = window.FES_SHELL_V2 && window.FES_SHELL_V2.open;
-  if (typeof open !== 'function') {
+  const openFn = window.FES_SHELL_V2 && window.FES_SHELL_V2.open;
+  if (typeof openFn !== 'function') {
+    console.warn('[v2-inspector] FES_SHELL_V2.open not available, using fallback');
     return renderBasicFallback(spec, moduleInstance, onSave, s);
   }
 
-  open(moduleInstance.el || document.body, spec, adapter, {
+  // Call as a method on FES_SHELL_V2 so `this` is bound correctly
+  openFn.call(window.FES_SHELL_V2, moduleInstance.el || document.body, spec, adapter, {
     onSave: (config) => onSave && onSave(config),
     onChange: handleChange,
     autoSelectFirst: true,

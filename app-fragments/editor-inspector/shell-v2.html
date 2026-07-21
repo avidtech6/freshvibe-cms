@@ -172,6 +172,25 @@
             border-left: 1px solid var(--border);
             display: flex;
             flex-direction: column;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 380px;
+            height: 100vh;
+            z-index: 999999;
+            box-shadow: -4px 0 24px rgba(0,0,0,0.4);
+        }
+
+        /* The shell root takes the body height for the grid */
+        #fes-shell-root {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 380px;
+            height: 100vh;
+            z-index: 999999;
+            display: flex;
+            flex-direction: column;
         }
 
         .fes-panels-tabs { display: flex; border-bottom: 1px solid var(--border); }
