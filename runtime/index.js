@@ -46,6 +46,7 @@ export {
   setDevMode,
   isDevMode,
 } from './install-editor.js';
+export { startRerenderWatcher, stopRerenderWatcher, isRerenderWatcherActive } from './rerender-watcher.js';
 
 import { getStore } from './store.js';
 import { CANONICAL_MODULES } from '../modules/index.js';
