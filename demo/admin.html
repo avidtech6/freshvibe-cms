@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreshVibe CMS Admin</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 0; background: #f8f9fa; color: #222; }
+    .fvcms-page-header { background: white; border-bottom: 1px solid #e5e7eb; padding: 16px 24px; }
+    .fvcms-page-title { font-size: 20px; font-weight: 700; margin: 0; }
+    .fvcms-page-subtitle { font-size: 13px; color: #666; margin: 4px 0 0; }
+    .fvcms-page-main { max-width: 960px; margin: 0 auto; padding: 24px; background: white; min-height: calc(100vh - 80px); }
+
+    .fvcms-admin { padding: 0; }
+    .fvcms-admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+    .fvcms-admin-title { font-size: 18px; font-weight: 600; margin: 0; }
+    .fvcms-admin-back { color: #7c3aed; cursor: pointer; text-decoration: none; background: none; border: none; padding: 0; font-size: 14px; }
+    .fvcms-admin-back:hover { text-decoration: underline; }
+    .fvcms-admin a { color: #7c3aed; cursor: pointer; text-decoration: none; }
+    .fvcms-admin a:hover { text-decoration: underline; }
+
+    .fvcms-field-row { margin-bottom: 12px; }
+    .fvcms-field-label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #333; }
+    .fvcms-field-label .required { color: #c00; margin-left: 2px; }
+    .fvcms-field-input { width: 100%; padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
+    .fvcms-field-input:focus { outline: 2px solid #7c3aed; outline-offset: -1px; }
+    .fvcms-field-help { font-size: 11px; color: #666; margin-top: 2px; }
+    .fvcms-field-error { font-size: 11px; color: #c00; margin-top: 2px; min-height: 14px; }
+    .fvcms-field-row textarea.fvcms-field-input { font-family: inherit; resize: vertical; min-height: 120px; }
+
+    .fvcms-type-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; padding: 8px 0; }
+    .fvcms-type-card { padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; background: white; transition: box-shadow 0.15s, border-color 0.15s; }
+    .fvcms-type-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-color: #7c3aed; }
+    .fvcms-type-card-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .fvcms-type-card-desc { font-size: 12px; color: #666; line-height: 1.4; }
+
+    .fvcms-items-list { margin-top: 32px; border-top: 1px solid #e5e7eb; padding-top: 16px; }
+    .fvcms-items-list h3 { font-size: 14px; font-weight: 600; margin: 0 0 12px; }
+    .fvcms-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 4px; margin-bottom: 6px; background: #fafafa; }
+    .fvcms-item-row-main { flex: 1; }
+    .fvcms-item-title { font-weight: 600; font-size: 14px; }
+    .fvcms-item-meta { font-size: 11px; color: #666; margin-top: 2px; }
+    .fvcms-item-actions { display: flex; gap: 6px; }
+    .fvcms-item-actions button { padding: 4px 10px; font-size: 12px; border: 1px solid #ccc; background: white; border-radius: 3px; cursor: pointer; }
+    .fvcms-item-actions button:hover { background: #f5f5f5; }
+    .fvcms-item-actions button.delete { color: #c00; border-color: #c00; }
+    .fvcms-item-actions button.delete:hover { background: #fff5f5; }
+
+    .fvcms-chip { display: inline-flex; align-items: center; padding: 2px 8px; background: #ede9fe; color: #5b21b6; border-radius: 12px; font-size: 12px; margin: 2px; font-weight: 500; }
+    .fvcms-chip-remove { margin-left: 4px; cursor: pointer; opacity: 0.7; font-weight: 700; }
+    .fvcms-chip-remove:hover { opacity: 1; }
+    .fvcms-tags-container { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; min-height: 32px; }
+    .fvcms-tag-input { border: none; outline: none; padding: 2px 4px; flex: 1; min-width: 100px; font-size: 14px; }
+
+    .fvcms-gallery-row { display: flex; gap: 4px; align-items: center; margin-bottom: 4px; }
+    .fvcms-gallery-row input { flex: 1; }
+    .fvcms-gallery-row button.fvcms-remove-btn { background: #fee; color: #c00; border: 1px solid #fcc; border-radius: 3px; padding: 4px 8px; cursor: pointer; }
+    .fvcms-add-btn { background: white; border: 1px dashed #7c3aed; color: #7c3aed; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    .fvcms-add-btn:hover { background: #f5f3ff; }
+
+    .fvcms-thumb { display: block; max-width: 80px; max-height: 50px; margin-top: 4px; border: 1px solid #ddd; border-radius: 3px; object-fit: cover; }
+
+    .fvcms-status { padding: 10px 14px; border-radius: 4px; margin-bottom: 12px; font-size: 13px; }
+    .fvcms-status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .fvcms-status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .fvcms-status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+    .fvcms-save-btn { background: #7c3aed; color: white; border: none; padding: 8px 18px; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .fvcms-save-btn:hover { background: #6d28d9; }
+    .fvcms-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .fvcms-cancel-btn { background: white; color: #333; border: 1px solid #ccc; padding: 8px 18px; border-radius: 4px; font-size: 14px; cursor: pointer; margin-left: 8px; }
+    .fvcms-cancel-btn:hover { background: #f5f5f5; }
+    .fvcms-editor-fields { display: flex; flex-direction: column; }
+  </style>
+</head>
+<body>
+  <header class="fvcms-page-header">
+    <h1 class="fvcms-page-title">FreshVibe CMS Admin</h1>
+    <p class="fvcms-page-subtitle">Manage content for any FreshVibe app</p>
+  </header>
+  <main class="fvcms-page-main">
+    <div id="admin-root"></div>
+  </main>
+
+  <script type="module">
+    import { renderContentAdmin } from '../runtime/content-admin.js';
+    
+    try {
+      const adminUI = renderContentAdmin({});
+      document.getElementById('admin-root').appendChild(adminUI);
+    } catch (error) {
+      const root = document.getElementById('admin-root');
+      const statusDiv = document.createElement('div');
+      statusDiv.className = 'fvcms-status error';
+      statusDiv.textContent = `Error initializing admin UI: ${error.message}`;
+      root.appendChild(statusDiv);
+    }
+  </script>
+</body>
+</html>

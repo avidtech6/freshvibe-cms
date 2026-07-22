@@ -47,6 +47,9 @@ export {
   isDevMode,
 } from './install-editor.js';
 export { startRerenderWatcher, stopRerenderWatcher, isRerenderWatcherActive } from './rerender-watcher.js';
+export { loadContentType, listContentTypes, clearContentTypeCache, RENDERERS as CONTENT_RENDERERS } from './content-types.js';
+export { listItems, getItem, createItem, updateItem, deleteItem, setBaseUrl, setToken } from './content-api-client.js';
+export { renderContentAdmin, renderContentList, renderContentPicker } from './content-admin.js';
 
 import { getStore } from './store.js';
 import { CANONICAL_MODULES } from '../modules/index.js';
